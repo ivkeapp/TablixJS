@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Table.js MVP Example</title>
+</head>
+<body>
+  <h2>My Table</h2>
+  <div id="myTable"></div>
+
+  <button onclick="filterJohn()">Filter name='John'</button>
+  <button onclick="loadAll()">Reset</button>
+
+  <script type="module">
+    import Table from '../src/core/Table.js';
+
+    const table = new Table('#myTable', {
+      data: [
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' },
+        { id: 3, name: 'Jack' },
+        { id: 4, name: 'Jill' }
+      ],
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Name', renderer: (cell) => `<strong>${cell}</strong>` }
+      ],
+      pagination: { pageSize: 2 }
+    });
+
+    table.on('afterLoad', data => console.log('Loaded data:', data));
+    table.on('afterFilter', crit => console.log('Filtered by:', crit));
+
+    window.filterJohn = () => table.filter({ name: 'John' });
+    window.loadAll = () => table.loadData([
+      { id: 1, name: 'John' },
+      { id: 2, name: 'Jane' },
+      { id: 3, name: 'Jack' },
+      { id: 4, name: 'Jill' }
+    ]);
+  </script>
+</body>
+</html>
