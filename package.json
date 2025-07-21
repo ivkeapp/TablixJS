@@ -1,0 +1,12 @@
+{
+  "name": "tablixjs",
+  "version": "0.1.0",
+  "description": "TablixJS is a lightweight, dependency-free JavaScript library for building powerful, responsive data tables.",
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve . -l 5174"
+  },
+  "keywords": ["table", "datatable", "javascript", "vanilla-js", "react", "jquery"],
+  "author": "Ivan Zarkovic",
+  "license": "MIT"
+}
