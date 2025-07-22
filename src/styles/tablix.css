@@ -1,0 +1,15 @@
+/* TablixJS - Main Stylesheet */
+
+/* Import core styles (required) */
+@import './table-core.css';
+@import './pagination-core.css';
+
+/* Import default theme */
+@import './themes/default.css';
+
+/* 
+To use the dark theme, either:
+1. Add data-theme="dark" to your html/body element
+2. Add the "dark" class to your table wrapper
+3. Import the dark theme CSS: @import './themes/dark.css';
+*/

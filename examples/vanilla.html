@@ -2,7 +2,8 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>Table.js MVP Example</title>
+  <title>TablixJS - Basic Example</title>
+  <link rel="stylesheet" href="../src/styles/tablix.css">
 </head>
 <body>
   <h2>My Table</h2>
@@ -10,6 +11,8 @@
 
   <button onclick="filterJohn()">Filter name='John'</button>
   <button onclick="loadAll()">Reset</button>
+  <button onclick="table.nextPage()">Next Page</button>
+  <button onclick="table.prevPage()">Prev Page</button>
 
   <script type="module">
     import Table from '../src/core/Table.js';
@@ -19,25 +22,40 @@
         { id: 1, name: 'John' },
         { id: 2, name: 'Jane' },
         { id: 3, name: 'Jack' },
-        { id: 4, name: 'Jill' }
+        { id: 4, name: 'Jill' },
+        { id: 5, name: 'John Doe' },
+        { id: 6, name: 'Jane Smith' },
+        { id: 7, name: 'Bob Johnson' }
       ],
       columns: [
         { name: 'id', title: 'ID' },
         { name: 'name', title: 'Name', renderer: (cell) => `<strong>${cell}</strong>` }
       ],
-      pagination: { pageSize: 2 }
+      pagination: { 
+        pageSize: 3,
+        showPageNumbers: true,
+        showPageSizes: true,
+        pageSizeOptions: [2, 3, 5, 10]
+      }
     });
 
     table.on('afterLoad', data => console.log('Loaded data:', data));
     table.on('afterFilter', crit => console.log('Filtered by:', crit));
+    table.on('afterPageChange', info => console.log('Page changed:', info));
 
     window.filterJohn = () => table.filter({ name: 'John' });
     window.loadAll = () => table.loadData([
       { id: 1, name: 'John' },
       { id: 2, name: 'Jane' },
       { id: 3, name: 'Jack' },
-      { id: 4, name: 'Jill' }
+      { id: 4, name: 'Jill' },
+      { id: 5, name: 'John Doe' },
+      { id: 6, name: 'Jane Smith' },
+      { id: 7, name: 'Bob Johnson' }
     ]);
+
+    // Make table globally accessible
+    window.table = table;
   </script>
 </body>
 </html>

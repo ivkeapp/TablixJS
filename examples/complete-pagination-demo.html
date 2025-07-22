@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>TablixJS - Complete Pagination Demo</title>
+  <link rel="stylesheet" href="../src/styles/tablix.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      margin: 20px;
+      background-color: #fafafa;
+    }
+    
+    .demo-section {
+      background-color: white;
+      padding: 30px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .info {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #666;
+      border-left: 4px solid #007acc;
+    }
+
+    .manual-controls {
+      margin-bottom: 20px;
+    }
+    
+    .manual-controls button {
+      margin-right: 10px;
+      margin-bottom: 10px;
+      padding: 8px 16px;
+      border: 1px solid #007acc;
+      background: white;
+      color: #007acc;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .manual-controls button:hover {
+      background: #007acc;
+      color: white;
+    }
+
+    .feature-highlight {
+      background: #e8f5e8;
+      padding: 12px;
+      border-radius: 4px;
+      border-left: 4px solid #28a745;
+      margin-bottom: 15px;
+    }
+
+    .feature-highlight h4 {
+      margin: 0 0 5px 0;
+      color: #28a745;
+    }
+
+    .feature-highlight p {
+      margin: 0;
+      font-size: 13px;
+      color: #155724;
+    }
+  </style>
+</head>
+<body>
+  <h1>TablixJS - Complete Pagination Demo</h1>
+  <p>This example demonstrates all the pagination features of TablixJS, including client-side, server-side, and automatic control generation.</p>
+
+  <!-- Example 1: Client-side Pagination with Auto Controls -->
+  <div class="demo-section">
+    <h2>1. Client-side Pagination with Auto Controls</h2>
+    
+    <div class="feature-highlight">
+      <h4>✨ Auto-Generated Controls</h4>
+      <p>Pagination controls, page size selector, and refresh button are automatically generated!</p>
+    </div>
+
+    <div id="clientTable"></div>
+    
+    <div class="info" id="clientInfo">
+      Loading client-side table with automatic pagination controls...
+    </div>
+  </div>
+
+  <!-- Example 2: Server-side Pagination -->
+  <div class="demo-section">
+    <h2>2. Server-side Pagination</h2>
+    
+    <div class="feature-highlight">
+      <h4>🌐 Server-side Data Loading</h4>
+      <p>Data is loaded from server on each page change. Simulates real API calls with loading states.</p>
+    </div>
+
+    <div id="serverTable"></div>
+    
+    <div class="info" id="serverInfo">
+      Loading server-side table...
+    </div>
+  </div>
+
+  <!-- Example 3: Manual Control Integration -->
+  <div class="demo-section">
+    <h2>3. Manual Control Integration</h2>
+    
+    <div class="feature-highlight">
+      <h4>🎛️ Programmatic Control</h4>
+      <p>Use JavaScript API to control pagination programmatically alongside automatic controls.</p>
+    </div>
+
+    <div class="manual-controls">
+      <button onclick="manualTable.goToPage(1)">Go to First Page</button>
+      <button onclick="manualTable.prevPage()">Previous Page</button>
+      <button onclick="manualTable.nextPage()">Next Page</button>
+      <button onclick="manualTable.goToPage(manualTable.paginationManager.getTotalPages())">Go to Last Page</button>
+      <button onclick="manualTable.changePageSize(5)">Page Size: 5</button>
+      <button onclick="manualTable.changePageSize(10)">Page Size: 10</button>
+      <button onclick="manualTable.changePageSize(20)">Page Size: 20</button>
+      <button onclick="addMoreData()">Add 25 More Records</button>
+    </div>
+
+    <div id="manualTable"></div>
+    
+    <div class="info" id="manualInfo">
+      Manual controls work alongside automatic pagination controls.
+    </div>
+  </div>
+
+  <!-- Example 4: Configuration Showcase -->
+  <div class="demo-section">
+    <h2>4. Configuration Options</h2>
+    
+    <div class="feature-highlight">
+      <h4>⚙️ Highly Configurable</h4>
+      <p>Customize pagination behavior, appearance, and control positioning.</p>
+    </div>
+
+    <div id="configTable"></div>
+    
+    <div class="info" id="configInfo">
+      Custom configuration: Controls at bottom, limited page numbers, custom page sizes.
+    </div>
+  </div>
+
+  <script type="module">
+    import Table from '../src/core/Table.js';
+
+    // Generate sample data
+    function generateEmployeeData(count = 100) {
+      const names = ['John Doe', 'Jane Smith', 'Alice Johnson', 'Bob Wilson', 'Charlie Brown', 'Diana Prince', 'Eve Adams', 'Frank Miller', 'Grace Davis', 'Henry Ford'];
+      const departments = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance', 'Operations'];
+      const positions = ['Manager', 'Senior Developer', 'Developer', 'Analyst', 'Coordinator', 'Specialist'];
+      const data = [];
+      
+      for (let i = 1; i <= count; i++) {
+        data.push({
+          id: i,
+          name: names[Math.floor(Math.random() * names.length)] + ` #${i}`,
+          email: `user${i}@company.com`,
+          department: departments[Math.floor(Math.random() * departments.length)],
+          position: positions[Math.floor(Math.random() * positions.length)],
+          salary: Math.floor(Math.random() * 80000) + 40000,
+          joinDate: new Date(2020 + Math.floor(Math.random() * 4), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toLocaleDateString()
+        });
+      }
+      
+      return data;
+    }
+
+    // ===== EXAMPLE 1: CLIENT-SIDE WITH AUTO CONTROLS =====
+    const clientTable = new Table('#clientTable', {
+      data: generateEmployeeData(150),
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Employee Name', renderer: (cell) => `<strong style="color: #007acc;">${cell}</strong>` },
+        { name: 'email', title: 'Email', renderer: (cell) => `<small style="color: #666;">${cell}</small>` },
+        { name: 'department', title: 'Department' },
+        { name: 'position', title: 'Position' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `<span style="color: #28a745;">$${cell.toLocaleString()}</span>` },
+        { name: 'joinDate', title: 'Join Date' }
+      ],
+      pagination: {
+        enabled: true,
+        pageSize: 12,
+        mode: 'client',
+        showPageNumbers: true,
+        showFirstLast: true,
+        showPrevNext: true,
+        showPageSizes: true,
+        pageSizeOptions: [8, 12, 16, 24, 50]
+      },
+      controls: {
+        enabled: true,
+        search: false,
+        pagination: true,
+        pageSize: true,
+        refresh: true,
+        export: false,
+        position: 'top'
+      }
+    });
+
+    // ===== EXAMPLE 2: SERVER-SIDE PAGINATION =====
+    
+    // Mock server data loader
+    async function mockServerLoader({ page, pageSize, filters = {}, sorts = [] }) {
+      // Show loading state
+      document.getElementById('serverInfo').textContent = `Loading page ${page}...`;
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Generate mock server response
+      const totalRecords = 487; // Simulate server having 487 total records
+      const startId = (page - 1) * pageSize + 1;
+      const data = [];
+      
+      for (let i = 0; i < pageSize && (startId + i <= totalRecords); i++) {
+        const id = startId + i;
+        data.push({
+          id: id,
+          name: `Server User ${id}`,
+          email: `user${id}@server.com`,
+          department: ['Engineering', 'Sales', 'Marketing'][id % 3],
+          position: ['Manager', 'Developer', 'Analyst'][id % 3],
+          salary: 40000 + (id % 50) * 1000,
+          joinDate: new Date(2020 + (id % 4), (id % 12), (id % 28) + 1).toLocaleDateString()
+        });
+      }
+      
+      return {
+        data: data,
+        totalRows: totalRecords,
+        currentPage: page,
+        totalPages: Math.ceil(totalRecords / pageSize)
+      };
+    }
+
+    const serverTable = new Table('#serverTable', {
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Name', renderer: (cell) => `<strong>${cell}</strong>` },
+        { name: 'department', title: 'Department' },
+        { name: 'position', title: 'Position' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `$${cell.toLocaleString()}` }
+      ],
+      pagination: {
+        enabled: true,
+        pageSize: 15,
+        mode: 'server',
+        serverDataLoader: mockServerLoader,
+        showPageNumbers: true,
+        maxPageNumbers: 7,
+        showFirstLast: true,
+        showPrevNext: true,
+        showPageSizes: true,
+        pageSizeOptions: [10, 15, 25, 50]
+      },
+      controls: {
+        enabled: true,
+        search: false,
+        pagination: true,
+        pageSize: true,
+        refresh: true,
+        export: false,
+        position: 'both'
+      }
+    });
+
+    // ===== EXAMPLE 3: MANUAL CONTROL INTEGRATION =====
+    window.manualTable = new Table('#manualTable', {
+      data: generateEmployeeData(75),
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Name' },
+        { name: 'department', title: 'Department' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `$${cell.toLocaleString()}` }
+      ],
+      pagination: {
+        enabled: true,
+        pageSize: 8,
+        mode: 'client',
+        showPageNumbers: true,
+        showFirstLast: true,
+        showPrevNext: true,
+        showPageSizes: true,
+        pageSizeOptions: [5, 8, 10, 15, 20]
+      },
+      controls: {
+        enabled: true,
+        search: false,
+        pagination: true,
+        pageSize: true,
+        refresh: false,
+        export: false,
+        position: 'top'
+      }
+    });
+
+    // ===== EXAMPLE 4: CONFIGURATION SHOWCASE =====
+    const configTable = new Table('#configTable', {
+      data: generateEmployeeData(200),
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Employee' },
+        { name: 'department', title: 'Dept.' },
+        { name: 'position', title: 'Role' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `$${(cell/1000).toFixed(0)}k` }
+      ],
+      pagination: {
+        enabled: true,
+        pageSize: 6,
+        mode: 'client',
+        showPageNumbers: true,
+        maxPageNumbers: 3,    // Show max 3 page numbers
+        showFirstLast: false, // Hide first/last buttons
+        showPrevNext: true,
+        showPageSizes: true,
+        pageSizeOptions: [3, 6, 9, 12]
+      },
+      controls: {
+        enabled: true,
+        search: false,
+        pagination: false,    // Hide pagination from control panel
+        pageSize: true,
+        refresh: true,
+        export: false,
+        position: 'bottom'    // Controls at bottom
+      }
+    });
+
+    // ===== EVENT LISTENERS FOR INFO UPDATES =====
+    
+    function updateInfo(table, infoElementId) {
+      const info = table.paginationManager.getInfo();
+      const element = document.getElementById(infoElementId);
+      element.textContent = `Page ${info.currentPage} of ${info.totalPages} (${info.startRow}-${info.endRow} of ${info.totalRows} records)`;
+    }
+
+    // Client table events
+    clientTable.eventManager.on('afterPageChange', () => updateInfo(clientTable, 'clientInfo'));
+    clientTable.eventManager.on('afterPageSizeChange', () => updateInfo(clientTable, 'clientInfo'));
+    
+    // Server table events  
+    serverTable.eventManager.on('afterPageChange', () => updateInfo(serverTable, 'serverInfo'));
+    serverTable.eventManager.on('afterPageSizeChange', () => updateInfo(serverTable, 'serverInfo'));
+    
+    // Manual table events
+    manualTable.eventManager.on('afterPageChange', () => updateInfo(manualTable, 'manualInfo'));
+    manualTable.eventManager.on('afterPageSizeChange', () => updateInfo(manualTable, 'manualInfo'));
+    
+    // Config table events
+    configTable.eventManager.on('afterPageChange', () => updateInfo(configTable, 'configInfo'));
+    configTable.eventManager.on('afterPageSizeChange', () => updateInfo(configTable, 'configInfo'));
+
+    // ===== HELPER FUNCTIONS =====
+    
+    window.addMoreData = function() {
+      const currentData = manualTable.dataManager.originalData;
+      const newData = [...currentData, ...generateEmployeeData(25)];
+      manualTable.loadData(newData);
+      updateInfo(manualTable, 'manualInfo');
+    };
+
+    // Initial info updates
+    setTimeout(() => {
+      updateInfo(clientTable, 'clientInfo');
+      updateInfo(manualTable, 'manualInfo');  
+      updateInfo(configTable, 'configInfo');
+    }, 100);
+  </script>
+</body>
+</html>

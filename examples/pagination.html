@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>TablixJS - Pagination Examples</title>
+  <link rel="stylesheet" href="../src/styles/tablix.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      margin: 20px;
+      background-color: #fafafa;
+    }
+    
+    .example {
+      background-color: white;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .controls {
+      margin-bottom: 20px;
+    }
+    
+    .controls button {
+      margin-right: 10px;
+      margin-bottom: 10px;
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .controls button:hover {
+      background: #f0f0f0;
+    }
+    
+    .info {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>TablixJS Pagination Examples</h1>
+
+  <!-- Client-side Pagination Example -->
+  <div class="example">
+    <h2>1. Client-side Pagination</h2>
+    <p>All data is loaded at once and paginated on the client-side.</p>
+    
+    <div class="controls">
+      <button onclick="clientTable.goToPage(1)">Go to Page 1</button>
+      <button onclick="clientTable.nextPage()">Next Page</button>
+      <button onclick="clientTable.prevPage()">Prev Page</button>
+      <button onclick="clientTable.changePageSize(5)">Page Size: 5</button>
+      <button onclick="clientTable.changePageSize(10)">Page Size: 10</button>
+      <button onclick="clientTable.filter({name: 'John'})">Filter 'John'</button>
+      <button onclick="clientTable.clearFilters()">Clear Filter</button>
+      <button onclick="loadLargeDataset()">Load Large Dataset (50 items)</button>
+    </div>
+    
+    <div id="clientTable"></div>
+    <div class="info" id="clientInfo"></div>
+  </div>
+
+  <!-- Server-side Pagination Example -->
+  <div class="example">
+    <h2>2. Server-side Pagination</h2>
+    <p>Data is loaded from server with pagination parameters.</p>
+    
+    <div class="controls">
+      <button onclick="serverTable.goToPage(1)">Go to Page 1</button>
+      <button onclick="serverTable.nextPage()">Next Page</button>
+      <button onclick="serverTable.prevPage()">Prev Page</button>
+      <button onclick="serverTable.changePageSize(3)">Page Size: 3</button>
+      <button onclick="serverTable.changePageSize(5)">Page Size: 5</button>
+    </div>
+    
+    <div id="serverTable"></div>
+    <div class="info" id="serverInfo"></div>
+  </div>
+
+  <!-- Advanced Features Example -->
+  <div class="example">
+    <h2>3. Advanced Features</h2>
+    <p>Pagination with page size selector and more controls.</p>
+    
+    <div class="controls">
+      <button onclick="advancedTable.setPaginationEnabled(false)">Disable Pagination</button>
+      <button onclick="advancedTable.setPaginationEnabled(true)">Enable Pagination</button>
+      <button onclick="loadRandomData()">Load Random Data</button>
+    </div>
+    
+    <div id="advancedTable"></div>
+    <div class="info" id="advancedInfo"></div>
+  </div>
+
+  <script type="module">
+    import Table from '../src/core/Table.js';
+
+    // ===== CLIENT-SIDE PAGINATION EXAMPLE =====
+    
+    // Generate sample data
+    function generateSampleData(count = 25) {
+      const names = ['John', 'Jane', 'Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry'];
+      const departments = ['IT', 'HR', 'Finance', 'Marketing', 'Sales'];
+      const data = [];
+      
+      for (let i = 1; i <= count; i++) {
+        data.push({
+          id: i,
+          name: names[Math.floor(Math.random() * names.length)] + ` ${i}`,
+          department: departments[Math.floor(Math.random() * departments.length)],
+          salary: Math.floor(Math.random() * 50000) + 30000,
+          joinDate: new Date(2020 + Math.floor(Math.random() * 4), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toLocaleDateString()
+        });
+      }
+      
+      return data;
+    }
+
+    const clientTable = new Table('#clientTable', {
+      data: generateSampleData(25),
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Name', renderer: (cell) => `<strong>${cell}</strong>` },
+        { name: 'department', title: 'Department' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `$${cell.toLocaleString()}` },
+        { name: 'joinDate', title: 'Join Date' }
+      ],
+      pagination: {
+        enabled: true,
+        pageSize: 8,
+        mode: 'client',
+        showPageNumbers: true,
+        showFirstLast: true,
+        showPrevNext: true,
+        maxPageNumbers: 5
+      }
+    });
+
+    // ===== SERVER-SIDE PAGINATION EXAMPLE =====
+    
+    // Mock server data loader
+    async function mockServerDataLoader({ page, pageSize, filters = {}, sorts = [] }) {
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Generate mock server data
+      const totalRows = 47; // Simulate server having 47 total records
+      const allData = generateSampleData(totalRows);
+      
+      // Apply filters (mock server-side filtering)
+      let filteredData = allData;
+      if (Object.keys(filters).length > 0) {
+        filteredData = allData.filter(item => {
+          return Object.entries(filters).every(([key, value]) => {
+            return item[key].toString().toLowerCase().includes(value.toLowerCase());
+          });
+        });
+      }
+      
+      // Apply sorting (mock server-side sorting)
+      if (sorts.length > 0) {
+        filteredData.sort((a, b) => {
+          for (const sort of sorts) {
+            const { column, direction } = sort;
+            let comparison = 0;
+            if (a[column] < b[column]) comparison = -1;
+            else if (a[column] > b[column]) comparison = 1;
+            
+            if (comparison !== 0) {
+              return direction === 'desc' ? -comparison : comparison;
+            }
+          }
+          return 0;
+        });
+      }
+      
+      // Paginate
+      const start = (page - 1) * pageSize;
+      const pageData = filteredData.slice(start, start + pageSize);
+      
+      return {
+        data: pageData,
+        totalRows: filteredData.length,
+        page,
+        pageSize
+      };
+    }
+
+    const serverTable = new Table('#serverTable', {
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Name', renderer: (cell) => `<strong>${cell}</strong>` },
+        { name: 'department', title: 'Department' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `$${cell.toLocaleString()}` }
+      ],
+      pagination: {
+        enabled: true,
+        pageSize: 5,
+        mode: 'server',
+        serverDataLoader: mockServerDataLoader,
+        showPageNumbers: true,
+        showFirstLast: true,
+        showPrevNext: true
+      }
+    });
+
+    // ===== ADVANCED FEATURES EXAMPLE =====
+    
+    const advancedTable = new Table('#advancedTable', {
+      data: generateSampleData(30),
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Employee Name' },
+        { name: 'department', title: 'Department' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `$${cell.toLocaleString()}` }
+      ],
+      pagination: {
+        enabled: true,
+        pageSize: 10,
+        mode: 'client',
+        showPageNumbers: true,
+        showFirstLast: true,
+        showPrevNext: true,
+        showPageSizes: true,
+        pageSizeOptions: [5, 10, 15, 25]
+      }
+    });
+
+    // ===== EVENT HANDLERS =====
+    
+    function updateInfo() {
+      // Update client table info
+      const clientInfo = clientTable.getPaginationInfo();
+      if (clientInfo) {
+        document.getElementById('clientInfo').innerHTML = `
+          Page ${clientInfo.currentPage} of ${clientInfo.totalPages} | 
+          Showing ${clientInfo.startRow}-${clientInfo.endRow} of ${clientInfo.totalRows} records
+        `;
+      }
+      
+      // Update server table info
+      const serverInfo = serverTable.getPaginationInfo();
+      if (serverInfo) {
+        document.getElementById('serverInfo').innerHTML = `
+          Page ${serverInfo.currentPage} of ${serverInfo.totalPages} | 
+          Showing ${serverInfo.startRow}-${serverInfo.endRow} of ${serverInfo.totalRows} records
+          ${serverInfo.isLoading ? ' | Loading...' : ''}
+        `;
+      }
+      
+      // Update advanced table info
+      const advancedInfo = advancedTable.getPaginationInfo();
+      if (advancedInfo) {
+        document.getElementById('advancedInfo').innerHTML = `
+          Page ${advancedInfo.currentPage} of ${advancedInfo.totalPages} | 
+          Showing ${advancedInfo.startRow}-${advancedInfo.endRow} of ${advancedInfo.totalRows} records
+        `;
+      }
+    }
+
+    // Set up event listeners
+    clientTable.on('afterPageChange', updateInfo);
+    clientTable.on('afterPageSizeChange', updateInfo);
+    clientTable.on('afterFilter', updateInfo);
+    
+    serverTable.on('afterPageChange', updateInfo);
+    serverTable.on('afterPageSizeChange', updateInfo);
+    serverTable.on('beforePageLoad', updateInfo);
+    serverTable.on('afterPageLoad', updateInfo);
+    
+    advancedTable.on('afterPageChange', updateInfo);
+    advancedTable.on('afterPageSizeChange', updateInfo);
+
+    // Initial info update
+    setTimeout(updateInfo, 100);
+
+    // ===== GLOBAL FUNCTIONS =====
+    
+    window.loadLargeDataset = async function() {
+      await clientTable.loadData(generateSampleData(50));
+      updateInfo();
+    };
+    
+    window.loadRandomData = async function() {
+      await advancedTable.loadData(generateSampleData(Math.floor(Math.random() * 30) + 10));
+      updateInfo();
+    };
+
+    // Make tables globally accessible for button handlers
+    window.clientTable = clientTable;
+    window.serverTable = serverTable;
+    window.advancedTable = advancedTable;
+  </script>
+</body>
+</html>

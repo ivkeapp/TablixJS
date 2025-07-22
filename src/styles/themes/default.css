@@ -1,0 +1,112 @@
+/* TablixJS - Default Light Theme */
+
+:root {
+  /* Typography */
+  --tablix-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --tablix-font-size: 14px;
+  --tablix-mobile-font-size: 13px;
+  
+  /* Colors - Text */
+  --tablix-text-color: #333;
+  --tablix-header-text-color: #333;
+  --tablix-empty-text-color: #999;
+  --tablix-loading-text-color: #666;
+  --tablix-error-text-color: #d32f2f;
+  
+  /* Colors - Backgrounds */
+  --tablix-table-bg: #fff;
+  --tablix-header-bg: #f5f5f5;
+  --tablix-row-even-bg: #fafafa;
+  --tablix-row-hover-bg: #f0f0f0;
+  --tablix-error-bg: #ffebee;
+  
+  /* Colors - Borders */
+  --tablix-table-border: 1px solid #e0e0e0;
+  --tablix-cell-border: 1px solid #e0e0e0;
+  --tablix-error-border: 1px solid #ffcdd2;
+  
+  /* Colors - Focus and Interactive */
+  --tablix-focus-color: #007acc;
+  --tablix-focus-shadow: rgba(0, 122, 204, 0.2);
+  
+  /* Spacing */
+  --tablix-cell-padding: 12px 8px;
+  --tablix-mobile-cell-padding: 8px 6px;
+  --tablix-empty-padding: 20px;
+  --tablix-loading-padding: 40px;
+  --tablix-error-padding: 40px;
+  
+  /* Header */
+  --tablix-header-font-weight: 600;
+  
+  /* Border radius */
+  --tablix-border-radius: 4px;
+  
+  /* Pagination specific */
+  --tablix-pagination-margin-top: 16px;
+  --tablix-pagination-padding: 12px 0;
+  --tablix-pagination-border: 1px solid #e0e0e0;
+  --tablix-pagination-gap: 16px;
+  --tablix-pagination-gap-small: 8px;
+  --tablix-pagination-mobile-gap: 12px;
+  --tablix-pagination-nav-gap: 4px;
+  
+  /* Pagination text */
+  --tablix-pagination-info-color: #666;
+  --tablix-pagination-info-font-size: 13px;
+  
+  /* Buttons */
+  --tablix-btn-padding: 6px 12px;
+  --tablix-btn-mobile-padding: 8px;
+  --tablix-btn-min-width: 32px;
+  --tablix-btn-mobile-min-width: 36px;
+  --tablix-btn-border: 1px solid #d0d0d0;
+  --tablix-btn-bg: #fff;
+  --tablix-btn-text-color: #333;
+  --tablix-btn-hover-bg: #f0f0f0;
+  --tablix-btn-hover-border-color: #007acc;
+  --tablix-btn-active-bg: #e0e0e0;
+  --tablix-btn-active-color: #007acc;
+  --tablix-btn-active-text: #fff;
+  --tablix-btn-disabled-bg: #f5f5f5;
+  --tablix-btn-disabled-text: #ccc;
+  --tablix-btn-disabled-border: #e0e0e0;
+  
+  /* Select elements */
+  --tablix-select-padding: 4px 8px;
+  --tablix-select-border: 1px solid #d0d0d0;
+  --tablix-select-bg: #fff;
+  
+  /* Other elements */
+  --tablix-ellipsis-padding: 6px 4px;
+  --tablix-ellipsis-color: #999;
+  --tablix-loading-color: #007acc;
+  
+  /* Control panel styles */
+  --tablix-controls-bg: #f8f9fa;
+  --tablix-controls-border: 1px solid #e0e0e0;
+  --tablix-controls-padding: 12px 16px;
+  --tablix-controls-margin: 0 0 12px 0;
+  --tablix-controls-gap: 16px;
+  --tablix-controls-gap-small: 8px;
+  --tablix-controls-border-radius: 4px;
+  
+  /* Search input styles */
+  --tablix-search-input-padding: 6px 8px;
+  --tablix-search-input-border: 1px solid #d0d0d0;
+  --tablix-search-input-bg: #fff;
+  --tablix-search-input-focus-border: #007acc;
+  --tablix-search-input-focus-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+  --tablix-search-clear-color: #999;
+  --tablix-search-clear-hover-color: #666;
+  
+  /* Control buttons */
+  --tablix-control-btn-padding: 6px 10px;
+  --tablix-control-btn-border: 1px solid #d0d0d0;
+  --tablix-control-btn-bg: #fff;
+  --tablix-control-btn-text-color: #333;
+  --tablix-control-btn-hover-bg: #f0f0f0;
+  --tablix-control-btn-hover-border: #007acc;
+  --tablix-control-btn-active-bg: #007acc;
+  --tablix-control-btn-active-text: #fff;
+}

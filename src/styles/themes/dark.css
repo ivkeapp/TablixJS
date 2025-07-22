@@ -1,0 +1,102 @@
+/* TablixJS - Dark Theme */
+
+[data-theme="dark"] {
+  /* Colors - Text */
+  --tablix-text-color: #e0e0e0;
+  --tablix-header-text-color: #e0e0e0;
+  --tablix-empty-text-color: #999;
+  --tablix-loading-text-color: #ccc;
+  --tablix-error-text-color: #ff6b6b;
+  
+  /* Colors - Backgrounds */
+  --tablix-table-bg: #2d2d2d;
+  --tablix-header-bg: #3a3a3a;
+  --tablix-row-even-bg: #333;
+  --tablix-row-hover-bg: #404040;
+  --tablix-error-bg: #3d1a1a;
+  
+  /* Colors - Borders */
+  --tablix-table-border: 1px solid #555;
+  --tablix-cell-border: 1px solid #555;
+  --tablix-error-border: 1px solid #6d2c2c;
+  --tablix-pagination-border: 1px solid #555;
+  
+  /* Colors - Focus and Interactive */
+  --tablix-focus-color: #4db6e6;
+  --tablix-focus-shadow: rgba(77, 182, 230, 0.2);
+  
+  /* Pagination text */
+  --tablix-pagination-info-color: #ccc;
+  
+  /* Buttons */
+  --tablix-btn-border: 1px solid #555;
+  --tablix-btn-bg: #3a3a3a;
+  --tablix-btn-text-color: #e0e0e0;
+  --tablix-btn-hover-bg: #4a4a4a;
+  --tablix-btn-hover-border-color: #4db6e6;
+  --tablix-btn-active-bg: #2a2a2a;
+  --tablix-btn-active-color: #4db6e6;
+  --tablix-btn-active-text: #fff;
+  --tablix-btn-disabled-bg: #2a2a2a;
+  --tablix-btn-disabled-text: #666;
+  --tablix-btn-disabled-border: #444;
+  
+  /* Select elements */
+  --tablix-select-border: 1px solid #555;
+  --tablix-select-bg: #3a3a3a;
+  
+  /* Other elements */
+  --tablix-ellipsis-color: #777;
+  --tablix-loading-color: #4db6e6;
+}
+
+/* Alternative class-based dark theme */
+.tablix-wrapper.dark {
+  /* Colors - Text */
+  --tablix-text-color: #e0e0e0;
+  --tablix-header-text-color: #e0e0e0;
+  --tablix-empty-text-color: #999;
+  --tablix-loading-text-color: #ccc;
+  --tablix-error-text-color: #ff6b6b;
+  
+  /* Colors - Backgrounds */
+  --tablix-table-bg: #2d2d2d;
+  --tablix-header-bg: #3a3a3a;
+  --tablix-row-even-bg: #333;
+  --tablix-row-hover-bg: #404040;
+  --tablix-error-bg: #3d1a1a;
+  
+  /* Colors - Borders */
+  --tablix-table-border: 1px solid #555;
+  --tablix-cell-border: 1px solid #555;
+  --tablix-error-border: 1px solid #6d2c2c;
+  --tablix-pagination-border: 1px solid #555;
+  
+  /* Colors - Focus and Interactive */
+  --tablix-focus-color: #4db6e6;
+  --tablix-focus-shadow: rgba(77, 182, 230, 0.2);
+  
+  /* Pagination text */
+  --tablix-pagination-info-color: #ccc;
+  
+  /* Buttons */
+  --tablix-btn-border: 1px solid #555;
+  --tablix-btn-bg: #3a3a3a;
+  --tablix-btn-text-color: #e0e0e0;
+  --tablix-btn-hover-bg: #4a4a4a;
+  --tablix-btn-hover-border-color: #4db6e6;
+  --tablix-btn-active-bg: #2a2a2a;
+  --tablix-btn-active-color: #4db6e6;
+  --tablix-btn-active-text: #fff;
+  --tablix-btn-disabled-bg: #2a2a2a;
+  --tablix-btn-disabled-text: #666;
+  --tablix-btn-disabled-border: #444;
+  
+  /* Select elements */
+  --tablix-select-border: 1px solid #555;
+  --tablix-select-bg: #3a3a3a;
+  
+  /* Other elements */
+  --tablix-ellipsis-color: #777;
+  --tablix-loading-color: #4db6e6;
+}
