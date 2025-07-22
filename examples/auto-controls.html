@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>TablixJS - Auto-Generated Controls Example</title>
+  <link rel="stylesheet" href="../src/styles/tablix.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      margin: 20px;
+      background-color: #fafafa;
+    }
+    
+    .example {
+      background-color: white;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .info {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .manual-controls {
+      margin-bottom: 15px;
+    }
+    
+    .manual-controls button {
+      margin-right: 10px;
+      margin-bottom: 10px;
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .manual-controls button:hover {
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <h1>TablixJS - Auto-Generated Pagination Controls</h1>
+  <p>This example shows how TablixJS can automatically generate pagination controls without requiring manual HTML. You only need to provide a single container element!</p>
+
+  <!-- Example 1: Fully automatic table with all controls -->
+  <div class="example">
+    <h2>1. Fully Automatic Table</h2>
+    <p>Only one div is needed - all controls are generated automatically!</p>
+    <div id="autoTable"></div>
+    <div class="info" id="autoInfo"></div>
+  </div>
+
+  <!-- Example 2: Server-side with automatic controls -->
+  <div class="example">
+    <h2>2. Server-side with Auto Controls</h2>
+    <p>Server-side pagination with automatically generated controls.</p>
+    <div id="serverTable"></div>
+    <div class="info" id="serverInfo"></div>
+  </div>
+
+  <!-- Example 3: Custom control configuration -->
+  <div class="example">
+    <h2>3. Custom Control Configuration</h2>
+    <p>You can still customize which controls to show and their position.</p>
+    <div id="customTable"></div>
+    <div class="info" id="customInfo"></div>
+  </div>
+
+  <!-- Example 4: Manual controls for comparison -->
+  <div class="example">
+    <h2>4. For Comparison - Manual Controls</h2>
+    <p>This shows how you could still use manual controls if needed (not recommended for new projects).</p>
+    
+    <div class="manual-controls">
+      <button onclick="manualTable.goToPage(1)">First</button>
+      <button onclick="manualTable.prevPage()">Previous</button>
+      <button onclick="manualTable.nextPage()">Next</button>
+      <button onclick="manualTable.changePageSize(5)">Page Size: 5</button>
+      <button onclick="manualTable.changePageSize(10)">Page Size: 10</button>
+      <button onclick="manualTable.filter({name: 'John'})">Filter 'John'</button>
+      <button onclick="manualTable.clearFilters()">Clear Filter</button>
+    </div>
+    
+    <div id="manualTable"></div>
+    <div class="info" id="manualInfo"></div>
+  </div>
+
+  <script type="module">
+    import Table from '../src/core/Table.js';
+
+    // Generate sample data
+    function generateSampleData(count = 25) {
+      const names = ['John', 'Jane', 'Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry'];
+      const departments = ['IT', 'HR', 'Finance', 'Marketing', 'Sales'];
+      const positions = ['Manager', 'Developer', 'Analyst', 'Coordinator', 'Specialist'];
+      const data = [];
+      
+      for (let i = 1; i <= count; i++) {
+        data.push({
+          id: i,
+          name: names[Math.floor(Math.random() * names.length)] + ` ${i}`,
+          department: departments[Math.floor(Math.random() * departments.length)],
+          position: positions[Math.floor(Math.random() * positions.length)],
+          salary: Math.floor(Math.random() * 50000) + 30000,
+          joinDate: new Date(2020 + Math.floor(Math.random() * 4), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toLocaleDateString()
+        });
+      }
+      
+      return data;
+    }
+
+    // ===== EXAMPLE 1: FULLY AUTOMATIC TABLE =====
+    
+    const autoTable = new Table('#autoTable', {
+      data: generateSampleData(50),
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Employee Name', renderer: (cell) => `<strong>${cell}</strong>` },
+        { name: 'department', title: 'Department' },
+        { name: 'position', title: 'Position' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `$${cell.toLocaleString()}` },
+        { name: 'joinDate', title: 'Join Date' }
+      ],
+      pagination: {
+        enabled: true,
+        pageSize: 8,
+        mode: 'client',
+        showPageNumbers: true,
+        showFirstLast: true,
+        showPrevNext: true,
+        showPageSizes: true,
+        pageSizeOptions: [5, 8, 10, 15, 25]
+      },
+      controls: {
+        enabled: true,        // Enable automatic control generation
+        search: false,        // Disable search box  
+        pagination: true,     // Show pagination controls
+        pageSize: true,       // Show page size selector
+        refresh: true,        // Show refresh button
+        export: false,        // Disable export button
+        position: 'top'       // Controls at top of table
+      },
+      search: {
+        enabled: false
+      }
+    });
+
+    // ===== EXAMPLE 2: SERVER-SIDE WITH AUTO CONTROLS =====
+    
+    // Mock server data loader
+    async function mockServerDataLoader({ page, pageSize, filters = {}, sorts = [] }) {
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Generate mock server data
+      const totalRows = 127; // Simulate server having 127 total records
+      const allData = generateSampleData(totalRows);
+      
+      // Apply filters (mock server-side filtering)
+      let filteredData = allData;
+      if (Object.keys(filters).length > 0) {
+        filteredData = allData.filter(item => {
+          return Object.entries(filters).every(([key, value]) => {
+            return item[key].toString().toLowerCase().includes(value.toLowerCase());
+          });
+        });
+      }
+      
+      // Apply sorting (mock server-side sorting)
+      if (sorts.length > 0) {
+        filteredData.sort((a, b) => {
+          for (const sort of sorts) {
+            const { column, direction } = sort;
+            let comparison = 0;
+            if (a[column] < b[column]) comparison = -1;
+            else if (a[column] > b[column]) comparison = 1;
+            
+            if (comparison !== 0) {
+              return direction === 'desc' ? -comparison : comparison;
+            }
+          }
+          return 0;
+        });
+      }
+      
+      // Paginate
+      const start = (page - 1) * pageSize;
+      const pageData = filteredData.slice(start, start + pageSize);
+      
+      return {
+        data: pageData,
+        totalRows: filteredData.length,
+        page,
+        pageSize
+      };
+    }
+
+    const serverTable = new Table('#serverTable', {
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Name', renderer: (cell) => `<strong>${cell}</strong>` },
+        { name: 'department', title: 'Department' },
+        { name: 'position', title: 'Position' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `$${cell.toLocaleString()}` }
+      ],
+      pagination: {
+        enabled: true,
+        pageSize: 10,
+        mode: 'server',
+        serverDataLoader: mockServerDataLoader,
+        showPageNumbers: true,
+        showFirstLast: true,
+        showPrevNext: true,
+        showPageSizes: true,
+        pageSizeOptions: [5, 10, 15, 20]
+      },
+      controls: {
+        enabled: true,
+        search: false,        // Disable search
+        pagination: true,
+        pageSize: true,
+        refresh: true,
+        export: false,        // Disable export for server-side example
+        position: 'both'      // Controls at both top and bottom
+      }
+    });
+
+    // ===== EXAMPLE 3: CUSTOM CONTROL CONFIGURATION =====
+    
+    const customTable = new Table('#customTable', {
+      data: generateSampleData(30),
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Name' },
+        { name: 'department', title: 'Department' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `$${cell.toLocaleString()}` }
+      ],
+      pagination: {
+        enabled: true,
+        pageSize: 12,
+        mode: 'client',
+        showPageNumbers: true,
+        showFirstLast: false,  // Hide first/last buttons
+        showPrevNext: true,
+        showPageSizes: true,
+        pageSizeOptions: [6, 12, 18, 24]
+      },
+      controls: {
+        enabled: true,
+        search: false,        // Disable search
+        pagination: false,    // Don't show pagination controls in control panel
+        pageSize: true,
+        refresh: true,
+        export: false,        // Disable export
+        position: 'bottom'    // Controls at bottom only
+      }
+    });
+
+    // ===== EXAMPLE 4: MANUAL CONTROLS (for comparison) =====
+    
+    const manualTable = new Table('#manualTable', {
+      data: generateSampleData(25),
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Name', renderer: (cell) => `<strong>${cell}</strong>` },
+        { name: 'department', title: 'Department' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `$${cell.toLocaleString()}` }
+      ],
+      pagination: {
+        enabled: true,
+        pageSize: 8,
+        mode: 'client',
+        showPageNumbers: true,
+        showFirstLast: true,
+        showPrevNext: true,
+        showPageSizes: true,
+        pageSizeOptions: [5, 8, 10, 15]
+      },
+      controls: {
+        enabled: false  // Disable automatic controls - use manual buttons above
+      }
+    });
+
+    // ===== INFO DISPLAY FUNCTIONS =====
+    
+    function updateInfo() {
+      // Update auto table info
+      const autoInfo = autoTable.getPaginationInfo();
+      if (autoInfo) {
+        document.getElementById('autoInfo').innerHTML = `
+          Page ${autoInfo.currentPage} of ${autoInfo.totalPages} | 
+          Showing ${autoInfo.startRow}-${autoInfo.endRow} of ${autoInfo.totalRows} records
+        `;
+      }
+      
+      // Update server table info
+      const serverInfo = serverTable.getPaginationInfo();
+      if (serverInfo) {
+        document.getElementById('serverInfo').innerHTML = `
+          Page ${serverInfo.currentPage} of ${serverInfo.totalPages} | 
+          Showing ${serverInfo.startRow}-${serverInfo.endRow} of ${serverInfo.totalRows} records
+          ${serverInfo.isLoading ? ' | Loading...' : ''}
+        `;
+      }
+      
+      // Update custom table info
+      const customInfo = customTable.getPaginationInfo();
+      if (customInfo) {
+        document.getElementById('customInfo').innerHTML = `
+          Page ${customInfo.currentPage} of ${customInfo.totalPages} | 
+          Showing ${customInfo.startRow}-${customInfo.endRow} of ${customInfo.totalRows} records
+        `;
+      }
+      
+      // Update manual table info
+      const manualInfo = manualTable.getPaginationInfo();
+      if (manualInfo) {
+        document.getElementById('manualInfo').innerHTML = `
+          Page ${manualInfo.currentPage} of ${manualInfo.totalPages} | 
+          Showing ${manualInfo.startRow}-${manualInfo.endRow} of ${manualInfo.totalRows} records
+        `;
+      }
+    }
+
+    // ===== EVENT LISTENERS =====
+    
+    // Auto table events
+    autoTable.on('afterPageChange', updateInfo);
+    autoTable.on('afterPageSizeChange', updateInfo);
+    autoTable.on('afterFilter', updateInfo);
+    autoTable.on('afterRefresh', () => {
+      console.log('Auto table refreshed!');
+      updateInfo();
+    });
+    autoTable.on('afterExport', (data) => {
+      console.log('Auto table exported!', data);
+    });
+    
+    // Server table events
+    serverTable.on('afterPageChange', updateInfo);
+    serverTable.on('afterPageSizeChange', updateInfo);
+    serverTable.on('afterFilter', updateInfo);
+    serverTable.on('beforePageLoad', updateInfo);
+    serverTable.on('afterPageLoad', updateInfo);
+    
+    // Custom table events
+    customTable.on('afterPageChange', updateInfo);
+    customTable.on('afterPageSizeChange', updateInfo);
+    customTable.on('afterFilter', updateInfo);
+    
+    // Manual table events
+    manualTable.on('afterPageChange', updateInfo);
+    manualTable.on('afterPageSizeChange', updateInfo);
+    manualTable.on('afterFilter', updateInfo);
+
+    // Initial info update
+    setTimeout(updateInfo, 100);
+
+    // Make tables globally accessible for manual controls
+    window.manualTable = manualTable;
+  </script>
+</body>
+</html>

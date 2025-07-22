@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>TablixJS - Pagination Test</title>
+  <link rel="stylesheet" href="../src/styles/tablix.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f5f5f5;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-controls {
+      margin: 10px 0;
+    }
+    .test-controls button {
+      margin: 5px;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      background: white;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .test-controls button:hover {
+      background: #f0f0f0;
+    }
+    .status {
+      margin: 10px 0;
+      padding: 10px;
+      background: #e8f5e8;
+      border-left: 4px solid #4caf50;
+      border-radius: 4px;
+    }
+    .error {
+      background: #ffebee;
+      border-left-color: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <h1>TablixJS Pagination - Comprehensive Test</h1>
+
+  <!-- Test 1: Basic Functionality -->
+  <div class="test-section">
+    <h2>Test 1: Basic Client-side Pagination</h2>
+    <div class="test-controls">
+      <button onclick="test1.nextPage()">Next Page</button>
+      <button onclick="test1.prevPage()">Prev Page</button>
+      <button onclick="test1.goToPage(3)">Go to Page 3</button>
+      <button onclick="test1.changePageSize(5)">Change to 5/page</button>
+      <button onclick="showTest1Info()">Show Info</button>
+    </div>
+    <div id="test1-table"></div>
+    <div id="test1-status" class="status"></div>
+  </div>
+
+  <!-- Test 2: Server-side Simulation -->
+  <div class="test-section">
+    <h2>Test 2: Server-side Pagination Simulation</h2>
+    <div class="test-controls">
+      <button onclick="test2.nextPage()">Next Page</button>
+      <button onclick="test2.prevPage()">Prev Page</button>
+      <button onclick="test2.goToPage(1)">Go to First</button>
+      <button onclick="test2.changePageSize(3)">Change to 3/page</button>
+      <button onclick="showTest2Info()">Show Info</button>
+    </div>
+    <div id="test2-table"></div>
+    <div id="test2-status" class="status"></div>
+  </div>
+
+  <!-- Test 3: Filtering Integration -->
+  <div class="test-section">
+    <h2>Test 3: Pagination with Filtering</h2>
+    <div class="test-controls">
+      <button onclick="test3.filter({name: 'John'})">Filter 'John'</button>
+      <button onclick="test3.filter({department: 'IT'})">Filter 'IT'</button>
+      <button onclick="test3.clearFilters()">Clear Filters</button>
+      <button onclick="test3.nextPage()">Next Page</button>
+      <button onclick="showTest3Info()">Show Info</button>
+    </div>
+    <div id="test3-table"></div>
+    <div id="test3-status" class="status"></div>
+  </div>
+
+  <script type="module">
+    import Table from '../src/core/Table.js';
+
+    // Generate test data
+    function generateTestData(count = 20) {
+      const names = ['John Smith', 'Jane Doe', 'Bob Johnson', 'Alice Brown', 'Charlie Wilson', 'Diana Davis', 'Mark Thompson', 'Derek White'];
+      const departments = ['IT', 'HR', 'Finance', 'Marketing', 'Sales', 'Operations', 'Support'];
+      const data = [];
+      
+      for (let i = 1; i <= count; i++) {
+        data.push({
+          id: i,
+          name: names[Math.floor(Math.random() * names.length)],
+          department: departments[Math.floor(Math.random() * departments.length)],
+          salary: Math.floor(Math.random() * 50000) + 40000,
+          status: Math.random() > 0.2 ? 'Active' : 'Inactive'
+        });
+      }
+      
+      return data;
+    }
+
+    // ===== TEST 1: Basic Client-side Pagination =====
+    
+    const test1 = new Table('#test1-table', {
+      data: generateTestData(15),
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Name' },
+        { name: 'department', title: 'Department' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `$${cell.toLocaleString()}` }
+      ],
+      pagination: {
+        pageSize: 3,
+        showPageNumbers: true,
+        showFirstLast: true,
+        showPrevNext: true
+      }
+    });
+
+    // ===== TEST 2: Server-side Pagination Simulation =====
+    
+    async function mockServerLoader({ page, pageSize }) {
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      const allData = generateTestData(25);
+      const start = (page - 1) * pageSize;
+      const pageData = allData.slice(start, start + pageSize);
+      
+      return {
+        data: pageData,
+        totalRows: allData.length
+      };
+    }
+
+    const test2 = new Table('#test2-table', {
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Name' },
+        { name: 'department', title: 'Dept' },
+        { name: 'status', title: 'Status' }
+      ],
+      pagination: {
+        mode: 'server',
+        pageSize: 4,
+        serverDataLoader: mockServerLoader,
+        showPageNumbers: true,
+        showFirstLast: true
+      }
+    });
+
+    // ===== TEST 3: Filtering Integration =====
+    
+    const test3 = new Table('#test3-table', {
+      data: generateTestData(12),
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Name' },
+        { name: 'department', title: 'Department' },
+        { name: 'status', title: 'Status' }
+      ],
+      pagination: {
+        pageSize: 4,
+        showPageNumbers: true,
+        showPrevNext: true
+      }
+    });
+
+    // ===== EVENT HANDLERS =====
+    
+    function updateStatus(table, elementId) {
+      const info = table.getPaginationInfo();
+      const element = document.getElementById(elementId);
+      
+      if (info) {
+        element.innerHTML = `
+          <strong>Page ${info.currentPage} of ${info.totalPages}</strong><br>
+          Showing ${info.startRow}-${info.endRow} of ${info.totalRows} records<br>
+          Page Size: ${info.pageSize}
+          ${info.isLoading ? '<br><em>Loading...</em>' : ''}
+        `;
+        element.className = 'status';
+      } else {
+        element.innerHTML = 'Pagination not available';
+        element.className = 'status error';
+      }
+    }
+
+    // Set up event listeners
+    test1.on('afterPageChange', () => updateStatus(test1, 'test1-status'));
+    test1.on('afterPageSizeChange', () => updateStatus(test1, 'test1-status'));
+    
+    test2.on('afterPageChange', () => updateStatus(test2, 'test2-status'));
+    test2.on('afterPageSizeChange', () => updateStatus(test2, 'test2-status'));
+    test2.on('beforePageLoad', () => updateStatus(test2, 'test2-status'));
+    test2.on('afterPageLoad', () => updateStatus(test2, 'test2-status'));
+    
+    test3.on('afterPageChange', () => updateStatus(test3, 'test3-status'));
+    test3.on('afterFilter', () => updateStatus(test3, 'test3-status'));
+
+    // Global functions for button handlers
+    window.test1 = test1;
+    window.test2 = test2;
+    window.test3 = test3;
+    
+    window.showTest1Info = () => {
+      console.log('Test 1 Info:', test1.getPaginationInfo());
+      updateStatus(test1, 'test1-status');
+    };
+    
+    window.showTest2Info = () => {
+      console.log('Test 2 Info:', test2.getPaginationInfo());
+      updateStatus(test2, 'test2-status');
+    };
+    
+    window.showTest3Info = () => {
+      console.log('Test 3 Info:', test3.getPaginationInfo());
+      updateStatus(test3, 'test3-status');
+    };
+
+    // Initial status update
+    setTimeout(() => {
+      updateStatus(test1, 'test1-status');
+      updateStatus(test2, 'test2-status');
+      updateStatus(test3, 'test3-status');
+    }, 100);
+
+    // Test error handling
+    console.log('✅ All pagination tests initialized successfully');
+  </script>
+</body>
+</html>

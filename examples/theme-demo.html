@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>TablixJS - Theme Demo</title>
+  <link rel="stylesheet" href="../src/styles/tablix.css">
+  <link rel="stylesheet" href="../src/styles/themes/dark.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      margin: 20px;
+      background-color: #fafafa;
+      transition: all 0.3s ease;
+    }
+    
+    body.dark-mode {
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+    }
+    
+    .demo-section {
+      background-color: white;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .dark-mode .demo-section {
+      background-color: #2d2d2d;
+      color: #e0e0e0;
+      border: 1px solid #555;
+    }
+    
+    .theme-controls {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .dark-mode .theme-controls {
+      background-color: #2d2d2d;
+      color: #e0e0e0;
+      border: 1px solid #555;
+    }
+    
+    .theme-btn {
+      margin: 0 10px;
+      padding: 10px 20px;
+      border: 2px solid #007acc;
+      background: white;
+      color: #007acc;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    
+    .theme-btn:hover {
+      background: #007acc;
+      color: white;
+    }
+    
+    .theme-btn.active {
+      background: #007acc;
+      color: white;
+    }
+    
+    .dark-mode .theme-btn {
+      border-color: #4db6e6;
+      background: #2d2d2d;
+      color: #4db6e6;
+    }
+    
+    .dark-mode .theme-btn:hover {
+      background: #4db6e6;
+      color: #1a1a1a;
+    }
+    
+    .dark-mode .theme-btn.active {
+      background: #4db6e6;
+      color: #1a1a1a;
+    }
+    
+    .custom-theme {
+      --tablix-btn-active-color: #28a745;
+      --tablix-focus-color: #28a745;
+      --tablix-btn-hover-border-color: #28a745;
+      --tablix-header-bg: #e8f5e9;
+    }
+    
+    .purple-theme {
+      --tablix-btn-active-color: #9c27b0;
+      --tablix-focus-color: #9c27b0;
+      --tablix-btn-hover-border-color: #9c27b0;
+      --tablix-header-bg: #f3e5f5;
+      --tablix-header-text-color: #4a148c;
+    }
+  </style>
+</head>
+<body>
+  <div class="theme-controls">
+    <h1>TablixJS Theme System Demo</h1>
+    <p>Demonstration of the new CSS custom property-based theming system</p>
+    
+    <button class="theme-btn active" onclick="setTheme('default')">Default Theme</button>
+    <button class="theme-btn" onclick="setTheme('dark')">Dark Theme</button>
+    <button class="theme-btn" onclick="setTheme('custom')">Green Theme</button>
+    <button class="theme-btn" onclick="setTheme('purple')">Purple Theme</button>
+  </div>
+
+  <!-- Default Theme Table -->
+  <div class="demo-section">
+    <h2>Default Theme</h2>
+    <p>Standard light theme with clean, professional appearance</p>
+    <div id="table1"></div>
+  </div>
+
+  <!-- Dark Theme Table -->
+  <div class="demo-section">
+    <h2>Dark Theme (Class-based)</h2>
+    <p>Dark theme applied using CSS class</p>
+    <div id="table2" class="dark"></div>
+  </div>
+
+  <!-- Custom Theme Table -->
+  <div class="demo-section">
+    <h2>Custom Green Theme</h2>
+    <p>Custom theme using CSS custom properties</p>
+    <div id="table3" class="custom-theme"></div>
+  </div>
+
+  <!-- Purple Theme Table -->
+  <div class="demo-section">
+    <h2>Purple Theme</h2>
+    <p>Another custom theme demonstration</p>
+    <div id="table4" class="purple-theme"></div>
+  </div>
+
+  <script type="module">
+    import Table from '../src/core/Table.js';
+
+    // Sample data
+    const sampleData = [
+      { id: 1, name: 'John Doe', department: 'Engineering', status: 'Active', salary: 85000 },
+      { id: 2, name: 'Jane Smith', department: 'Marketing', status: 'Active', salary: 72000 },
+      { id: 3, name: 'Bob Johnson', department: 'Sales', status: 'Active', salary: 68000 },
+      { id: 4, name: 'Alice Brown', department: 'HR', status: 'Inactive', salary: 65000 },
+      { id: 5, name: 'Charlie Wilson', department: 'Engineering', status: 'Active', salary: 92000 },
+      { id: 6, name: 'Diana Davis', department: 'Finance', status: 'Active', salary: 78000 },
+      { id: 7, name: 'Eve Miller', department: 'Marketing', status: 'Active', salary: 71000 },
+      { id: 8, name: 'Frank Garcia', department: 'Sales', status: 'Active', salary: 69000 }
+    ];
+
+    const columns = [
+      { name: 'id', title: 'ID' },
+      { name: 'name', title: 'Name' },
+      { name: 'department', title: 'Department' },
+      { name: 'status', title: 'Status', renderer: (cell) => 
+        `<span style="color: ${cell === 'Active' ? '#28a745' : '#dc3545'}">${cell}</span>` 
+      },
+      { name: 'salary', title: 'Salary', renderer: (cell) => `$${cell.toLocaleString()}` }
+    ];
+
+    const paginationOptions = {
+      pageSize: 4,
+      showPageNumbers: true,
+      showPageSizes: true,
+      pageSizeOptions: [3, 4, 6, 8],
+      showFirstLast: true
+    };
+
+    // Create tables
+    const table1 = new Table('#table1', {
+      data: sampleData,
+      columns,
+      pagination: paginationOptions
+    });
+
+    const table2 = new Table('#table2', {
+      data: sampleData,
+      columns,
+      pagination: paginationOptions
+    });
+
+    const table3 = new Table('#table3', {
+      data: sampleData,
+      columns,
+      pagination: paginationOptions
+    });
+
+    const table4 = new Table('#table4', {
+      data: sampleData,
+      columns,
+      pagination: paginationOptions
+    });
+
+    // Theme switching
+    window.setTheme = function(theme) {
+      // Update button states
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // Apply theme
+      const body = document.body;
+      const html = document.documentElement;
+      
+      // Reset all theme classes and attributes
+      body.classList.remove('dark-mode');
+      html.removeAttribute('data-theme');
+      
+      switch(theme) {
+        case 'dark':
+          body.classList.add('dark-mode');
+          html.setAttribute('data-theme', 'dark');
+          break;
+        case 'custom':
+          // Custom themes are handled by CSS classes on individual tables
+          break;
+        case 'purple':
+          // Purple theme is handled by CSS classes on individual tables
+          break;
+        default:
+          // Default theme, no additional classes needed
+          break;
+      }
+    };
+
+    // Add some interactivity
+    table1.on('afterPageChange', (info) => {
+      console.log('Default theme table page changed:', info.newPage);
+    });
+
+    table2.on('afterPageChange', (info) => {
+      console.log('Dark theme table page changed:', info.newPage);
+    });
+  </script>
+</body>
+</html>
