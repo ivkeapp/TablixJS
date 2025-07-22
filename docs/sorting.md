@@ -6,7 +6,7 @@ TablixJS now includes a comprehensive sorting system that supports both client-s
 
 ## Features
 
-### ✨ Core Features
+### Core Features
 - **Interactive Headers**: Click column headers to cycle through sort states (ascending → descending → unsorted)
 - **Multi-column Sorting**: Hold Ctrl/Cmd while clicking headers to sort by multiple columns
 - **Custom Sort Functions**: Define custom sorting logic per column for complex data types
@@ -16,7 +16,7 @@ TablixJS now includes a comprehensive sorting system that supports both client-s
 - **Accessibility**: Full keyboard support and ARIA labels
 - **Event System**: beforeSort and afterSort events with detailed information
 
-### 🎯 Sorting States
+### Sorting States
 Each column can be in one of three states:
 1. **Ascending** (↑): Data sorted A-Z, 0-9, oldest-newest
 2. **Descending** (↓): Data sorted Z-A, 9-0, newest-oldest  

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>TablixJS - Async Loading Test</title>
+  <link rel="stylesheet" href="../src/styles/tablix.css">
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      padding: 20px; 
+      max-width: 800px; 
+      margin: 0 auto; 
+    }
+    
+    .test-section { 
+      margin: 20px 0; 
+      padding: 15px; 
+      border: 1px solid #ddd; 
+      border-radius: 5px; 
+    }
+    
+    .test-result { 
+      padding: 10px; 
+      margin: 5px 0; 
+      border-radius: 3px; 
+    }
+    
+    .test-pass { 
+      background-color: #d4edda; 
+      color: #155724; 
+      border: 1px solid #c3e6cb; 
+    }
+    
+    .test-fail { 
+      background-color: #f8d7da; 
+      color: #721c24; 
+      border: 1px solid #f5c6cb; 
+    }
+    
+    .test-info { 
+      background-color: #d1ecf1; 
+      color: #0c5460; 
+      border: 1px solid #bee5eb; 
+    }
+    
+    button { 
+      margin: 5px; 
+      padding: 8px 16px; 
+      background: #007cba; 
+      color: white; 
+      border: none; 
+      border-radius: 3px; 
+      cursor: pointer; 
+    }
+    
+    button:hover { 
+      background: #005a87; 
+    }
+  </style>
+</head>
+<body>
+  <h1>TablixJS Async Loading Tests</h1>
+  
+  <div class="test-section">
+    <h2>Test Table</h2>
+    <div id="testTable"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Test Controls</h2>
+    <button onclick="runAllTests()">Run All Tests</button>
+    <button onclick="clearResults()">Clear Results</button>
+  </div>
+  
+  <div class="test-section">
+    <h2>Test Results</h2>
+    <div id="testResults"></div>
+  </div>
+
+  <script type="module">
+    import Table from '../src/core/Table.js';
+
+    let testTable;
+    let testResults = [];
+
+    // Initialize test table
+    function initTestTable() {
+      // Clear any existing table
+      const container = document.getElementById('testTable');
+      container.innerHTML = '';
+      
+      testTable = new Table('#testTable', {
+        columns: [
+          { name: 'id', title: 'ID', width: '60px' },
+          { name: 'name', title: 'Name' },
+          { name: 'email', title: 'Email' }
+        ],
+        pagination: { pageSize: 5 }
+      });
+      
+      // Clear any existing event listeners
+      if (testTable.clearEvents) {
+        testTable.clearEvents();
+      }
+    }
+
+    // Test utilities
+    function addTestResult(testName, passed, message, isActualTest = true) {
+      testResults.push({ testName, passed, message, isActualTest });
+      displayResults();
+    }
+
+    function displayResults() {
+      const resultsDiv = document.getElementById('testResults');
+      resultsDiv.innerHTML = testResults.map(result => {
+        const className = result.passed ? 'test-pass' : 'test-fail';
+        const icon = result.passed ? '✅' : '❌';
+        return `<div class="${className}">${icon} <strong>${result.testName}:</strong> ${result.message}</div>`;
+      }).join('');
+    }
+
+    // Test functions
+    async function testArrayLoading() {
+      try {
+        const testData = [
+          { id: 1, name: 'Test User 1', email: 'test1@example.com' },
+          { id: 2, name: 'Test User 2', email: 'test2@example.com' }
+        ];
+        
+        await testTable.loadData(testData);
+        const loadedData = testTable.getData();
+        
+        if (loadedData.length === 2 && loadedData[0].name === 'Test User 1') {
+          addTestResult('Array Loading', true, 'Successfully loaded array data');
+        } else {
+          addTestResult('Array Loading', false, 'Data not loaded correctly');
+        }
+      } catch (error) {
+        addTestResult('Array Loading', false, `Error: ${error.message}`);
+      }
+    }
+
+    async function testUrlLoading() {
+      try {
+        // Use JSONPlaceholder API for testing
+        await testTable.loadData('https://jsonplaceholder.typicode.com/users');
+        const loadedData = testTable.getData();
+        
+        if (loadedData.length > 0 && loadedData[0].name) {
+          addTestResult('URL Loading', true, `Successfully loaded ${loadedData.length} records from API`);
+        } else {
+          addTestResult('URL Loading', false, 'No data loaded from URL');
+        }
+      } catch (error) {
+        addTestResult('URL Loading', false, `Error: ${error.message}`);
+      }
+    }
+
+    async function testCustomFunctionLoading() {
+      try {
+        const customLoader = () => {
+          return Promise.resolve([
+            { id: 100, name: 'Custom User 1', email: 'custom1@example.com' },
+            { id: 101, name: 'Custom User 2', email: 'custom2@example.com' },
+            { id: 102, name: 'Custom User 3', email: 'custom3@example.com' }
+          ]);
+        };
+        
+        await testTable.loadData(customLoader);
+        const loadedData = testTable.getData();
+        
+        if (loadedData.length === 3 && loadedData[0].name === 'Custom User 1') {
+          addTestResult('Custom Function Loading', true, 'Successfully loaded data from custom function');
+        } else {
+          addTestResult('Custom Function Loading', false, 'Custom function data not loaded correctly');
+        }
+      } catch (error) {
+        addTestResult('Custom Function Loading', false, `Error: ${error.message}`);
+      }
+    }
+
+    async function testErrorHandling() {
+      try {
+        let errorCaught = false;
+        let errorPayload = null;
+        
+        // Create a fresh event listener for this test
+        const errorHandler = (payload) => {
+          errorCaught = true;
+          errorPayload = payload;
+        };
+        
+        testTable.on('loadError', errorHandler);
+        
+        // Try to load from bad URL - this should definitely fail
+        try {
+          await testTable.loadData('https://this-domain-definitely-does-not-exist-12345.com/api/data');
+          addTestResult('Error Handling', false, 'Expected error but none was thrown');
+          return;
+        } catch (error) {
+          // Expected error - this is good
+        }
+        
+        // Give the event time to fire
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        if (errorCaught && errorPayload) {
+          addTestResult('Error Handling', true, `Error event triggered with message: ${errorPayload.error.message.substring(0, 50)}...`);
+        } else {
+          addTestResult('Error Handling', false, `Error event not triggered. Caught: ${errorCaught}, Payload: ${!!errorPayload}`);
+        }
+        
+        // Clean up
+        testTable.off('loadError', errorHandler);
+        
+      } catch (error) {
+        addTestResult('Error Handling', false, `Unexpected error: ${error.message}`);
+      }
+    }
+
+    async function testEventHooks() {
+      try {
+        let beforeLoadTriggered = false;
+        let afterLoadTriggered = false;
+        let beforePayload = null;
+        let afterPayload = null;
+        
+        // Create fresh event listeners for this test
+        const beforeHandler = (payload) => {
+          beforeLoadTriggered = true;
+          beforePayload = payload;
+        };
+        
+        const afterHandler = (payload) => {
+          afterLoadTriggered = true;
+          afterPayload = payload;
+        };
+        
+        testTable.on('beforeLoad', beforeHandler);
+        testTable.on('afterLoad', afterHandler);
+        
+        // Load some data
+        await testTable.loadData([{ id: 1, name: 'Hook Test', email: 'hook@example.com' }]);
+        
+        // Give events time to fire
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        if (beforeLoadTriggered && afterLoadTriggered && beforePayload && afterPayload) {
+          addTestResult('Event Hooks', true, `beforeLoad and afterLoad events triggered with correct payloads`);
+        } else {
+          addTestResult('Event Hooks', false, `beforeLoad: ${beforeLoadTriggered}, afterLoad: ${afterLoadTriggered}, payloads: ${!!beforePayload}/${!!afterPayload}`);
+        }
+        
+        // Clean up
+        testTable.off('beforeLoad', beforeHandler);
+        testTable.off('afterLoad', afterHandler);
+        
+      } catch (error) {
+        addTestResult('Event Hooks', false, `Error: ${error.message}`);
+      }
+    }
+
+    async function testBackwardsCompatibility() {
+      try {
+        // Test the old way of loading data (should still work)
+        const oldData = [
+          { id: 99, name: 'Legacy User', email: 'legacy@example.com' }
+        ];
+        
+        await testTable.loadData(oldData);
+        const loadedData = testTable.getData();
+        
+        if (loadedData.length === 1 && loadedData[0].name === 'Legacy User') {
+          addTestResult('Backwards Compatibility', true, 'Legacy array loading still works');
+        } else {
+          addTestResult('Backwards Compatibility', false, 'Legacy loading broken');
+        }
+      } catch (error) {
+        addTestResult('Backwards Compatibility', false, `Error: ${error.message}`);
+      }
+    }
+
+    // Main test runner
+    window.runAllTests = async function() {
+      // Clear previous results
+      testResults = [];
+      displayResults();
+      
+      addTestResult('Test Suite', true, 'Starting async data loading tests...', false);
+      
+      // Initialize fresh table for testing
+      initTestTable();
+      
+      // Run tests sequentially to avoid interference
+      await testArrayLoading();
+      await new Promise(resolve => setTimeout(resolve, 500)); // Small delay
+      
+      await testUrlLoading();
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      await testCustomFunctionLoading();
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      await testEventHooks();
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      await testBackwardsCompatibility();
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      await testErrorHandling();
+      
+      // Count only actual tests (not info messages)
+      const actualTests = testResults.filter(r => r.isActualTest !== false);
+      const passedTests = actualTests.filter(r => r.passed).length;
+      const totalTests = actualTests.length;
+      
+      addTestResult('Test Suite Complete', passedTests === totalTests, `${passedTests}/${totalTests} tests passed`, false);
+    };
+
+    window.clearResults = function() {
+      testResults = [];
+      displayResults();
+    };
+
+    // Initialize
+    initTestTable();
+    
+    // Auto-run info message on load
+    setTimeout(() => {
+      addTestResult('Auto Test', true, 'Page loaded, ready for testing. Click "Run All Tests" to start.', false);
+    }, 1000);
+  </script>
+</body>
+</html>

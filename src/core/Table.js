@@ -75,14 +75,23 @@ export default class Table {
 
   async init() {
     try {
+      // Get initial data
+      const initialData = this.dataManager.getData();
+      
+      // Trigger beforeLoad hook for initial data
+      this.eventManager.trigger('beforeLoad', { source: initialData });
+      
       // Render table with first page of data
       await this.refreshTable();
       
-      // Trigger afterLoad hook
-      this.eventManager.trigger('afterLoad', this.dataManager.getData());
+      // Trigger afterLoad hook with consistent payload format
+      this.eventManager.trigger('afterLoad', { data: initialData, source: initialData });
     } catch (error) {
       console.error('Failed to initialize table:', error);
-      this.renderer.renderError(error);
+      this.eventManager.trigger('loadError', { error, source: 'initialization' });
+      if (this.renderer && this.renderer.renderError) {
+        this.renderer.renderError(error);
+      }
     }
   }
 
@@ -101,11 +110,77 @@ export default class Table {
 
   /**
    * Load new data into the table
+   * Supports multiple data sources:
+   * - Array: loadData([{id: 1, name: 'John'}])
+   * - URL string: loadData('/api/data')
+   * - Async function: loadData(() => fetch('/api/data').then(r => r.json()))
+   * @param {Array|string|Function} source - Data source
    */
-  async loadData(data) {
-    this.dataManager.setData(data);
-    await this.refreshTable();
-    this.eventManager.trigger('afterLoad', data);
+  async loadData(source) {
+    try {
+      // Trigger beforeLoad hook
+      this.eventManager.trigger('beforeLoad', { source });
+
+      let data;
+
+      // Handle different data source types
+      if (Array.isArray(source)) {
+        // Direct array data
+        data = source;
+      } else if (typeof source === 'string') {
+        // URL string - fetch data
+        data = await this._fetchFromUrl(source);
+      } else if (typeof source === 'function') {
+        // Custom async function
+        data = await source();
+      } else {
+        throw new Error('Invalid data source. Expected array, URL string, or function.');
+      }
+
+      // Validate data
+      if (!Array.isArray(data)) {
+        throw new Error('Data source must resolve to an array.');
+      }
+
+      // Update data and refresh table
+      this.dataManager.setData(data);
+      await this.refreshTable();
+      
+      // Trigger afterLoad hook
+      this.eventManager.trigger('afterLoad', { data, source });
+
+    } catch (error) {
+      // Handle loading errors
+      console.error('Error loading data:', error);
+      this.eventManager.trigger('loadError', { error, source });
+      
+      // Render error state
+      if (this.renderer && this.renderer.renderError) {
+        this.renderer.renderError(error);
+      }
+      
+      // Re-throw for caller handling
+      throw error;
+    }
+  }
+
+  /**
+   * Internal method to fetch data from URL
+   * @private
+   */
+  async _fetchFromUrl(url) {
+    if (typeof fetch === 'undefined') {
+      throw new Error('fetch is not available. Please use a modern browser or provide a polyfill.');
+    }
+
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
   }
 
   /**
@@ -282,6 +357,20 @@ export default class Table {
    */
   on(event, callback) {
     this.eventManager.on(event, callback);
+  }
+
+  /**
+   * Remove event callback
+   */
+  off(event, callback) {
+    this.eventManager.off(event, callback);
+  }
+
+  /**
+   * Clear event listeners
+   */
+  clearEvents(event) {
+    this.eventManager.clear(event);
   }
 
   /**
