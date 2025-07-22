@@ -1,8 +1,8 @@
-# 🎨 TablixJS Column Formatting System
+# TablixJS Column Formatting System
 
 The TablixJS Column Formatting System provides a flexible, lightweight, and fully optional way to format cell values using the modern Intl APIs. This system is inspired by Handsontable cell formats but designed to be more flexible and lightweight.
 
-## 📌 Overview
+## Overview
 
 ### Key Features
 - **Flexible formatting**: Text, date, currency, number, and percentage formats
@@ -14,7 +14,7 @@ The TablixJS Column Formatting System provides a flexible, lightweight, and full
 - **No defaults**: Pure behavior - values unchanged unless explicitly formatted
 - **Extensible design**: Ready for future custom format types
 
-## 🚀 Quick Start
+## Quick Start
 
 ```javascript
 import Table from './src/core/Table.js';
@@ -32,7 +32,7 @@ const table = new Table('#container', {
 });
 ```
 
-## 📝 Column Configuration
+## Column Configuration
 
 ### Basic Structure
 ```javascript
@@ -175,7 +175,7 @@ Uses `Intl.NumberFormat` with percent style.
 }
 ```
 
-## 🎨 Custom Renderers
+## Custom Renderers
 
 Custom renderers have priority over formatting but can use formatted values.
 
@@ -210,7 +210,7 @@ renderer: (value, row, formattedValue) => {
 {
   name: 'status',
   renderer: (value) => {
-    return value ? '✅ Active' : '❌ Inactive';
+    return value ? 'Active' : 'Inactive';
   }
 }
 ```
@@ -225,7 +225,7 @@ renderer: (value, row, formattedValue) => {
 }
 ```
 
-## 🌍 Internationalization
+## Internationalization
 
 ### Locale Support
 - **Default**: Uses browser's default locale
@@ -263,7 +263,7 @@ formatOptions: {
 }
 ```
 
-## ⚡ Performance
+## Performance
 
 ### Optimization Features
 - **Formatter Caching**: Compiled once per column, reused for all rows
@@ -276,7 +276,7 @@ formatOptions: {
 3. **Cache heavy renderers**: For complex custom renderers, consider memoization
 4. **Test with large datasets**: Verify performance with your expected data size
 
-## 🛠️ Error Handling
+## Error Handling
 
 The formatting system gracefully handles various error conditions:
 
@@ -323,7 +323,7 @@ The modular design allows for future plugins that could add:
 - Conditional formatting
 - Template-based formatting
 
-## 📊 Real-World Examples
+## Real-World Examples
 
 ### Employee Table
 ```javascript
@@ -394,7 +394,7 @@ const financialTable = new Table('#financial', {
 });
 ```
 
-## 🧪 Testing
+## Testing
 
 Test your formatting with various data types:
 
@@ -407,7 +407,7 @@ const testData = [
 ];
 ```
 
-## 📚 API Reference
+## API Reference
 
 ### ColumnManager Methods
 

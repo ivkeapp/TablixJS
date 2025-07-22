@@ -5,15 +5,15 @@ TablixJS is a lightweight, dependency-free JavaScript library for building power
 ## ✨ Features
 
 ### **Pagination Core Features**
-- **🏗️ Modular Architecture** - Clean separation with dedicated PaginationManager
-- **📄 Client & Server Pagination** - Efficient pagination for both local and remote data
-- **🎛️ Automatic Controls** - Auto-generated pagination controls with zero HTML required
-- **📊 Page Size Management** - Dynamic page size selection with customizable options
-- **🔢 Smart Page Numbers** - Intelligent page number display with ellipsis
-- **📱 Responsive Design** - Mobile-friendly pagination controls
-- **🎨 Theming System** - CSS custom properties with modular styling
-- **⚡ Performance Optimized** - Efficient data slicing and rendering
-- **🔧 Extensible** - Event hooks and programmatic API
+- **Modular Architecture** - Clean separation with dedicated PaginationManager
+- **Client & Server Pagination** - Efficient pagination for both local and remote data
+- **Automatic Controls** - Auto-generated pagination controls with zero HTML required
+- **Page Size Management** - Dynamic page size selection with customizable options
+- **Smart Page Numbers** - Intelligent page number display with ellipsis
+- **Responsive Design** - Mobile-friendly pagination controls
+- **Theming System** - CSS custom properties with modular styling
+- **Performance Optimized** - Efficient data slicing and rendering
+- **Extensible** - Event hooks and programmatic API
 
 ### **Control Features**
 - Pagination controls (first, prev, next, last, page numbers)
@@ -24,6 +24,7 @@ TablixJS is a lightweight, dependency-free JavaScript library for building power
 - Loading states and error handling
 
 ### **Advanced Capabilities**
+- **Async Data Loading** - URL-based loading, custom async functions, direct arrays
 - Custom cell renderers with HTML support
 - Comprehensive event system for state tracking
 - Server-side data loading with async support
@@ -31,7 +32,7 @@ TablixJS is a lightweight, dependency-free JavaScript library for building power
 - Responsive breakpoints for mobile
 - Accessibility features (ARIA labels, keyboard support)
 
-## 🚀 Quick Start
+## Quick Start
 
 ```javascript
 import Table from './src/core/Table.js';
@@ -60,7 +61,7 @@ const table = new Table('#tableContainer', {
 });
 ```
 
-## 🏗️ Architecture
+## Architecture
 
 ### **Core Components**
 - **Table.js** - Main orchestrator with pagination API
@@ -152,6 +153,92 @@ const serverTable = new Table('#serverTable', {
   }
 });
 ```
+
+## Async Data Loading
+
+TablixJS supports flexible asynchronous data loading with three different approaches while maintaining full backwards compatibility.
+
+### **Direct Array Loading** (Existing)
+```javascript
+// Load data directly from an array
+const data = [
+  { id: 1, name: 'John Doe', email: 'john@example.com' },
+  { id: 2, name: 'Jane Smith', email: 'jane@example.com' }
+];
+await table.loadData(data);
+```
+
+### **URL-based Loading** (New)
+```javascript
+// Load data from a REST API endpoint
+await table.loadData('https://api.example.com/users');
+
+// The API should return JSON array:
+// [
+//   { "id": 1, "name": "John Doe", "email": "john@example.com" },
+//   { "id": 2, "name": "Jane Smith", "email": "jane@example.com" }
+// ]
+```
+
+### **Custom Async Function Loading** (New)
+```javascript
+// Load with custom async function for complex scenarios
+const customLoader = () => {
+  return fetch('/api/users', {
+    headers: { 'Authorization': 'Bearer ' + authToken }
+  })
+  .then(response => response.json())
+  .then(data => data.users); // Transform if needed
+};
+
+await table.loadData(customLoader);
+
+// Advanced example with error handling and transformation
+const advancedLoader = async () => {
+  try {
+    const response = await fetch('/api/complex-data');
+    const rawData = await response.json();
+    
+    // Transform data to match table columns
+    return rawData.results.map(item => ({
+      id: item.user_id,
+      name: `${item.first_name} ${item.last_name}`,
+      email: item.email_address,
+      department: item.dept?.name || 'Unknown'
+    }));
+  } catch (error) {
+    throw new Error('Failed to load user data');
+  }
+};
+
+await table.loadData(advancedLoader);
+```
+
+### **Event Hooks for Loading**
+```javascript
+// Show loading indicators
+table.on('beforeLoad', (payload) => {
+  console.log('Loading started from:', typeof payload.source);
+  if (typeof payload.source === 'string' || typeof payload.source === 'function') {
+    showLoadingSpinner();
+  }
+});
+
+// Handle successful loading
+table.on('afterLoad', (payload) => {
+  console.log(`Loaded ${payload.data.length} records`);
+  hideLoadingSpinner();
+});
+
+// Handle loading errors
+table.on('loadError', (payload) => {
+  console.error('Loading failed:', payload.error.message);
+  hideLoadingSpinner();
+  showErrorMessage(payload.error.message);
+});
+```
+
+See [Async Data Loading Guide](docs/async-data-loading.md) for complete documentation and examples.
 
 ### **Event Handling**
 ```javascript

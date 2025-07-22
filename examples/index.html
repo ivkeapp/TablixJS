@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>TablixJS - Examples Index</title>
+  <link rel="stylesheet" href="../src/styles/tablix.css">
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      padding: 20px; 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      background-color: #f5f5f5;
+    }
+    
+    .header { 
+      text-align: center; 
+      margin-bottom: 40px; 
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .examples-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
+      gap: 20px; 
+    }
+    
+    .example-card { 
+      background: white; 
+      padding: 20px; 
+      border-radius: 10px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .example-card:hover { 
+      transform: translateY(-5px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    
+    .example-card h3 { 
+      color: #007cba; 
+      margin-top: 0; 
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .example-card p { 
+      color: #666; 
+      line-height: 1.6;
+    }
+    
+    .example-card .buttons { 
+      margin-top: 15px; 
+    }
+    
+    .example-card a { 
+      display: inline-block; 
+      padding: 8px 16px; 
+      margin: 5px 5px 5px 0; 
+      background: #007cba; 
+      color: white; 
+      text-decoration: none; 
+      border-radius: 5px; 
+      transition: background 0.2s;
+    }
+    
+    .example-card a:hover { 
+      background: #005a87; 
+    }
+    
+    .example-card a.secondary { 
+      background: #6c757d; 
+    }
+    
+    .example-card a.secondary:hover { 
+      background: #545b62; 
+    }
+    
+    .feature-badge { 
+      display: inline-block; 
+      padding: 2px 8px; 
+      background: #28a745; 
+      color: white; 
+      font-size: 12px; 
+      border-radius: 12px; 
+      margin-left: 10px;
+    }
+    
+    .new-badge { 
+      background: #dc3545; 
+    }
+    
+    .footer { 
+      text-align: center; 
+      margin-top: 40px; 
+      padding: 20px; 
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🚀 TablixJS Examples</h1>
+    <p>Explore the powerful features of TablixJS through interactive examples and demos.</p>
+    <p><strong>Lightweight • Dependency-free • Modern • Performant</strong></p>
+  </div>
+
+  <div class="examples-grid">
+    
+    <!-- Basic Usage -->
+    <div class="example-card">
+      <h3>
+        📋 Basic Usage
+        <span class="feature-badge">Core</span>
+      </h3>
+      <p>Simple table with basic pagination and sorting. Perfect starting point to understand TablixJS fundamentals.</p>
+      <div class="buttons">
+        <a href="vanilla.html">View Demo</a>
+        <a href="https://github.com/yourusername/TablixJS/blob/main/examples/vanilla.html" class="secondary">View Source</a>
+      </div>
+    </div>
+
+    <!-- Async Data Loading -->
+    <div class="example-card">
+      <h3>
+        🔄 Async Data Loading
+        <span class="feature-badge new-badge">New!</span>
+      </h3>
+      <p>Comprehensive demo of the new async data loading features including URL loading, custom functions, and error handling.</p>
+      <div class="buttons">
+        <a href="async-data-loading-demo.html">View Demo</a>
+        <a href="async-loading-test.html" class="secondary">Run Tests</a>
+      </div>
+    </div>
+
+    <!-- Column Formatting -->
+    <div class="example-card">
+      <h3>
+        🎨 Column Formatting
+        <span class="feature-badge">Advanced</span>
+      </h3>
+      <p>Custom cell renderers, formatters, and column styling options. Learn how to create rich, formatted table content.</p>
+      <div class="buttons">
+        <a href="column-formatting-demo.html">View Demo</a>
+        <a href="column-formatting-usage.js" class="secondary">View Code</a>
+      </div>
+    </div>
+
+    <!-- Pagination Features -->
+    <div class="example-card">
+      <h3>
+        📄 Pagination Demo
+        <span class="feature-badge">Core</span>
+      </h3>
+      <p>Comprehensive pagination features including client-side and server-side pagination with customizable controls.</p>
+      <div class="buttons">
+        <a href="pagination.html">View Demo</a>
+        <a href="complete-pagination-demo.html" class="secondary">Complete Demo</a>
+      </div>
+    </div>
+
+    <!-- Sorting Features -->
+    <div class="example-card">
+      <h3>
+        🔄 Sorting Demo
+        <span class="feature-badge">Core</span>
+      </h3>
+      <p>Multi-column sorting, custom sort functions, and sort state management examples.</p>
+      <div class="buttons">
+        <a href="sorting-demo.html">View Demo</a>
+        <a href="sorting-usage-examples.js" class="secondary">View Code</a>
+      </div>
+    </div>
+
+    <!-- Auto Controls -->
+    <div class="example-card">
+      <h3>
+        🎛️ Auto Controls
+        <span class="feature-badge">Feature</span>
+      </h3>
+      <p>Automatically generated control panels with search, pagination, and export functionality.</p>
+      <div class="buttons">
+        <a href="auto-controls.html">View Demo</a>
+      </div>
+    </div>
+
+    <!-- Theming -->
+    <div class="example-card">
+      <h3>
+        🎨 Theming System
+        <span class="feature-badge">Style</span>
+      </h3>
+      <p>CSS custom properties theming system with dark mode and custom theme examples.</p>
+      <div class="buttons">
+        <a href="theme-demo.html">View Demo</a>
+      </div>
+    </div>
+
+    <!-- jQuery Integration -->
+    <div class="example-card">
+      <h3>
+        💎 jQuery Integration
+        <span class="feature-badge">Plugin</span>
+      </h3>
+      <p>TablixJS jQuery plugin wrapper for easy integration with existing jQuery-based projects.</p>
+      <div class="buttons">
+        <a href="jquery.html">View Demo</a>
+      </div>
+    </div>
+
+    <!-- React Integration -->
+    <div class="example-card">
+      <h3>
+        ⚛️ React Component
+        <span class="feature-badge">Framework</span>
+      </h3>
+      <p>React component wrapper demonstrating how to integrate TablixJS with React applications.</p>
+      <div class="buttons">
+        <a href="react.html">View Demo</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <h3>📖 Documentation</h3>
+    <p>
+      <a href="../docs/async-data-loading.md">Async Data Loading Guide</a> •
+      <a href="../docs/pagination.md">Pagination Guide</a> •
+      <a href="../docs/sorting.md">Sorting Guide</a> •
+      <a href="../docs/theming.md">Theming Guide</a> •
+      <a href="../docs/column-formatting.md">Column Formatting Guide</a>
+    </p>
+    <p style="color: #666; margin-top: 20px;">
+      TablixJS - A modern, lightweight, dependency-free table library for JavaScript
+    </p>
+  </div>
+
+  <script>
+    // Add some interactive touches
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add click tracking for analytics (if needed)
+      document.querySelectorAll('.example-card a').forEach(link => {
+        link.addEventListener('click', function(e) {
+          console.log('Example clicked:', this.textContent.trim(), 'URL:', this.href);
+        });
+      });
+
+      // Add keyboard navigation
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'h' && !e.ctrlKey && !e.metaKey) {
+          window.location.href = '../README.md';
+        }
+      });
+
+      console.log('🚀 TablixJS Examples loaded! Press "h" to view documentation.');
+    });
+  </script>
+</body>
+</html>
