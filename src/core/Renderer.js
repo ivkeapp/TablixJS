@@ -4,7 +4,7 @@ export default class Renderer {
   }
 
   renderTable(data) {
-    const columns = this.table.options.columns || [];
+    const columns = this.table.columnManager ? this.table.columnManager.getColumns() : (this.table.options.columns || []);
     const controlsOptions = this.table.options.controls;
 
     let html = '<div class="tablix-wrapper">';
@@ -55,7 +55,23 @@ export default class Renderer {
         html += `<tr class="tablix-row" data-row-index="${index}">`;
         columns.forEach(col => {
           const cell = row[col.name];
-          const renderedCell = col.renderer ? col.renderer(cell, row) : this.escapeHtml(cell);
+          let renderedCell;
+          
+          // Use ColumnManager for formatting if available
+          if (this.table.columnManager) {
+            const result = this.table.columnManager.formatCellValue(col.name, cell, row);
+            if (result.isHtml) {
+              // Custom renderer returned HTML - use as is
+              renderedCell = result.value;
+            } else {
+              // Formatted or raw value - escape for safety
+              renderedCell = this.escapeHtml(result.value);
+            }
+          } else {
+            // Fallback to original renderer logic
+            renderedCell = col.renderer ? col.renderer(cell, row) : this.escapeHtml(cell);
+          }
+          
           html += `<td class="tablix-td">${renderedCell}</td>`;
         });
         html += '</tr>';

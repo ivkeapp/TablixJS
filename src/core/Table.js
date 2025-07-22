@@ -3,6 +3,7 @@ import Renderer from './Renderer.js';
 import EventManager from './EventManager.js';
 import PaginationManager from './PaginationManager.js';
 import SortingManager from './SortingManager.js';
+import ColumnManager from './ColumnManager.js';
 
 export default class Table {
   constructor(container, options = {}) {
@@ -50,8 +51,14 @@ export default class Table {
 
     // Initialize managers
     this.eventManager = new EventManager();
+    this.columnManager = new ColumnManager(this);
     this.dataManager = new DataManager(this, options.data || []);
     this.renderer = new Renderer(this);
+    
+    // Initialize columns if provided
+    if (options.columns) {
+      this.columnManager.initializeColumns(options.columns);
+    }
     
     // Initialize pagination if enabled
     if (this.options.pagination && this.options.pagination.enabled !== false) {

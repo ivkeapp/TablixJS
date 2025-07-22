@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS - Column Formatting Demo</title>
+    <link rel="stylesheet" href="../src/styles/tablix.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 40px;
+            background-color: #f5f5f5;
+        }
+        
+        .demo-section {
+            margin-bottom: 40px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .demo-title {
+            color: #333;
+            border-bottom: 2px solid #007acc;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .code-example {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+        
+        .table-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 TablixJS Column Formatting System</h1>
+    <p>Demonstration of the enhanced column formatting system with Intl APIs support.</p>
+
+    <!-- Basic Formatting Demo -->
+    <div class="demo-section">
+        <h2 class="demo-title">1. Basic Format Types</h2>
+        <p>Demonstrates text, number, currency, date, and percent formatting.</p>
+        
+        <div class="code-example">
+const basicFormattingTable = new Table('#basicFormatting', {
+  data: sampleData,
+  columns: [
+    { name: 'name', title: 'Employee Name', format: 'text' },
+    { name: 'salary', title: 'Salary', format: 'currency', currency: 'USD' },
+    { name: 'joinDate', title: 'Join Date', format: 'date' },
+    { name: 'bonus', title: 'Bonus Rate', format: 'percent' },
+    { name: 'rating', title: 'Rating', format: 'number', formatOptions: { minimumFractionDigits: 1, maximumFractionDigits: 1 } }
+  ]
+});
+        </div>
+        
+        <div class="table-container">
+            <div id="basicFormatting"></div>
+        </div>
+    </div>
+
+    <!-- Locale-Specific Formatting Demo -->
+    <div class="demo-section">
+        <h2 class="demo-title">2. Locale-Specific Formatting</h2>
+        <p>Same data with different locales to show internationalization support.</p>
+        
+        <div class="code-example">
+const localeTable = new Table('#localeFormatting', {
+  data: sampleData,
+  columns: [
+    { name: 'name', title: 'Name' },
+    { name: 'salary', title: 'Salary (EUR)', format: 'currency', currency: 'EUR', locale: 'de-DE' },
+    { name: 'joinDate', title: 'Join Date', format: 'date', locale: 'fr-FR', formatOptions: { dateStyle: 'long' } },
+    { name: 'bonus', title: 'Bonus', format: 'percent', locale: 'en-GB', formatOptions: { minimumFractionDigits: 2 } }
+  ]
+});
+        </div>
+        
+        <div class="table-container">
+            <div id="localeFormatting"></div>
+        </div>
+    </div>
+
+    <!-- Custom Renderer Priority Demo -->
+    <div class="demo-section">
+        <h2 class="demo-title">3. Custom Renderer Priority</h2>
+        <p>Shows how custom renderers can override formatting or use formatted values.</p>
+        
+        <div class="code-example">
+const customRendererTable = new Table('#customRenderer', {
+  data: sampleData,
+  columns: [
+    { name: 'name', title: 'Employee' },
+    { 
+      name: 'salary', 
+      title: 'Salary Badge', 
+      format: 'currency', 
+      currency: 'USD',
+      renderer: (value, row, formattedValue) => {
+        const color = value >= 80000 ? 'green' : value >= 70000 ? 'orange' : 'red';
+        return `&lt;span style="background: ${color}; color: white; padding: 4px 8px; border-radius: 4px;"&gt;${formattedValue}&lt;/span&gt;`;
+      }
+    },
+    { 
+      name: 'active', 
+      title: 'Status',
+      renderer: (value) => value ? '✅ Active' : '❌ Inactive'
+    }
+  ]
+});
+        </div>
+        
+        <div class="table-container">
+            <div id="customRenderer"></div>
+        </div>
+    </div>
+
+    <!-- Mixed Columns Demo -->
+    <div class="demo-section">
+        <h2 class="demo-title">4. Mixed Columns (Formatted + Raw)</h2>
+        <p>Demonstrates mixing formatted columns with raw value columns.</p>
+        
+        <div class="code-example">
+const mixedTable = new Table('#mixedFormatting', {
+  data: sampleData,
+  columns: [
+    { name: 'id', title: 'ID' }, // Raw value, no formatting
+    { name: 'name', title: 'Name' }, // Raw value, no formatting
+    { name: 'department', title: 'Department' }, // Raw value, no formatting
+    { name: 'salary', title: 'Annual Salary', format: 'currency', currency: 'USD', formatOptions: { minimumFractionDigits: 0 } },
+    { name: 'joinDate', title: 'Hire Date', format: 'date', formatOptions: { year: 'numeric', month: 'short', day: '2-digit' } }
+  ]
+});
+        </div>
+        
+        <div class="table-container">
+            <div id="mixedFormatting"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import Table from '../src/core/Table.js';
+
+        // Sample data for all demos
+        const sampleData = [
+            { 
+                id: 1, 
+                name: 'Alice Johnson', 
+                department: 'Engineering', 
+                salary: 95000, 
+                joinDate: '2022-03-15', 
+                active: true,
+                bonus: 0.15,
+                rating: 4.8
+            },
+            { 
+                id: 2, 
+                name: 'Bob Smith', 
+                department: 'Marketing', 
+                salary: 72000, 
+                joinDate: '2021-08-22', 
+                active: true,
+                bonus: 0.12,
+                rating: 4.2
+            },
+            { 
+                id: 3, 
+                name: 'Charlie Brown', 
+                department: 'Engineering', 
+                salary: 88000, 
+                joinDate: '2023-01-10', 
+                active: false,
+                bonus: 0.18,
+                rating: 4.6
+            },
+            { 
+                id: 4, 
+                name: 'Diana Prince', 
+                department: 'Sales', 
+                salary: 79000, 
+                joinDate: '2020-11-05', 
+                active: true,
+                bonus: 0.22,
+                rating: 4.9
+            },
+            { 
+                id: 5, 
+                name: 'Eve Davis', 
+                department: 'HR', 
+                salary: 65000, 
+                joinDate: '2022-07-18', 
+                active: true,
+                bonus: 0.08,
+                rating: 4.1
+            }
+        ];
+
+        // 1. Basic Formatting Demo
+        const basicFormattingTable = new Table('#basicFormatting', {
+            data: sampleData,
+            columns: [
+                { name: 'name', title: 'Employee Name', format: 'text' },
+                { name: 'salary', title: 'Salary', format: 'currency', currency: 'USD' },
+                { name: 'joinDate', title: 'Join Date', format: 'date' },
+                { name: 'bonus', title: 'Bonus Rate', format: 'percent' },
+                { name: 'rating', title: 'Rating', format: 'number', formatOptions: { minimumFractionDigits: 1, maximumFractionDigits: 1 } }
+            ],
+            pagination: { enabled: false }
+        });
+
+        // 2. Locale-Specific Formatting Demo
+        const localeTable = new Table('#localeFormatting', {
+            data: sampleData,
+            columns: [
+                { name: 'name', title: 'Name' },
+                { name: 'salary', title: 'Salary (EUR)', format: 'currency', currency: 'EUR', locale: 'de-DE' },
+                { name: 'joinDate', title: 'Join Date', format: 'date', locale: 'sr-RS', formatOptions: { dateStyle: 'long' } },
+                { name: 'bonus', title: 'Bonus', format: 'percent', locale: 'en-GB', formatOptions: { minimumFractionDigits: 2 } }
+            ],
+            pagination: { enabled: false }
+        });
+
+        // 3. Custom Renderer Priority Demo
+        const customRendererTable = new Table('#customRenderer', {
+            data: sampleData,
+            columns: [
+                { name: 'name', title: 'Employee' },
+                { 
+                    name: 'salary', 
+                    title: 'Salary Badge', 
+                    format: 'currency', 
+                    currency: 'USD',
+                    renderer: (value, row, formattedValue) => {
+                        const color = value >= 80000 ? 'green' : value >= 70000 ? 'orange' : 'red';
+                        return `<span style="background: ${color}; color: white; padding: 4px 8px; border-radius: 4px;">${formattedValue}</span>`;
+                    }
+                },
+                { 
+                    name: 'active', 
+                    title: 'Status',
+                    renderer: (value) => value ? '✅ Active' : '❌ Inactive'
+                }
+            ],
+            pagination: { enabled: false }
+        });
+
+        // 4. Mixed Columns Demo
+        const mixedTable = new Table('#mixedFormatting', {
+            data: sampleData,
+            columns: [
+                { name: 'id', title: 'ID' }, // Raw value, no formatting
+                { name: 'name', title: 'Name' }, // Raw value, no formatting
+                { name: 'department', title: 'Department' }, // Raw value, no formatting
+                { name: 'salary', title: 'Annual Salary', format: 'currency', currency: 'USD', formatOptions: { minimumFractionDigits: 0 } },
+                { name: 'joinDate', title: 'Hire Date', format: 'date', formatOptions: { year: 'numeric', month: 'short', day: '2-digit' } }
+            ],
+            pagination: { enabled: false }
+        });
+
+        console.log('✅ TablixJS Column Formatting Demo loaded successfully');
+        console.log('🎨 All formatting examples are now rendered');
+    </script>
+</body>
+</html>
