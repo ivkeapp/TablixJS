@@ -3,6 +3,7 @@
 /* Import core styles (required) */
 @import './table-core.css';
 @import './pagination-core.css';
+@import './sorting-core.css';
 
 /* Import default theme */
 @import './themes/default.css';

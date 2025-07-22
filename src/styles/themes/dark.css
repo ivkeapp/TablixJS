@@ -48,6 +48,17 @@
   /* Other elements */
   --tablix-ellipsis-color: #777;
   --tablix-loading-color: #4db6e6;
+  
+  /* Sorting specific */
+  --tablix-header-hover-bg: rgba(255, 255, 255, 0.1);
+  --tablix-sorted-header-bg: rgba(77, 182, 230, 0.1);
+  --tablix-sorted-header-hover-bg: rgba(77, 182, 230, 0.15);
+  --tablix-sorted-cell-bg: rgba(77, 182, 230, 0.05);
+  --tablix-sort-arrow-color: #ccc;
+  --tablix-sort-active-color: #4db6e6;
+  --tablix-sort-inactive-color: #666;
+  --tablix-sort-order-bg: #4db6e6;
+  --tablix-sort-order-text: #1a1a1a;
 }
 
 /* Alternative class-based dark theme */
@@ -99,4 +110,15 @@
   /* Other elements */
   --tablix-ellipsis-color: #777;
   --tablix-loading-color: #4db6e6;
+  
+  /* Sorting specific */
+  --tablix-header-hover-bg: rgba(255, 255, 255, 0.1);
+  --tablix-sorted-header-bg: rgba(77, 182, 230, 0.1);
+  --tablix-sorted-header-hover-bg: rgba(77, 182, 230, 0.15);
+  --tablix-sorted-cell-bg: rgba(77, 182, 230, 0.05);
+  --tablix-sort-arrow-color: #ccc;
+  --tablix-sort-active-color: #4db6e6;
+  --tablix-sort-inactive-color: #666;
+  --tablix-sort-order-bg: #4db6e6;
+  --tablix-sort-order-text: #1a1a1a;
 }

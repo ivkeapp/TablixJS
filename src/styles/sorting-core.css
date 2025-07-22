@@ -1,0 +1,116 @@
+/* TablixJS - Sorting Styles */
+
+/* Sortable column headers */
+.tablix-sortable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  transition: background-color 0.15s ease;
+}
+
+.tablix-sortable:hover {
+  background-color: var(--tablix-header-hover-bg, rgba(0, 0, 0, 0.05)) !important;
+}
+
+.tablix-sortable:focus {
+  outline: 2px solid var(--tablix-focus-color, #007acc);
+  outline-offset: -2px;
+}
+
+/* Header content container */
+.tablix-th-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 20px;
+}
+
+.tablix-th-text {
+  flex: 1;
+  margin-right: var(--tablix-sort-spacing, 8px);
+}
+
+/* Sort indicator */
+.tablix-sort-indicator {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.5;
+  transition: opacity 0.15s ease;
+  min-width: 16px;
+  justify-content: center;
+}
+
+.tablix-sortable:hover .tablix-sort-indicator,
+.tablix-sorted .tablix-sort-indicator {
+  opacity: 1;
+}
+
+.tablix-sort-arrow {
+  font-size: var(--tablix-sort-arrow-size, 12px);
+  line-height: 1;
+  position: relative;
+  transition: color 0.15s ease;
+  color: var(--tablix-sort-arrow-color, #666);
+}
+
+/* Sort arrow states */
+.tablix-sort-asc {
+  color: var(--tablix-sort-active-color, #007acc);
+}
+
+.tablix-sort-desc {
+  color: var(--tablix-sort-active-color, #007acc);
+}
+
+.tablix-sort-none {
+  color: var(--tablix-sort-inactive-color, #ccc);
+}
+
+/* Sorted column highlighting */
+.tablix-sorted {
+  background-color: var(--tablix-sorted-header-bg, rgba(0, 122, 204, 0.05)) !important;
+}
+
+.tablix-sorted.tablix-sortable:hover {
+  background-color: var(--tablix-sorted-header-hover-bg, rgba(0, 122, 204, 0.1)) !important;
+}
+
+/* Column cells for sorted columns */
+.tablix-table .tablix-td[data-sorted="true"] {
+  background-color: var(--tablix-sorted-cell-bg, rgba(0, 122, 204, 0.02));
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .tablix-th-content {
+    font-size: var(--tablix-mobile-header-font-size, 13px);
+  }
+  
+  .tablix-sort-indicator {
+    min-width: 14px;
+  }
+  
+  .tablix-sort-arrow {
+    font-size: var(--tablix-mobile-sort-arrow-size, 11px);
+  }
+}
+
+/* High contrast and accessibility */
+@media (prefers-contrast: high) {
+  .tablix-sort-arrow {
+    font-weight: bold;
+  }
+  
+  .tablix-sortable:focus {
+    outline-width: 3px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .tablix-sortable,
+  .tablix-sort-indicator,
+  .tablix-sort-arrow {
+    transition: none;
+  }
+}
