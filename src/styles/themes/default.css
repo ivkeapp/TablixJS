@@ -109,4 +109,19 @@
   --tablix-control-btn-hover-border: #007acc;
   --tablix-control-btn-active-bg: #007acc;
   --tablix-control-btn-active-text: #fff;
+  
+  /* Sorting specific */
+  --tablix-header-hover-bg: rgba(0, 0, 0, 0.05);
+  --tablix-sorted-header-bg: rgba(0, 122, 204, 0.05);
+  --tablix-sorted-header-hover-bg: rgba(0, 122, 204, 0.1);
+  --tablix-sorted-cell-bg: rgba(0, 122, 204, 0.02);
+  --tablix-sort-spacing: 8px;
+  --tablix-sort-arrow-size: 12px;
+  --tablix-mobile-sort-arrow-size: 11px;
+  --tablix-sort-arrow-color: #666;
+  --tablix-sort-active-color: #007acc;
+  --tablix-sort-inactive-color: #ccc;
+  --tablix-sort-order-bg: #007acc;
+  --tablix-sort-order-text: #fff;
+  --tablix-mobile-header-font-size: 13px;
 }

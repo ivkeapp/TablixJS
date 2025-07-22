@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TablixJS - Sorting Feature Demo</title>
+  <link rel="stylesheet" href="../src/styles/tablix.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      margin: 20px;
+      background-color: #f8f9fa;
+    }
+    
+    .demo-section {
+      background: white;
+      padding: 24px;
+      margin-bottom: 24px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .demo-section h2 {
+      margin-top: 0;
+      color: #333;
+      border-bottom: 2px solid #007acc;
+      padding-bottom: 8px;
+    }
+    
+    .controls {
+      margin: 16px 0;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+    
+    .controls button {
+      margin: 4px;
+      padding: 8px 16px;
+      background: #007acc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .controls button:hover {
+      background: #005999;
+    }
+    
+    .info {
+      margin-top: 16px;
+      padding: 12px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      border-radius: 0 4px 4px 0;
+      font-size: 14px;
+    }
+    
+    .usage-info {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 4px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .usage-info h3 {
+      margin-top: 0;
+      color: #856404;
+    }
+    
+    .dark-section {
+      background: #1a1a1a;
+      color: #e0e0e0;
+    }
+    
+    .dark-section h2 {
+      color: #e0e0e0;
+      border-bottom-color: #4db6e6;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔄 TablixJS Sorting Feature Demo</h1>
+  
+  <div class="usage-info">
+    <h3>💡 How to Use Sorting</h3>
+    <ul>
+      <li><strong>Click</strong> any column header to sort by that column</li>
+      <li><strong>Click again</strong> to cycle through sort order (asc → desc → unsorted)</li>
+      <li><strong>Tab + Enter/Space</strong> for keyboard accessibility</li>
+      <li>Only one column can be sorted at a time (single-column sorting)</li>
+      <li>Use the buttons below each table for programmatic sorting</li>
+    </ul>
+  </div>
+
+  <!-- Basic Client-Side Sorting -->
+  <div class="demo-section">
+    <h2>📊 Basic Client-Side Sorting</h2>
+    <p>Default sorting with auto-detection of data types (numbers, dates, text).</p>
+    
+    <div id="basicTable"></div>
+    
+    <div class="controls">
+      <h4>Programmatic Controls:</h4>
+      <button onclick="basicTable.sort('name', 'asc')">Sort Name A-Z</button>
+      <button onclick="basicTable.sort('salary', 'desc')">Sort Salary High-Low</button>
+      <button onclick="basicTable.sort('joinDate', 'asc')">Sort Join Date Oldest</button>
+      <button onclick="basicTable.clearSorting()">Clear Sorting</button>
+      <button onclick="showSortState('basicTable')">Show Sort State</button>
+    </div>
+    <div class="info" id="basicInfo">Click column headers to sort. Each click cycles through ascending → descending → unsorted.</div>
+  </div>
+
+  <!-- Custom Sort Functions -->
+  <div class="demo-section">
+    <h2>⚙️ Custom Sort Functions</h2>
+    <p>Columns with custom sort logic, different data types, and special sorting rules.</p>
+    
+    <div id="customTable"></div>
+    
+    <div class="controls">
+      <h4>Test Custom Sorting:</h4>
+      <button onclick="customTable.sort('priority', 'desc')">Priority High-Low</button>
+      <button onclick="customTable.sort('status', 'asc')">Status Order</button>
+      <button onclick="customTable.sort('score', 'desc')">Score High-Low</button>
+      <button onclick="customTable.clearSorting()">Clear Sorting</button>
+    </div>
+    <div class="info" id="customInfo">Custom sorting: Priority (Critical > High > Medium > Low), Status (Active > Pending > Inactive), Score (numeric)</div>
+  </div>
+
+  <!-- Server-Side Sorting Simulation -->
+  <div class="demo-section">
+    <h2>🌐 Server-Side Sorting (Simulated)</h2>
+    <p>Sorting handled by server with loading states and pagination integration.</p>
+    
+    <div id="serverTable"></div>
+    
+  <!-- Server-Side Sorting Simulation -->
+  <div class="demo-section">
+    <h2>🌐 Server-Side Sorting (Simulated)</h2>
+    <p>Sorting handled by server with loading states and pagination integration.</p>
+    
+    <div id="serverTable"></div>
+    
+    <div class="controls">
+      <h4>Server Sorting:</h4>
+      <button onclick="serverTable.sort('name', 'asc')">Server Sort Name</button>
+      <button onclick="serverTable.sort('department', 'desc')">Server Sort Department</button>
+      <button onclick="serverTable.clearSorting()">Clear Server Sort</button>
+    </div>
+    <div class="info" id="serverInfo">Server-side sorting with simulated loading delays</div>
+  </div>
+
+  <!-- Dark Theme Example -->
+  <div class="demo-section dark-section" data-theme="dark">
+    <h2>🌙 Dark Theme Sorting</h2>
+    <p>Sorting features work seamlessly with the dark theme.</p>
+    
+    <div id="darkTable" class="dark"></div>
+    
+    <div class="controls">
+      <h4>Dark Theme Sorting:</h4>
+      <button onclick="darkTable.sort('name', 'desc')">Sort Name Z-A</button>
+      <button onclick="darkTable.sort('value', 'asc')">Sort Value Low-High</button>
+      <button onclick="darkTable.clearSorting()">Clear Sorting</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import Table from '../src/core/Table.js';
+
+    // Generate sample data
+    function generateEmployeeData(count = 20) {
+      const names = ['John Smith', 'Jane Doe', 'Alice Johnson', 'Bob Wilson', 'Charlie Brown', 'Diana Prince', 'Eve Adams', 'Frank Miller'];
+      const departments = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance'];
+      const statuses = ['Active', 'Pending', 'Inactive'];
+      const priorities = ['Critical', 'High', 'Medium', 'Low'];
+      
+      const data = [];
+      for (let i = 1; i <= count; i++) {
+        const joinDate = new Date(2020 + Math.floor(Math.random() * 4), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1);
+        data.push({
+          id: i,
+          name: names[Math.floor(Math.random() * names.length)] + ` ${i}`,
+          department: departments[Math.floor(Math.random() * departments.length)],
+          salary: Math.floor(Math.random() * 80000) + 40000,
+          joinDate: joinDate.toISOString().split('T')[0],
+          status: statuses[Math.floor(Math.random() * statuses.length)],
+          priority: priorities[Math.floor(Math.random() * priorities.length)],
+          score: Math.floor(Math.random() * 100),
+          value: Math.floor(Math.random() * 1000)
+        });
+      }
+      return data;
+    }
+
+    // ===== BASIC SORTING TABLE =====
+    window.basicTable = new Table('#basicTable', {
+      data: generateEmployeeData(15),
+      columns: [
+        { name: 'id', title: 'ID', sortType: 'number' },
+        { name: 'name', title: 'Employee Name' },
+        { name: 'department', title: 'Department' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `$${cell.toLocaleString()}`, sortType: 'number' },
+        { name: 'joinDate', title: 'Join Date', sortType: 'date' }
+      ],
+      pagination: { pageSize: 8, showPageSizes: true },
+      sorting: {
+        enabled: true,
+        defaultSortType: 'auto'
+      }
+    });
+
+    // ===== CUSTOM SORT FUNCTIONS TABLE =====
+    // Custom sort for priority
+    const prioritySortOrder = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Low': 1 };
+    const statusSortOrder = { 'Active': 3, 'Pending': 2, 'Inactive': 1 };
+
+    window.customTable = new Table('#customTable', {
+      data: generateEmployeeData(12),
+      columns: [
+        { name: 'name', title: 'Name' },
+        { 
+          name: 'priority', 
+          title: 'Priority',
+          renderer: (cell) => {
+            const colors = { 'Critical': '#dc3545', 'High': '#fd7e14', 'Medium': '#ffc107', 'Low': '#28a745' };
+            return `<span style="color: ${colors[cell]}; font-weight: bold;">${cell}</span>`;
+          },
+          sortFunction: (a, b) => prioritySortOrder[b] - prioritySortOrder[a] // Reverse for high to low
+        },
+        { 
+          name: 'status', 
+          title: 'Status',
+          renderer: (cell) => {
+            const colors = { 'Active': '#28a745', 'Pending': '#ffc107', 'Inactive': '#6c757d' };
+            return `<span style="color: ${colors[cell]};">● ${cell}</span>`;
+          },
+          sortFunction: (a, b) => statusSortOrder[b] - statusSortOrder[a]
+        },
+        { 
+          name: 'score', 
+          title: 'Score',
+          renderer: (cell) => `${cell}%`,
+          sortType: 'number'
+        }
+      ],
+      pagination: { pageSize: 6 },
+      sorting: {
+        enabled: true
+      }
+    });
+
+    // ===== SERVER-SIDE SORTING TABLE =====
+    // Mock server data loader
+    async function mockServerSortLoader({ sort, filters, page, pageSize }) {
+      // Simulate server delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      let data = generateEmployeeData(50);
+      
+      // Apply server-side sorting
+      if (sort) {
+        data.sort((a, b) => {
+          const aVal = a[sort.column];
+          const bVal = b[sort.column];
+          
+          let comparison = 0;
+          if (aVal < bVal) comparison = -1;
+          else if (aVal > bVal) comparison = 1;
+          
+          return sort.direction === 'desc' ? -comparison : comparison;
+        });
+      }
+      
+      // Paginate
+      const start = (page - 1) * pageSize;
+      const pageData = data.slice(start, start + pageSize);
+      
+      return {
+        data: pageData,
+        totalRows: data.length
+      };
+    }
+
+    window.serverTable = new Table('#serverTable', {
+      columns: [
+        { name: 'name', title: 'Name' },
+        { name: 'department', title: 'Department' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `$${cell.toLocaleString()}` }
+      ],
+      pagination: {
+        enabled: true,
+        pageSize: 8,
+        mode: 'server',
+        serverDataLoader: mockServerSortLoader
+      },
+      sorting: {
+        enabled: true,
+        mode: 'server',
+        serverSortLoader: mockServerSortLoader
+      }
+    });
+
+    // ===== DARK THEME TABLE =====
+    window.darkTable = new Table('#darkTable', {
+      data: generateEmployeeData(10),
+      columns: [
+        { name: 'name', title: 'Name' },
+        { name: 'department', title: 'Department' },
+        { name: 'value', title: 'Value', sortType: 'number' }
+      ],
+      pagination: { pageSize: 5 },
+      sorting: {
+        enabled: true
+      }
+    });
+
+    // ===== HELPER FUNCTIONS =====
+    window.showSortState = (tableName) => {
+      const table = window[tableName];
+      const state = table.getSortState();
+      alert(`Sort State: ${JSON.stringify(state, null, 2)}`);
+    };
+
+    // ===== EVENT LISTENERS =====
+    // Update info displays
+    function updateInfo() {
+      const basicInfo = basicTable.getSortState();
+      document.getElementById('basicInfo').innerHTML = 
+        `Current Sort: ${basicInfo.sort ? `${basicInfo.sort.column} (${basicInfo.sort.direction})` : 'None'}`;
+      
+      const customInfo = customTable.getSortState();
+      document.getElementById('customInfo').innerHTML = 
+        `Current Sort: ${customInfo.sort ? `${customInfo.sort.column} (${customInfo.sort.direction})` : 'None'}`;
+      
+      const serverInfo = serverTable.getSortState();
+      document.getElementById('serverInfo').innerHTML = 
+        `Server Sort: ${serverInfo.sort ? `${serverInfo.sort.column} (${serverInfo.sort.direction})` : 'None'}`;
+    }
+
+    // Set up event listeners
+    basicTable.on('afterSort', updateInfo);
+    customTable.on('afterSort', updateInfo);
+    serverTable.on('afterSort', updateInfo);
+
+    // Initial info update
+    updateInfo();
+
+    console.log('📋 TablixJS Sorting Demo loaded successfully!');
+    console.log('💡 Try clicking column headers to sort. Each click cycles through asc → desc → unsorted');
+  </script>
+</body>
+</html>

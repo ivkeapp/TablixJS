@@ -4,7 +4,8 @@ export default class DataManager {
     this.originalData = data;   // full data set
     this.filteredData = [...data];  // filtered data
     this.currentFilters = {};   // current filter criteria
-    this.currentSorts = [];     // current sort criteria
+    this.currentSorts = [];     // current sort criteria (deprecated - use SortingManager)
+    this.serverTotalRows = null; // for server-side pagination
   }
 
   getData() {
@@ -19,6 +20,27 @@ export default class DataManager {
     if (this.table.paginationManager) {
       this.table.paginationManager.updatePaginationInfo();
     }
+  }
+
+  /**
+   * Set data from server (for server-side operations)
+   */
+  setServerData(data, totalRows = null) {
+    this.originalData = data;
+    this.filteredData = [...data];
+    this.serverTotalRows = totalRows;
+    
+    // Update pagination info after data change
+    if (this.table.paginationManager) {
+      this.table.paginationManager.updatePaginationInfo(totalRows);
+    }
+  }
+
+  /**
+   * Get total rows (for server-side pagination)
+   */
+  getTotalRows() {
+    return this.serverTotalRows !== null ? this.serverTotalRows : this.originalData.length;
   }
 
   applyFilter(criteria) {
@@ -51,22 +73,28 @@ export default class DataManager {
       return;
     }
 
-    this.filteredData.sort((a, b) => {
-      for (const sort of sorts) {
-        const { column, direction } = sort;
-        const aVal = a[column];
-        const bVal = b[column];
-        
-        let comparison = 0;
-        if (aVal < bVal) comparison = -1;
-        else if (aVal > bVal) comparison = 1;
-        
-        if (comparison !== 0) {
-          return direction === 'desc' ? -comparison : comparison;
+    // Use SortingManager if available, otherwise fall back to basic sorting
+    if (this.table.sortingManager && this.table.sortingManager.currentSorts.length > 0) {
+      this.table.sortingManager._applySorting();
+    } else {
+      // Legacy sorting implementation
+      this.filteredData.sort((a, b) => {
+        for (const sort of sorts) {
+          const { column, direction } = sort;
+          const aVal = a[column];
+          const bVal = b[column];
+          
+          let comparison = 0;
+          if (aVal < bVal) comparison = -1;
+          else if (aVal > bVal) comparison = 1;
+          
+          if (comparison !== 0) {
+            return direction === 'desc' ? -comparison : comparison;
+          }
         }
-      }
-      return 0;
-    });
+        return 0;
+      });
+    }
 
     // Reset pagination to first page after sorting
     if (this.table.paginationManager) {

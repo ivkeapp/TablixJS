@@ -2,6 +2,7 @@ import DataManager from './DataManager.js';
 import Renderer from './Renderer.js';
 import EventManager from './EventManager.js';
 import PaginationManager from './PaginationManager.js';
+import SortingManager from './SortingManager.js';
 
 export default class Table {
   constructor(container, options = {}) {
@@ -19,6 +20,15 @@ export default class Table {
         showPageSizes: false,
         pageSizeOptions: [10, 25, 50, 100],
         serverDataLoader: null
+      },
+      // Sorting options
+      sorting: {
+        enabled: true,
+        mode: 'client', // 'client' or 'server'
+        serverSortLoader: null,
+        defaultSortType: 'auto',
+        caseSensitive: false,
+        nullsFirst: false
       },
       // Control panels
       controls: {
@@ -46,6 +56,11 @@ export default class Table {
     // Initialize pagination if enabled
     if (this.options.pagination && this.options.pagination.enabled !== false) {
       this.paginationManager = new PaginationManager(this, this.options.pagination);
+    }
+
+    // Initialize sorting if enabled
+    if (this.options.sorting && this.options.sorting.enabled !== false) {
+      this.sortingManager = new SortingManager(this, this.options.sorting);
     }
 
     this.init();
@@ -96,12 +111,52 @@ export default class Table {
   }
 
   /**
-   * Sort data by column(s)
+   * Sort data by column
+   * @param {string} columnName - Column to sort by
+   * @param {string|null} direction - 'asc', 'desc', or null (unsorted)
    */
-  async sort(sorts) {
-    this.dataManager.applySorting(sorts);
-    await this.refreshTable();
-    this.eventManager.trigger('afterSort', sorts);
+  async sort(columnName, direction = 'asc') {
+    if (this.sortingManager) {
+      await this.sortingManager.sort(columnName, direction);
+    } else {
+      // Fallback to legacy sorting
+      this.dataManager.applySorting([{ column: columnName, direction }]);
+      await this.refreshTable();
+      this.eventManager.trigger('afterSort', [{ column: columnName, direction }]);
+    }
+  }
+
+  /**
+   * Toggle sort for a column (handles click cycling)
+   */
+  async toggleSort(columnName) {
+    if (this.sortingManager) {
+      await this.sortingManager.toggleSort(columnName);
+    }
+  }
+
+  /**
+   * Clear all sorting
+   */
+  async clearSorting() {
+    if (this.sortingManager) {
+      await this.sortingManager.clearSorting();
+    } else {
+      // Fallback to legacy sorting
+      this.dataManager.clearSorting();
+      await this.refreshTable();
+      this.eventManager.trigger('afterSort', []);
+    }
+  }
+
+  /**
+   * Get current sort state
+   */
+  getSortState() {
+    if (this.sortingManager) {
+      return this.sortingManager.getSortState();
+    }
+    return { sort: null, mode: 'client' };
   }
 
   /**
@@ -117,9 +172,14 @@ export default class Table {
    * Clear all sorting
    */
   async clearSorting() {
-    this.dataManager.clearSorting();
-    await this.refreshTable();
-    this.eventManager.trigger('afterSort', []);
+    if (this.sortingManager) {
+      await this.sortingManager.clearSorting();
+    } else {
+      // Fallback to legacy sorting
+      this.dataManager.clearSorting();
+      await this.refreshTable();
+      this.eventManager.trigger('afterSort', []);
+    }
   }
 
   // ===== PAGINATION API =====
@@ -279,5 +339,6 @@ export default class Table {
     this.renderer = null;
     this.eventManager = null;
     this.paginationManager = null;
+    this.sortingManager = null;
   }
 }

@@ -20,7 +20,29 @@ export default class Renderer {
     // Header
     html += '<thead class="tablix-thead"><tr class="tablix-header-row">';
     columns.forEach(col => {
-      html += `<th class="tablix-th">${col.title || col.name}</th>`;
+      const isSortable = this._isColumnSortable(col);
+      const sortDirection = this._getSortDirection(col.name);
+      const sortClass = isSortable ? ' tablix-sortable' : '';
+      const sortDirectionClass = sortDirection ? ` tablix-sorted tablix-sorted-${sortDirection}` : '';
+      
+      html += `<th class="tablix-th${sortClass}${sortDirectionClass}" data-column="${col.name}">`;
+      html += `<div class="tablix-th-content">`;
+      html += `<span class="tablix-th-text">${col.title || col.name}</span>`;
+      
+      if (isSortable) {
+        html += `<span class="tablix-sort-indicator">`;
+        if (sortDirection === 'asc') {
+          html += `<span class="tablix-sort-arrow tablix-sort-asc" aria-label="Sorted ascending">↑</span>`;
+        } else if (sortDirection === 'desc') {
+          html += `<span class="tablix-sort-arrow tablix-sort-desc" aria-label="Sorted descending">↓</span>`;
+        } else {
+          html += `<span class="tablix-sort-arrow tablix-sort-none" aria-label="Not sorted">↕</span>`;
+        }
+        html += `</span>`;
+      }
+      
+      html += `</div>`;
+      html += `</th>`;
     });
     html += '</tr></thead>';
 
@@ -61,6 +83,11 @@ export default class Renderer {
     // Bind control events
     if (controlsOptions.enabled) {
       this.bindControlEvents();
+    }
+
+    // Bind sort events if sorting is enabled
+    if (this.table.sortingManager) {
+      this.bindSortEvents();
     }
   }
 
@@ -400,5 +427,98 @@ export default class Renderer {
     URL.revokeObjectURL(url);
     
     this.table.eventManager.trigger('afterExport', { data, format: 'csv' });
+  }
+
+  /**
+   * Bind sorting events to header columns
+   */
+  bindSortEvents() {
+    const headerRow = this.table.container.querySelector('.tablix-header-row');
+    if (!headerRow) return;
+
+    headerRow.addEventListener('click', async (e) => {
+      const th = e.target.closest('.tablix-sortable');
+      if (!th) return;
+
+      e.preventDefault();
+      
+      const columnName = th.dataset.column;
+      
+      try {
+        await this.table.toggleSort(columnName);
+      } catch (error) {
+        console.error('Failed to sort column:', error);
+      }
+    });
+
+    // Keyboard support for accessibility
+    headerRow.addEventListener('keydown', async (e) => {
+      const th = e.target.closest('.tablix-sortable');
+      if (!th || (e.key !== 'Enter' && e.key !== ' ')) return;
+
+      e.preventDefault();
+      
+      const columnName = th.dataset.column;
+      
+      try {
+        await this.table.toggleSort(columnName);
+      } catch (error) {
+        console.error('Failed to sort column:', error);
+      }
+    });
+  }
+
+  /**
+   * Update sort indicators in headers
+   */
+  updateSortIndicators(currentSort) {
+    const headers = this.table.container.querySelectorAll('.tablix-th[data-column]');
+    
+    headers.forEach(th => {
+      const columnName = th.dataset.column;
+      const isSorted = currentSort && currentSort.column === columnName;
+      
+      // Remove all sort classes
+      th.classList.remove('tablix-sorted', 'tablix-sorted-asc', 'tablix-sorted-desc');
+      
+      const indicator = th.querySelector('.tablix-sort-indicator');
+      if (!indicator) return;
+
+      const arrow = indicator.querySelector('.tablix-sort-arrow');
+      if (!arrow) return;
+
+      if (isSorted) {
+        // Column is sorted
+        th.classList.add('tablix-sorted', `tablix-sorted-${currentSort.direction}`);
+        arrow.classList.remove('tablix-sort-none', 'tablix-sort-asc', 'tablix-sort-desc');
+        arrow.classList.add(`tablix-sort-${currentSort.direction}`);
+        arrow.textContent = currentSort.direction === 'asc' ? '↑' : '↓';
+        arrow.setAttribute('aria-label', `Sorted ${currentSort.direction === 'asc' ? 'ascending' : 'descending'}`);
+        arrow.removeAttribute('data-sort-order');
+      } else {
+        // Column is not sorted
+        arrow.classList.remove('tablix-sort-asc', 'tablix-sort-desc');
+        arrow.classList.add('tablix-sort-none');
+        arrow.textContent = '↕';
+        arrow.setAttribute('aria-label', 'Not sorted');
+        arrow.removeAttribute('data-sort-order');
+      }
+    });
+  }
+
+  /**
+   * Check if a column is sortable
+   */
+  _isColumnSortable(column) {
+    if (!this.table.sortingManager) return false;
+    return this.table.sortingManager.isColumnSortable(column.name);
+  }
+
+  /**
+   * Get sort direction for a column
+   */
+  _getSortDirection(columnName) {
+    if (!this.table.sortingManager) return null;
+    return this.table.sortingManager.getSortDirection(columnName);
   }
 }
