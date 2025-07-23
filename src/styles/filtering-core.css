@@ -1,0 +1,392 @@
+/* TablixJS Filtering Core Styles */
+
+/* Filter indicators in table headers */
+.tablix-filter-indicator {
+  display: inline-block;
+  margin-left: 0.25rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.tablix-filter-indicator:hover {
+  opacity: 1;
+}
+
+.tablix-filter-indicator.tablix-filter-active {
+  opacity: 1;
+  color: var(--tablix-btn-active-color, #007bff);
+}
+
+.tablix-filter-icon {
+  font-size: 0.75rem;
+  user-select: none;
+}
+
+.tablix-filter-badge {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+  background: var(--tablix-btn-active-color, #007bff);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.6rem;
+  line-height: 1;
+  padding: 0.1rem 0.3rem;
+  min-width: 1rem;
+  text-align: center;
+}
+
+/* Filter dropdown */
+.tablix-filter-dropdown {
+  position: absolute;
+  background: var(--tablix-dropdown-bg, white);
+  border: 1px solid var(--tablix-border-color, #dee2e6);
+  border-radius: 0.25rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  z-index: 1000;
+  min-width: 280px;
+  max-width: 400px;
+  max-height: 500px;
+  display: none;
+  font-family: var(--tablix-font-family, inherit);
+  font-size: var(--tablix-font-size, 0.875rem);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tablix-filter-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--tablix-border-color, #dee2e6);
+  background: var(--tablix-header-bg, #f8f9fa);
+}
+
+.tablix-filter-dropdown-header h4 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tablix-header-text-color, #495057);
+}
+
+.tablix-filter-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  color: var(--tablix-text-color, #6c757d);
+}
+
+.tablix-filter-close:hover {
+  color: var(--tablix-text-color, #495057);
+}
+
+/* Filter tabs */
+.tablix-filter-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--tablix-border-color, #dee2e6);
+}
+
+.tablix-filter-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--tablix-text-color, #6c757d);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tablix-filter-tab:hover {
+  color: var(--tablix-text-color, #495057);
+  background: var(--tablix-hover-bg, #f8f9fa);
+}
+
+.tablix-filter-tab.active {
+  color: var(--tablix-btn-active-color, #007bff);
+  border-bottom-color: var(--tablix-btn-active-color, #007bff);
+}
+
+/* Filter panels */
+.tablix-filter-content {
+  position: relative;
+  min-height: 200px;
+  max-height: 300px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.tablix-filter-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1rem;
+  display: none;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.tablix-filter-panel.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Value filter panel */
+.tablix-filter-search {
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+}
+
+.tablix-filter-search-input {
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--tablix-border-color, #ced4da);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  box-sizing: border-box;
+}
+
+.tablix-filter-search-input:focus {
+  outline: none;
+  border-color: var(--tablix-focus-color, #80bdff);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.tablix-filter-select-all {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--tablix-border-color, #dee2e6);
+  flex-shrink: 0;
+}
+
+.tablix-filter-select-all label {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--tablix-text-color, #495057);
+}
+
+.tablix-filter-select-all input {
+  margin-right: 0.5rem;
+}
+
+.tablix-filter-values {
+  max-height: 150px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.tablix-filter-value-item {
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.tablix-filter-value-item:hover {
+  background: var(--tablix-hover-bg, #f8f9fa);
+}
+
+.tablix-filter-value-item input {
+  margin-right: 0.5rem;
+}
+
+.tablix-filter-value-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Condition filter panel */
+.tablix-filter-conditions {
+  margin-bottom: 1rem;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.tablix-filter-condition {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tablix-filter-operator {
+  flex: 1;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--tablix-border-color, #ced4da);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.tablix-filter-value {
+  flex: 1;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--tablix-border-color, #ced4da);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.tablix-filter-value:disabled {
+  background: var(--tablix-disabled-bg, #e9ecef);
+  color: var(--tablix-disabled-text, #6c757d);
+}
+
+.tablix-filter-remove-condition {
+  background: none;
+  border: none;
+  color: var(--tablix-danger-color, #dc3545);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.tablix-filter-remove-condition:hover {
+  color: var(--tablix-danger-hover-color, #c82333);
+}
+
+.tablix-filter-add-condition {
+  background: none;
+  border: 1px dashed var(--tablix-border-color, #ced4da);
+  color: var(--tablix-btn-active-color, #007bff);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  width: 100%;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.tablix-filter-add-condition:hover {
+  border-color: var(--tablix-btn-active-color, #007bff);
+  background: var(--tablix-hover-bg, #f8f9fa);
+}
+
+/* Filter actions */
+.tablix-filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-top: 1px solid var(--tablix-border-color, #dee2e6);
+  background: var(--tablix-header-bg, #f8f9fa);
+  flex-shrink: 0;
+}
+
+.tablix-filter-actions button {
+  flex: 1;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--tablix-border-color, #ced4da);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.tablix-filter-apply {
+  background: var(--tablix-btn-primary-bg, #007bff);
+  color: var(--tablix-btn-primary-text, white);
+  border-color: var(--tablix-btn-primary-bg, #007bff);
+}
+
+.tablix-filter-apply:hover {
+  background: var(--tablix-btn-primary-hover-bg, #0056b3);
+  border-color: var(--tablix-btn-primary-hover-bg, #0056b3);
+}
+
+.tablix-filter-clear {
+  background: var(--tablix-btn-secondary-bg, #6c757d);
+  color: var(--tablix-btn-secondary-text, white);
+  border-color: var(--tablix-btn-secondary-bg, #6c757d);
+}
+
+.tablix-filter-clear:hover {
+  background: var(--tablix-btn-secondary-hover-bg, #5a6268);
+  border-color: var(--tablix-btn-secondary-hover-bg, #5a6268);
+}
+
+.tablix-filter-cancel {
+  background: var(--tablix-btn-light-bg, white);
+  color: var(--tablix-btn-light-text, #495057);
+}
+
+.tablix-filter-cancel:hover {
+  background: var(--tablix-btn-light-hover-bg, #e2e6ea);
+}
+
+/* Empty state */
+.tablix-filter-empty {
+  color: var(--tablix-empty-text-color, #6c757d);
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Focus styles */
+.tablix-filter-dropdown input:focus,
+.tablix-filter-dropdown select:focus,
+.tablix-filter-dropdown button:focus {
+  outline: none;
+  border-color: var(--tablix-focus-color, #80bdff);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Scrollbar styling for webkit browsers */
+.tablix-filter-values::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.tablix-filter-values::-webkit-scrollbar-track {
+  background: var(--tablix-scrollbar-track, #f1f1f1);
+}
+
+.tablix-filter-values::-webkit-scrollbar-thumb {
+  background: var(--tablix-scrollbar-thumb, #c1c1c1);
+  border-radius: 0.25rem;
+}
+
+.tablix-filter-values::-webkit-scrollbar-thumb:hover {
+  background: var(--tablix-scrollbar-thumb-hover, #a8a8a8);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .tablix-filter-dropdown,
+.dark .tablix-filter-dropdown {
+  --tablix-dropdown-bg: #343a40;
+  --tablix-border-color: #495057;
+  --tablix-header-bg: #495057;
+  --tablix-header-text-color: #f8f9fa;
+  --tablix-text-color: #f8f9fa;
+  --tablix-hover-bg: #495057;
+  --tablix-disabled-bg: #495057;
+  --tablix-disabled-text: #adb5bd;
+  --tablix-btn-light-bg: #495057;
+  --tablix-btn-light-text: #f8f9fa;
+  --tablix-btn-light-hover-bg: #5a6268;
+  --tablix-empty-text-color: #adb5bd;
+  --tablix-scrollbar-track: #495057;
+  --tablix-scrollbar-thumb: #6c757d;
+  --tablix-scrollbar-thumb-hover: #adb5bd;
+}

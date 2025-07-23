@@ -85,20 +85,23 @@
   <h1>🔄 TablixJS Sorting Feature Demo</h1>
   
   <div class="usage-info">
-    <h3>💡 How to Use Sorting</h3>
+    <h3>💡 How to Use Sorting & Search</h3>
     <ul>
       <li><strong>Click</strong> any column header to sort by that column</li>
       <li><strong>Click again</strong> to cycle through sort order (asc → desc → unsorted)</li>
       <li><strong>Tab + Enter/Space</strong> for keyboard accessibility</li>
+      <li><strong>Global Search:</strong> Use the search box in the top-right to search across all columns in real-time</li>
+      <li><strong>Search Configuration:</strong> Each table has customizable search delay and minimum character length</li>
+      <li><strong>Search Hooks:</strong> beforeSearch and afterSearch events provide detailed search information</li>
       <li>Only one column can be sorted at a time (single-column sorting)</li>
-      <li>Use the buttons below each table for programmatic sorting</li>
+      <li>Use the buttons below each table for programmatic sorting and search</li>
     </ul>
   </div>
 
   <!-- Basic Client-Side Sorting -->
   <div class="demo-section">
     <h2>📊 Basic Client-Side Sorting</h2>
-    <p>Default sorting with auto-detection of data types (numbers, dates, text).</p>
+    <p>Default sorting with auto-detection of data types (numbers, dates, text). Search configured with 300ms delay and 2-character minimum.</p>
     
     <div id="basicTable"></div>
     
@@ -109,14 +112,17 @@
       <button onclick="basicTable.sort('joinDate', 'asc')">Sort Join Date Oldest</button>
       <button onclick="basicTable.clearSorting()">Clear Sorting</button>
       <button onclick="showSortState('basicTable')">Show Sort State</button>
+      <button onclick="testSearch('basicTable')">Test Search</button>
+      <button onclick="clearSearch('basicTable')">Clear Search</button>
+      <button onclick="configureSearch('basicTable')">Configure Search</button>
     </div>
-    <div class="info" id="basicInfo">Click column headers to sort. Each click cycles through ascending → descending → unsorted.</div>
+    <div class="info" id="basicInfo">Click column headers to sort. Each click cycles through ascending → descending → unsorted. Use the search box to filter results in real-time.</div>
   </div>
 
   <!-- Custom Sort Functions -->
   <div class="demo-section">
     <h2>⚙️ Custom Sort Functions</h2>
-    <p>Columns with custom sort logic, different data types, and special sorting rules.</p>
+    <p>Columns with custom sort logic, different data types, and special sorting rules. Fast search with 200ms delay and immediate filtering (1 character).</p>
     
     <div id="customTable"></div>
     
@@ -126,21 +132,17 @@
       <button onclick="customTable.sort('status', 'asc')">Status Order</button>
       <button onclick="customTable.sort('score', 'desc')">Score High-Low</button>
       <button onclick="customTable.clearSorting()">Clear Sorting</button>
+      <button onclick="testSearch('customTable')">Test Search</button>
+      <button onclick="clearSearch('customTable')">Clear Search</button>
+      <button onclick="configureSearch('customTable')">Configure Search</button>
     </div>
-    <div class="info" id="customInfo">Custom sorting: Priority (Critical > High > Medium > Low), Status (Active > Pending > Inactive), Score (numeric)</div>
+    <div class="info" id="customInfo">Custom sorting: Priority (Critical > High > Medium > Low), Status (Active > Pending > Inactive), Score (numeric). Search works across all visible columns.</div>
   </div>
 
   <!-- Server-Side Sorting Simulation -->
   <div class="demo-section">
     <h2>🌐 Server-Side Sorting (Simulated)</h2>
-    <p>Sorting handled by server with loading states and pagination integration.</p>
-    
-    <div id="serverTable"></div>
-    
-  <!-- Server-Side Sorting Simulation -->
-  <div class="demo-section">
-    <h2>🌐 Server-Side Sorting (Simulated)</h2>
-    <p>Sorting handled by server with loading states and pagination integration.</p>
+    <p>Sorting handled by server with loading states and pagination integration. Conservative search with 500ms delay and 3-character minimum to reduce server requests.</p>
     
     <div id="serverTable"></div>
     
@@ -149,14 +151,16 @@
       <button onclick="serverTable.sort('name', 'asc')">Server Sort Name</button>
       <button onclick="serverTable.sort('department', 'desc')">Server Sort Department</button>
       <button onclick="serverTable.clearSorting()">Clear Server Sort</button>
+      <button onclick="testSearch('serverTable')">Test Search</button>
+      <button onclick="clearSearch('serverTable')">Clear Search</button>
     </div>
-    <div class="info" id="serverInfo">Server-side sorting with simulated loading delays</div>
+    <div class="info" id="serverInfo">Server-side sorting with simulated loading delays. Search functionality works with client-side filtering.</div>
   </div>
 
   <!-- Dark Theme Example -->
   <div class="demo-section dark-section" data-theme="dark">
     <h2>🌙 Dark Theme Sorting</h2>
-    <p>Sorting features work seamlessly with the dark theme.</p>
+    <p>Sorting features work seamlessly with the dark theme. Medium-speed search with 250ms delay and 2-character minimum.</p>
     
     <div id="darkTable" class="dark"></div>
     
@@ -165,6 +169,8 @@
       <button onclick="darkTable.sort('name', 'desc')">Sort Name Z-A</button>
       <button onclick="darkTable.sort('value', 'asc')">Sort Value Low-High</button>
       <button onclick="darkTable.clearSorting()">Clear Sorting</button>
+      <button onclick="testSearch('darkTable')">Test Search</button>
+      <button onclick="clearSearch('darkTable')">Clear Search</button>
     </div>
   </div>
 
@@ -210,6 +216,13 @@
       sorting: {
         enabled: true,
         defaultSortType: 'auto'
+      },
+      search: {
+        enabled: true,
+        placeholder: 'Search employees...',
+        searchDelay: 300, // Wait 300ms after user stops typing
+        minLength: 2, // Start searching after 2 characters
+        caseSensitive: false
       }
     });
 
@@ -250,6 +263,12 @@
       pagination: { pageSize: 6 },
       sorting: {
         enabled: true
+      },
+      search: {
+        enabled: true,
+        placeholder: 'Search tasks...',
+        searchDelay: 200, // Faster response for smaller dataset
+        minLength: 1 // Search immediately
       }
     });
 
@@ -301,6 +320,12 @@
         enabled: true,
         mode: 'server',
         serverSortLoader: mockServerSortLoader
+      },
+      search: {
+        enabled: true,
+        placeholder: 'Search employees...',
+        searchDelay: 500, // Slower for server-side to avoid too many requests
+        minLength: 3 // Wait for 3 characters
       }
     });
 
@@ -315,6 +340,12 @@
       pagination: { pageSize: 5 },
       sorting: {
         enabled: true
+      },
+      search: {
+        enabled: true,
+        placeholder: 'Search...',
+        searchDelay: 250,
+        minLength: 2
       }
     });
 
@@ -325,20 +356,53 @@
       alert(`Sort State: ${JSON.stringify(state, null, 2)}`);
     };
 
+    window.testSearch = (tableName) => {
+      const table = window[tableName];
+      const searchTerm = prompt('Enter search term:');
+      if (searchTerm !== null) {
+        table.setSearchTerm(searchTerm);
+      }
+    };
+
+    window.clearSearch = (tableName) => {
+      const table = window[tableName];
+      table.clearSearch();
+    };
+
+    window.configureSearch = (tableName) => {
+      const table = window[tableName];
+      const delay = prompt('Enter search delay (ms):', table.searchManager.getConfiguration().searchDelay);
+      const minLength = prompt('Enter minimum search length:', table.searchManager.getConfiguration().minLength);
+      
+      if (delay !== null && minLength !== null) {
+        table.searchManager.configure({
+          searchDelay: parseInt(delay) || 300,
+          minLength: parseInt(minLength) || 1
+        });
+        alert(`Search configured: delay=${delay}ms, minLength=${minLength}`);
+      }
+    };
+
     // ===== EVENT LISTENERS =====
     // Update info displays
     function updateInfo() {
       const basicInfo = basicTable.getSortState();
+      const basicSearch = basicTable.getSearchInfo();
       document.getElementById('basicInfo').innerHTML = 
-        `Current Sort: ${basicInfo.sort ? `${basicInfo.sort.column} (${basicInfo.sort.direction})` : 'None'}`;
+        `Current Sort: ${basicInfo.sort ? `${basicInfo.sort.column} (${basicInfo.sort.direction})` : 'None'} | ` +
+        `Search: ${basicSearch?.isActive ? `"${basicSearch.searchTerm}" (${basicSearch.resultsCount}/${basicSearch.totalCount})` : 'None'}`;
       
       const customInfo = customTable.getSortState();
+      const customSearch = customTable.getSearchInfo();
       document.getElementById('customInfo').innerHTML = 
-        `Current Sort: ${customInfo.sort ? `${customInfo.sort.column} (${customInfo.sort.direction})` : 'None'}`;
+        `Current Sort: ${customInfo.sort ? `${customInfo.sort.column} (${customInfo.sort.direction})` : 'None'} | ` +
+        `Search: ${customSearch?.isActive ? `"${customSearch.searchTerm}" (${customSearch.resultsCount}/${customSearch.totalCount})` : 'None'}`;
       
       const serverInfo = serverTable.getSortState();
+      const serverSearch = serverTable.getSearchInfo();
       document.getElementById('serverInfo').innerHTML = 
-        `Server Sort: ${serverInfo.sort ? `${serverInfo.sort.column} (${serverInfo.sort.direction})` : 'None'}`;
+        `Server Sort: ${serverInfo.sort ? `${serverInfo.sort.column} (${serverInfo.sort.direction})` : 'None'} | ` +
+        `Search: ${serverSearch?.isActive ? `"${serverSearch.searchTerm}" (${serverSearch.resultsCount}/${serverSearch.totalCount})` : 'None'}`;
     }
 
     // Set up event listeners
@@ -346,11 +410,39 @@
     customTable.on('afterSort', updateInfo);
     serverTable.on('afterSort', updateInfo);
 
+    // Add search event listeners
+    basicTable.on('afterSearch', updateInfo);
+    customTable.on('afterSearch', updateInfo);
+    serverTable.on('afterSearch', updateInfo);
+
     // Initial info update
     updateInfo();
 
-    console.log('📋 TablixJS Sorting Demo loaded successfully!');
+    // Log search events for demonstration
+    [basicTable, customTable, serverTable, darkTable].forEach((table, index) => {
+      const tableNames = ['Basic', 'Custom', 'Server', 'Dark'];
+      const tableName = tableNames[index];
+      
+      table.on('beforeSearch', (data) => {
+        console.log(`🔍 ${tableName} - Before search:`, data);
+        if (!data.willSearch) {
+          console.log(`⚠️ ${tableName} - Search skipped (term too short: ${data.searchTerm.length} < ${data.minLength})`);
+        }
+      });
+      
+      table.on('afterSearch', (data) => {
+        console.log(`✅ ${tableName} - After search:`, data);
+        if (data.searchPerformed) {
+          console.log(`${tableName} search results: ${data.resultsCount}/${data.totalCount} rows (delay: ${table.searchManager.getConfiguration().searchDelay}ms)`);
+        } else {
+          console.log(`${tableName} search cleared or below minimum length`);
+        }
+      });
+    });
+
+    console.log('📋 TablixJS Sorting & Search Demo loaded successfully!');
     console.log('💡 Try clicking column headers to sort. Each click cycles through asc → desc → unsorted');
+    console.log('🔍 Try using the search boxes to filter data in real-time across all columns');
   </script>
 </body>
 </html>

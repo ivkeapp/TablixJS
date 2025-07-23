@@ -1,0 +1,242 @@
+/* TablixJS Search Core Styles */
+
+/* Controls layout */
+.tablix-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tablix-controls-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tablix-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.tablix-control-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Search styles */
+.tablix-search-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tablix-search-input {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--tablix-border-color, #ced4da);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  min-width: 200px;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  box-sizing: border-box;
+}
+
+.tablix-search-input:focus {
+  outline: none;
+  border-color: var(--tablix-focus-color, #80bdff);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.tablix-search-input::placeholder {
+  color: var(--tablix-placeholder-color, #6c757d);
+  opacity: 1;
+}
+
+.tablix-search-clear {
+  background: none;
+  border: none;
+  color: var(--tablix-text-color, #6c757d);
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  line-height: 1;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+  display: none;
+}
+
+.tablix-search-clear:hover {
+  color: var(--tablix-danger-color, #dc3545);
+  background: var(--tablix-hover-bg, #f8f9fa);
+}
+
+.tablix-search-clear:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Control buttons */
+.tablix-control-btn {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--tablix-border-color, #ced4da);
+  background: var(--tablix-btn-bg, white);
+  color: var(--tablix-btn-color, #495057);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+}
+
+.tablix-control-btn:hover {
+  background: var(--tablix-btn-hover-bg, #e2e6ea);
+  border-color: var(--tablix-btn-hover-border-color, #adb5bd);
+}
+
+.tablix-control-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.tablix-control-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Page size control */
+.tablix-page-size-group label {
+  font-size: 0.875rem;
+  color: var(--tablix-text-color, #495057);
+  margin-right: 0.25rem;
+}
+
+.tablix-page-size-select {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--tablix-border-color, #ced4da);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  background: var(--tablix-input-bg, white);
+  color: var(--tablix-input-color, #495057);
+  cursor: pointer;
+}
+
+.tablix-page-size-select:focus {
+  outline: none;
+  border-color: var(--tablix-focus-color, #80bdff);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.tablix-page-size-group span {
+  font-size: 0.875rem;
+  color: var(--tablix-text-color, #495057);
+  margin-left: 0.25rem;
+}
+
+/* Refresh button */
+.tablix-refresh-group .tablix-control-btn {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .tablix-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .tablix-controls-left,
+  .tablix-controls-right {
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-left: 0;
+  }
+
+  .tablix-control-group {
+    justify-content: center;
+  }
+
+  .tablix-search-input {
+    min-width: auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .tablix-control-group {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .tablix-pagination-controls {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .tablix-control-btn {
+    flex: 1;
+    min-width: auto;
+  }
+}
+
+/* Search active state */
+.tablix-search-input:not(:placeholder-shown) {
+  border-color: var(--tablix-btn-active-color, #007bff);
+}
+
+.tablix-search-input:not(:placeholder-shown) + .tablix-search-clear {
+  display: block;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .tablix-controls,
+.dark .tablix-controls {
+  --tablix-border-color: #495057;
+  --tablix-btn-bg: #495057;
+  --tablix-btn-color: #f8f9fa;
+  --tablix-btn-hover-bg: #5a6268;
+  --tablix-btn-hover-border-color: #6c757d;
+  --tablix-input-bg: #495057;
+  --tablix-input-color: #f8f9fa;
+  --tablix-text-color: #f8f9fa;
+  --tablix-placeholder-color: #adb5bd;
+  --tablix-hover-bg: #5a6268;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .tablix-search-input,
+  .tablix-control-btn,
+  .tablix-page-size-select {
+    border-width: 2px;
+  }
+
+  .tablix-search-input:focus,
+  .tablix-control-btn:focus,
+  .tablix-page-size-select:focus {
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .tablix-search-input,
+  .tablix-control-btn,
+  .tablix-page-size-select,
+  .tablix-search-clear {
+    transition: none;
+  }
+}

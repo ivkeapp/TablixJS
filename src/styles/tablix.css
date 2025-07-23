@@ -4,6 +4,8 @@
 @import './table-core.css';
 @import './pagination-core.css';
 @import './sorting-core.css';
+@import './filtering-core.css';
+@import './search-core.css';
 
 /* Import default theme */
 @import './themes/default.css';

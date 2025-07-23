@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TablixJS - Search Input Test</title>
+  <link rel="stylesheet" href="../src/styles/tablix.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      margin: 20px;
+      background-color: #f8f9fa;
+    }
+    
+    .test-section {
+      background: white;
+      padding: 24px;
+      margin-bottom: 24px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .controls {
+      margin: 16px 0;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+    
+    .controls button {
+      margin: 4px;
+      padding: 8px 16px;
+      background: #007acc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .controls button:hover {
+      background: #005999;
+    }
+    
+    .info {
+      margin-top: 16px;
+      padding: 12px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      border-radius: 0 4px 4px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 TablixJS Search Input Preservation Test</h1>
+  
+  <div class="test-section">
+    <h2>Test Instructions</h2>
+    <ol>
+      <li><strong>Type quickly</strong> in the search box below (try typing "john" or "engineering" fast)</li>
+      <li><strong>Verify</strong> that your typed text remains in the input field</li>
+      <li><strong>Check</strong> that the table filters correctly based on your search</li>
+      <li><strong>Test</strong> different configurations using the buttons below</li>
+    </ol>
+  </div>
+  
+  <div class="test-section">
+    <h2>Fast Response Search (100ms delay, 1 char minimum)</h2>
+    <div id="fastTable"></div>
+    
+    <div class="controls">
+      <button onclick="testSearch('fastTable')">Programmatic Search</button>
+      <button onclick="clearSearch('fastTable')">Clear Search</button>
+      <button onclick="configureSearch('fastTable')">Configure Search</button>
+      <button onclick="showSearchState('fastTable')">Show Search State</button>
+    </div>
+    <div class="info" id="fastInfo">Search configuration: 100ms delay, 1 character minimum</div>
+  </div>
+
+  <div class="test-section">
+    <h2>Slow Response Search (800ms delay, 3 char minimum)</h2>
+    <div id="slowTable"></div>
+    
+    <div class="controls">
+      <button onclick="testSearch('slowTable')">Programmatic Search</button>
+      <button onclick="clearSearch('slowTable')">Clear Search</button>
+      <button onclick="configureSearch('slowTable')">Configure Search</button>
+      <button onclick="showSearchState('slowTable')">Show Search State</button>
+    </div>
+    <div class="info" id="slowInfo">Search configuration: 800ms delay, 3 character minimum</div>
+  </div>
+
+  <script type="module">
+    import Table from '../src/core/Table.js';
+
+    // Generate test data
+    function generateTestData(count = 20) {
+      const names = ['John Smith', 'Jane Doe', 'Alice Johnson', 'Bob Wilson', 'Charlie Brown', 'Diana Prince', 'Eve Adams', 'Frank Miller'];
+      const departments = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance'];
+      const cities = ['New York', 'San Francisco', 'London', 'Tokyo', 'Berlin'];
+      
+      const data = [];
+      for (let i = 1; i <= count; i++) {
+        data.push({
+          id: i,
+          name: names[Math.floor(Math.random() * names.length)] + ` ${i}`,
+          department: departments[Math.floor(Math.random() * departments.length)],
+          city: cities[Math.floor(Math.random() * cities.length)],
+          salary: Math.floor(Math.random() * 80000) + 40000,
+          email: `user${i}@company.com`
+        });
+      }
+      return data;
+    }
+
+    // Fast response table
+    window.fastTable = new Table('#fastTable', {
+      data: generateTestData(15),
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Name' },
+        { name: 'department', title: 'Department' },
+        { name: 'city', title: 'City' },
+        { name: 'email', title: 'Email' }
+      ],
+      pagination: { pageSize: 8 },
+      search: {
+        enabled: true,
+        placeholder: 'Type quickly here...',
+        searchDelay: 100,
+        minLength: 1
+      }
+    });
+
+    // Slow response table
+    window.slowTable = new Table('#slowTable', {
+      data: generateTestData(15),
+      columns: [
+        { name: 'id', title: 'ID' },
+        { name: 'name', title: 'Name' },
+        { name: 'department', title: 'Department' },
+        { name: 'city', title: 'City' },
+        { name: 'salary', title: 'Salary', renderer: (cell) => `$${cell.toLocaleString()}` }
+      ],
+      pagination: { pageSize: 8 },
+      search: {
+        enabled: true,
+        placeholder: 'Type at least 3 characters...',
+        searchDelay: 800,
+        minLength: 3
+      }
+    });
+
+    // Helper functions
+    window.testSearch = (tableName) => {
+      const table = window[tableName];
+      const searchTerm = prompt('Enter search term to test programmatic search:');
+      if (searchTerm !== null) {
+        table.setSearchTerm(searchTerm);
+      }
+    };
+
+    window.clearSearch = (tableName) => {
+      const table = window[tableName];
+      table.clearSearch();
+    };
+
+    window.configureSearch = (tableName) => {
+      const table = window[tableName];
+      const config = table.searchManager.getConfiguration();
+      const delay = prompt('Enter search delay (ms):', config.searchDelay);
+      const minLength = prompt('Enter minimum search length:', config.minLength);
+      
+      if (delay !== null && minLength !== null) {
+        table.searchManager.configure({
+          searchDelay: parseInt(delay) || 300,
+          minLength: parseInt(minLength) || 1
+        });
+        alert(`Search configured: delay=${delay}ms, minLength=${minLength}`);
+        updateInfo();
+      }
+    };
+
+    window.showSearchState = (tableName) => {
+      const table = window[tableName];
+      const config = table.searchManager.getConfiguration();
+      const searchInfo = table.getSearchInfo();
+      const state = {
+        configuration: config,
+        currentState: searchInfo
+      };
+      alert(`Search State:\n${JSON.stringify(state, null, 2)}`);
+    };
+
+    // Update info displays
+    function updateInfo() {
+      const fastConfig = fastTable.searchManager.getConfiguration();
+      const fastSearch = fastTable.getSearchInfo();
+      document.getElementById('fastInfo').innerHTML = 
+        `Config: ${fastConfig.searchDelay}ms delay, ${fastConfig.minLength} char min | ` +
+        `Search: ${fastSearch?.isActive ? `"${fastSearch.searchTerm}" (${fastSearch.resultsCount}/${fastSearch.totalCount})` : 'None'}`;
+      
+      const slowConfig = slowTable.searchManager.getConfiguration();
+      const slowSearch = slowTable.getSearchInfo();
+      document.getElementById('slowInfo').innerHTML = 
+        `Config: ${slowConfig.searchDelay}ms delay, ${slowConfig.minLength} char min | ` +
+        `Search: ${slowSearch?.isActive ? `"${slowSearch.searchTerm}" (${slowSearch.resultsCount}/${slowSearch.totalCount})` : 'None'}`;
+    }
+
+    // Event listeners for both tables
+    [fastTable, slowTable].forEach((table, index) => {
+      const tableNames = ['Fast', 'Slow'];
+      const tableName = tableNames[index];
+      
+      table.on('beforeSearch', (data) => {
+        console.log(`🔍 ${tableName} - Before search:`, data);
+        if (!data.willSearch) {
+          console.log(`⚠️ ${tableName} - Search skipped (${data.searchTerm.length} < ${data.minLength} chars)`);
+        }
+      });
+      
+      table.on('afterSearch', (data) => {
+        console.log(`✅ ${tableName} - After search:`, data);
+        updateInfo();
+      });
+    });
+
+    // Initial info update
+    updateInfo();
+
+    console.log('🔍 Search Input Preservation Test loaded!');
+    console.log('📝 Type quickly in the search boxes to test input value preservation');
+    console.log('⚡ Try the fast table (100ms) vs slow table (800ms) to see the difference');
+  </script>
+</body>
+</html>
