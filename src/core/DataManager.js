@@ -50,7 +50,7 @@ export default class DataManager {
       // No filters, show all data
       this.filteredData = [...this.originalData];
     } else {
-      // Simple filtering: supports multiple criteria
+      // Simple filtering: supports multiple criteria (legacy format)
       this.filteredData = this.originalData.filter(item => {
         return Object.entries(criteria).every(([key, value]) => {
           const itemValue = (item[key] + '').toLowerCase();
@@ -60,6 +60,19 @@ export default class DataManager {
       });
     }
 
+    // Reset pagination to first page after filtering
+    if (this.table.paginationManager) {
+      this.table.paginationManager.resetToFirstPage();
+    }
+  }
+
+  /**
+   * Apply filtering from FilterManager (this will be called by FilterManager)
+   * @param {Array} filteredData - Pre-filtered data from FilterManager
+   */
+  setFilteredData(filteredData) {
+    this.filteredData = filteredData;
+    
     // Reset pagination to first page after filtering
     if (this.table.paginationManager) {
       this.table.paginationManager.resetToFirstPage();

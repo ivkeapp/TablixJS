@@ -7,6 +7,17 @@ export default class Renderer {
     const columns = this.table.columnManager ? this.table.columnManager.getColumns() : (this.table.options.columns || []);
     const controlsOptions = this.table.options.controls;
 
+    // Preserve search input value and focus state before re-rendering
+    let preservedSearchValue = '';
+    let searchInputHadFocus = false;
+    let cursorPosition = 0;
+    const existingSearchInput = this.table.container.querySelector('.tablix-search-input');
+    if (existingSearchInput) {
+      preservedSearchValue = existingSearchInput.value;
+      searchInputHadFocus = document.activeElement === existingSearchInput;
+      cursorPosition = existingSearchInput.selectionStart || 0;
+    }
+
     let html = '<div class="tablix-wrapper">';
     
     // Top controls
@@ -93,6 +104,14 @@ export default class Renderer {
     // Update DOM
     this.table.container.innerHTML = html;
     
+    // Restore search input value immediately after DOM update
+    if (preservedSearchValue) {
+      const newSearchInput = this.table.container.querySelector('.tablix-search-input');
+      if (newSearchInput) {
+        newSearchInput.value = preservedSearchValue;
+      }
+    }
+    
     // Render pagination controls if pagination is enabled
     this.renderPagination();
     
@@ -101,9 +120,42 @@ export default class Renderer {
       this.bindControlEvents();
     }
 
+    // Bind search events if search is enabled
+    if (this.table.searchManager) {
+      this.table.searchManager.bindEvents();
+    }
+
     // Bind sort events if sorting is enabled
     if (this.table.sortingManager) {
       this.bindSortEvents();
+    }
+
+    // Render filter icons and bind events if filtering is enabled
+    if (this.table.filterUI) {
+      this.table.filterUI.renderFilterIcons();
+    }
+
+    // Restore focus AFTER all event binding is complete
+    if (searchInputHadFocus) {
+      const newSearchInput = this.table.container.querySelector('.tablix-search-input');
+      if (newSearchInput) {
+        // Use requestAnimationFrame to ensure focus happens after all DOM operations
+        requestAnimationFrame(() => {
+          newSearchInput.focus();
+          // Restore cursor position
+          if (cursorPosition > 0) {
+            newSearchInput.setSelectionRange(cursorPosition, cursorPosition);
+          }
+        });
+      }
+    }
+    if (this.table.sortingManager) {
+      this.bindSortEvents();
+    }
+
+    // Render filter icons and bind events if filtering is enabled
+    if (this.table.filterUI) {
+      this.table.filterUI.renderFilterIcons();
     }
   }
 
@@ -271,17 +323,12 @@ export default class Renderer {
    */
   renderControls(position) {
     const controlsOptions = this.table.options.controls;
-    const searchOptions = this.table.options.search;
+    const searchOptions = this.table.options.search || { enabled: false, placeholder: 'Search...' };
     
     let html = `<div class="tablix-controls tablix-controls-${position}">`;
     
-    // Search control
-    if (controlsOptions.search && searchOptions.enabled) {
-      html += '<div class="tablix-control-group tablix-search-group">';
-      html += `<input type="text" class="tablix-search-input" placeholder="${searchOptions.placeholder}" />`;
-      html += '<button type="button" class="tablix-btn tablix-search-clear" title="Clear search">✕</button>';
-      html += '</div>';
-    }
+    // Left side controls
+    html += '<div class="tablix-controls-left">';
     
     // Pagination controls
     if (controlsOptions.pagination && this.table.paginationManager) {
@@ -317,14 +364,26 @@ export default class Renderer {
       html += '</div>';
     }
     
-    // Export control (if enabled)
-    if (controlsOptions.export) {
-      html += '<div class="tablix-control-group tablix-export-group">';
-      html += '<button type="button" class="tablix-btn tablix-control-btn" data-action="export" title="Export data">⬇</button>';
+    html += '</div>'; // Close left controls
+    
+    // Right side controls
+    html += '<div class="tablix-controls-right">';
+    
+    // Search control
+    if (controlsOptions.search && searchOptions.enabled) {
+      html += '<div class="tablix-control-group tablix-search-group">';
+      html += `<input type="text" 
+                      class="tablix-search-input" 
+                      id="tablix-search-input" 
+                      name="table-search"
+                      placeholder="${searchOptions.placeholder}" />`;
+      html += '<button type="button" class="tablix-btn tablix-search-clear" title="Clear search" style="display: none;">✕</button>';
       html += '</div>';
     }
     
-    html += '</div>';
+    html += '</div>'; // Close right controls
+    
+    html += '</div>'; // Close main controls container
     
     return html;
   }

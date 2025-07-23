@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TablixJS - Advanced Filtering Demo</title>
+  <link rel="stylesheet" href="../src/styles/tablix.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #f8f9fa;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    .demo-header {
+      margin-bottom: 2rem;
+    }
+    .demo-controls {
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .demo-controls button {
+      padding: 0.5rem 1rem;
+      border: 1px solid #007bff;
+      background: white;
+      color: #007bff;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .demo-controls button:hover {
+      background: #007bff;
+      color: white;
+    }
+    .demo-info {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+    }
+    .theme-toggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid #6c757d;
+      background: white;
+      color: #6c757d;
+      border-radius: 0.25rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Theme</button>
+  
+  <div class="container">
+    <div class="demo-header">
+      <h1>TablixJS - Advanced Filtering Demo</h1>
+      <p>This demo showcases the advanced filtering capabilities of TablixJS with both value-based and condition-based filters.</p>
+    </div>
+
+    <div class="demo-controls">
+      <button onclick="applyValueFilter()">Apply Value Filter (Status)</button>
+      <button onclick="applyConditionFilter()">Apply Condition Filter (Name)</button>
+      <button onclick="applyCombinedFilters()">Apply Combined Filters</button>
+      <button onclick="clearAllFilters()">Clear All Filters</button>
+      <button onclick="showActiveFilters()">Show Active Filters</button>
+      <button onclick="testSearch()">Test Search</button>
+      <button onclick="clearSearch()">Clear Search</button>
+    </div>
+
+    <div id="filterTable"></div>
+
+    <div class="demo-info">
+      <h3>How to Use Filtering & Search:</h3>
+      <ol>
+        <li><strong>Global Search:</strong> Use the search box in the top-right to search across all columns in real-time.</li>
+        <li><strong>Filter by Value:</strong> Click the filter icon (⚪) in any column header, then use the "Filter by Value" tab to select/deselect specific values.</li>
+        <li><strong>Filter by Condition:</strong> Use the "Filter by Condition" tab to set conditions like "begins with", "contains", etc.</li>
+        <li><strong>Multiple Filters:</strong> Apply filters to multiple columns simultaneously - they work together (AND logic).</li>
+        <li><strong>Programmatic API:</strong> Use the buttons above to see how filters can be applied programmatically.</li>
+      </ol>
+      
+      <h4>Available Operators:</h4>
+      <ul>
+        <li>Is empty / Is not empty</li>
+        <li>Is equal to / Is not equal to</li>
+        <li>Begins with / Ends with</li>
+        <li>Contains / Does not contain</li>
+      </ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import Table from '../src/core/Table.js';
+
+    // Sample data with mixed content for filtering demo
+    const sampleData = [
+      { id: 1, name: 'Alice Johnson', email: 'alice@example.com', department: 'Engineering', status: 'Active', salary: 75000, joinDate: '2020-03-15' },
+      { id: 2, name: 'Bob Smith', email: 'bob@example.com', department: 'Marketing', status: 'Active', salary: 65000, joinDate: '2019-07-22' },
+      { id: 3, name: 'Carol Davis', email: 'carol@example.com', department: 'Engineering', status: 'Inactive', salary: 80000, joinDate: '2021-01-10' },
+      { id: 4, name: 'David Brown', email: 'david@example.com', department: 'Sales', status: 'Active', salary: 60000, joinDate: '2020-11-05' },
+      { id: 5, name: 'Eve Wilson', email: 'eve@example.com', department: 'Engineering', status: 'Pending', salary: 78000, joinDate: '2022-02-28' },
+      { id: 6, name: 'Frank Miller', email: 'frank@example.com', department: 'Marketing', status: 'Active', salary: 70000, joinDate: '2019-09-12' },
+      { id: 7, name: 'Grace Lee', email: 'grace@example.com', department: 'Sales', status: 'Active', salary: 55000, joinDate: '2021-06-18' },
+      { id: 8, name: 'Henry Garcia', email: 'henry@example.com', department: 'Engineering', status: 'Inactive', salary: 85000, joinDate: '2018-04-03' },
+      { id: 9, name: 'Ivy Chen', email: 'ivy@example.com', department: 'Marketing', status: 'Active', salary: 72000, joinDate: '2020-08-14' },
+      { id: 10, name: 'Jack Thompson', email: 'jack@example.com', department: 'Sales', status: 'Pending', salary: 58000, joinDate: '2022-01-20' },
+      { id: 11, name: 'Kate Rodriguez', email: 'kate@example.com', department: 'Engineering', status: 'Active', salary: 82000, joinDate: '2019-12-07' },
+      { id: 12, name: 'Liam Anderson', email: 'liam@example.com', department: 'Marketing', status: 'Active', salary: 67000, joinDate: '2021-03-25' },
+      { id: 13, name: 'Mia Taylor', email: 'mia@example.com', department: 'Sales', status: 'Inactive', salary: 62000, joinDate: '2020-05-11' },
+      { id: 14, name: 'Noah Martinez', email: 'noah@example.com', department: 'Engineering', status: 'Active', salary: 88000, joinDate: '2018-11-30' },
+      { id: 15, name: 'Olivia White', email: 'olivia@example.com', department: 'Marketing', status: 'Pending', salary: 69000, joinDate: '2022-04-16' }
+    ];
+
+    // Column definitions
+    const columns = [
+      { name: 'id', title: 'ID' },
+      { name: 'name', title: 'Name' },
+      { name: 'email', title: 'Email' },
+      { name: 'department', title: 'Department' },
+      { name: 'status', title: 'Status' },
+      { name: 'salary', title: 'Salary', format: 'currency', currency: 'USD' },
+      { name: 'joinDate', title: 'Join Date', format: 'date' }
+    ];
+
+    // Initialize table with filtering enabled
+    const table = new Table('#filterTable', {
+      data: sampleData,
+      columns: columns,
+      pagination: {
+        enabled: true,
+        pageSize: 8,
+        showPageSizes: true,
+        pageSizeOptions: [5, 8, 15, 25]
+      },
+      sorting: {
+        enabled: true
+      },
+      filtering: {
+        enabled: true,
+        showBadges: true,
+        showTooltips: true
+      },
+      search: {
+        enabled: true,
+        placeholder: 'Search all columns...',
+        searchDelay: 300
+      }
+    });
+
+    // Add event listeners to see filtering and search in action
+    table.eventManager.on('beforeFilter', (data) => {
+      console.log('Before filter:', data);
+    });
+
+    table.eventManager.on('afterFilter', (data) => {
+      console.log('After filter:', data);
+      console.log('Filtered data count:', data.filteredData ? data.filteredData.length : 'N/A');
+    });
+
+    table.eventManager.on('beforeSearch', (data) => {
+      console.log('Before search:', data);
+    });
+
+    table.eventManager.on('afterSearch', (data) => {
+      console.log('After search:', data);
+      console.log('Search results:', `${data.resultsCount}/${data.totalCount} rows`);
+    });
+
+    // Demo functions
+    window.applyValueFilter = async () => {
+      await table.applyFilter('status', {
+        type: 'value',
+        values: ['Active', 'Pending']
+      });
+      alert('Applied value filter: Status = Active or Pending');
+    };
+
+    window.applyConditionFilter = async () => {
+      await table.applyFilter('name', {
+        type: 'condition',
+        conditions: [
+          { operator: 'beginsWith', value: 'A' }
+        ]
+      });
+      alert('Applied condition filter: Name begins with "A"');
+    };
+
+    window.applyCombinedFilters = async () => {
+      await table.applyFilter('department', {
+        type: 'value',
+        values: ['Engineering', 'Marketing']
+      });
+      await table.applyFilter('salary', {
+        type: 'condition',
+        conditions: [
+          { operator: 'equals', value: '70000' }
+        ]
+      });
+      alert('Applied combined filters: Department = Engineering/Marketing AND Salary >= 70000');
+    };
+
+    window.clearAllFilters = async () => {
+      await table.clearAllFilters();
+      alert('All filters cleared');
+    };
+
+    window.showActiveFilters = () => {
+      const filters = table.getActiveFilters();
+      alert('Active filters: ' + JSON.stringify(filters, null, 2));
+    };
+
+    window.toggleTheme = () => {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+    };
+  </script>
+</body>
+</html>

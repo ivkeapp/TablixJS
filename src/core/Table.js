@@ -4,6 +4,9 @@ import EventManager from './EventManager.js';
 import PaginationManager from './PaginationManager.js';
 import SortingManager from './SortingManager.js';
 import ColumnManager from './ColumnManager.js';
+import FilterManager from './FilterManager.js';
+import FilterUI from './FilterUI.js';
+import SearchManager from './SearchManager.js';
 
 export default class Table {
   constructor(container, options = {}) {
@@ -31,9 +34,18 @@ export default class Table {
         caseSensitive: false,
         nullsFirst: false
       },
+      // Filtering options
+      filtering: {
+        enabled: true,
+        mode: 'client', // 'client' or 'server'
+        serverFilterLoader: null,
+        debounceDelay: 300,
+        showBadges: true,
+        showTooltips: true
+      },
       // Control panels
       controls: {
-        enabled: false,
+        enabled: true,  // Enable by default to show search
         search: true,
         pagination: true,
         pageSize: true,
@@ -44,7 +56,9 @@ export default class Table {
       search: {
         enabled: true,
         placeholder: 'Search...',
-        searchDelay: 300
+        searchDelay: 300, // Debounce delay in milliseconds
+        minLength: 1, // Minimum characters before search starts
+        caseSensitive: false
       },
       ...options
     };
@@ -70,11 +84,27 @@ export default class Table {
       this.sortingManager = new SortingManager(this, this.options.sorting);
     }
 
+    // Initialize filtering if enabled
+    if (this.options.filtering && this.options.filtering.enabled !== false) {
+      this.filterManager = new FilterManager(this, this.options.filtering);
+      this.filterUI = new FilterUI(this.filterManager);
+    }
+
+    // Initialize search if enabled
+    if (this.options.search && this.options.search.enabled !== false) {
+      this.searchManager = new SearchManager(this, this.options.search);
+    }
+
     this.init();
   }
 
   async init() {
     try {
+      // Initialize search manager
+      if (this.searchManager) {
+        this.searchManager.init();
+      }
+
       // Get initial data
       const initialData = this.dataManager.getData();
       
@@ -262,6 +292,104 @@ export default class Table {
       await this.refreshTable();
       this.eventManager.trigger('afterSort', []);
     }
+  }
+
+  // ===== FILTERING API =====
+
+  /**
+   * Apply filter to a specific column
+   * @param {string} columnName - Column to filter
+   * @param {Object} filterConfig - Filter configuration
+   * @example
+   * table.applyFilter('status', { type: 'value', values: ['Active', 'Pending'] });
+   * table.applyFilter('name', { type: 'condition', conditions: [{ operator: 'beginsWith', value: 'A' }] });
+   */
+  async applyFilter(columnName, filterConfig) {
+    if (this.filterManager) {
+      await this.filterManager.applyFilter(columnName, filterConfig);
+    } else {
+      console.warn('TablixJS: Filtering is not enabled. Set filtering.enabled to true in options.');
+    }
+  }
+
+  /**
+   * Clear filter for a specific column
+   * @param {string} columnName - Column to clear filter for
+   */
+  async clearFilter(columnName) {
+    if (this.filterManager) {
+      await this.filterManager.clearFilter(columnName);
+    }
+  }
+
+  /**
+   * Clear all filters
+   */
+  async clearAllFilters() {
+    if (this.filterManager) {
+      await this.filterManager.clearAllFilters();
+    } else {
+      // Fallback to legacy method
+      this.dataManager.clearFilters();
+      await this.refreshTable();
+      this.eventManager.trigger('afterFilter', {});
+    }
+  }
+
+  /**
+   * Get active filters
+   * @returns {Object} Active filters by column
+   */
+  getActiveFilters() {
+    return this.filterManager ? this.filterManager.getActiveFilters() : {};
+  }
+
+  /**
+   * Get filter state for a column
+   * @param {string} columnName - Column name
+   * @returns {Object|null} Filter state
+   */
+  getColumnFilter(columnName) {
+    return this.filterManager ? this.filterManager.getColumnFilter(columnName) : null;
+  }
+
+  // ===== SEARCH API =====
+
+  /**
+   * Set search term programmatically
+   * @param {string} searchTerm - Search term
+   */
+  async setSearchTerm(searchTerm) {
+    if (this.searchManager) {
+      await this.searchManager.setSearchTerm(searchTerm);
+    } else {
+      console.warn('TablixJS: Search is not enabled. Set search.enabled to true in options.');
+    }
+  }
+
+  /**
+   * Get current search term
+   * @returns {string} Current search term
+   */
+  getSearchTerm() {
+    return this.searchManager ? this.searchManager.getSearchTerm() : '';
+  }
+
+  /**
+   * Clear search
+   */
+  async clearSearch() {
+    if (this.searchManager) {
+      await this.searchManager.clearSearch();
+    }
+  }
+
+  /**
+   * Get search information
+   * @returns {Object} Search results information
+   */
+  getSearchInfo() {
+    return this.searchManager ? this.searchManager.getSearchInfo() : null;
   }
 
   // ===== PAGINATION API =====
