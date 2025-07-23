@@ -61,6 +61,8 @@ const table = new Table('#tableContainer', {
 });
 ```
 
+> For advanced column formatting examples, see [Column Formatting Demo](examples/column-formatting-demo.html) and [Column Formatting Usage](examples/column-formatting-usage.js).
+
 ## Architecture
 
 ### **Core Components**
@@ -154,6 +156,8 @@ const serverTable = new Table('#serverTable', {
 });
 ```
 
+> For sorting examples, see [Sorting Demo](examples/sorting-demo.html) and [Sorting Usage Examples](examples/sorting-usage-examples.js).
+
 ## Async Data Loading
 
 TablixJS supports flexible asynchronous data loading with three different approaches while maintaining full backwards compatibility.
@@ -238,7 +242,7 @@ table.on('loadError', (payload) => {
 });
 ```
 
-See [Async Data Loading Guide](docs/async-data-loading.md) for complete documentation and examples.
+See [Async Data Loading Guide](docs/async-data-loading.md) for complete documentation and [live demo](examples/async-data-loading-demo.html).
 
 ### **Event Handling**
 ```javascript
@@ -257,12 +261,21 @@ table.on('afterFilter', (criteria) => {
 });
 ```
 
+For more examples, see [Filtering Demo](examples/filtering-demo.html) and [Filtering Usage Examples](examples/filtering-usage-examples.js).
+
 ## Examples
 
 - **[Basic Usage](examples/vanilla.html)** - Simple client-side pagination
-- **[Comprehensive Demo](examples/pagination.html)** - All pagination features
-- **[Test Suite](examples/pagination-test.html)** - Feature testing
-- **[Code Samples](examples/pagination-samples.js)** - Implementation patterns
+- **[Async Data Loading Demo](examples/async-data-loading-demo.html)** - Asynchronous data loading examples
+- **[Column Formatting Demo](examples/column-formatting-demo.html)** - Custom column formatting
+- **[Complete Pagination Demo](examples/complete-pagination-demo.html)** - All pagination features
+- **[Filtering Demo](examples/filtering-demo.html)** - Data filtering capabilities
+- **[Auto Controls](examples/auto-controls.html)** - Automatic control generation
+- **[Theme Demo](examples/theme-demo.html)** - Theming and styling examples
+- **[Sorting Demo](examples/sorting-demo.html)** - Column sorting functionality
+- **[Pagination Samples](examples/pagination-samples.js)** - Implementation patterns
+- **[jQuery Integration](examples/jquery.html)** - jQuery wrapper usage
+- **[React Integration](examples/react.html)** - React component usage
 
 ## Styling
 
@@ -303,11 +316,21 @@ npm run dev  # Runs on http://localhost:5174
 open http://localhost:5174/examples/pagination.html
 ```
 
+### Quick Links
+- **[Example Index](examples/index.html)** - Main examples page
+- **[Basic Demo](examples/vanilla.html)** - Start here for basic usage
+- **[Complete Demo](examples/complete-pagination-demo.html)** - Full feature showcase
+
 ## Documentation
 
 - **[Pagination API](docs/pagination.md)** - Complete pagination guide
+- **[Async Data Loading](docs/async-data-loading.md)** - Asynchronous data loading documentation
+- **[Column Formatting](docs/column-formatting.md)** - Custom column formatting guide
+- **[Filtering](docs/filtering.md)** - Data filtering documentation
+- **[Sorting](docs/sorting.md)** - Column sorting guide
+- **[Simple Sorting](docs/sorting-simple.md)** - Basic sorting implementation
 - **[Theming Guide](docs/theming.md)** - CSS customization and themes
-- **[Migration Guide](docs/pagination.md#migration-from-legacy-code)** - Upgrading existing code
+- **[Plugin Architecture](docs/plugin-architecture.md)** - Extending TablixJS functionality
 
 ## Performance
 
