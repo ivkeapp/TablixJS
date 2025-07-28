@@ -26,8 +26,10 @@ TablixJS is a lightweight, dependency-free JavaScript library for building power
 ### **Selection Features** 🆕
 - **Single & Multi-Row Selection** - Choose between single or multiple row selection modes
 - **Keyboard Modifiers** - Ctrl+click to toggle individual rows, Shift+click for range selection
+- **Drag Selection** - Click and drag to select multiple consecutive rows (multi mode only)
 - **Stable Selection** - Selection preserved across pagination, filtering, and sorting
 - **Click to Deselect** - Click selected row to deselect (both single and multi modes)
+- **Visual Feedback** - Real-time hover effects and drag overlays during selection
 - **Event Hooks** - `beforeSelect` and `afterSelect` events for custom logic
 - **Programmatic API** - Select, deselect, and query selection programmatically
 - **Visual Feedback** - Clear styling for selected and last-selected rows
@@ -307,6 +309,7 @@ const table = new Table('#tableContainer', {
 - **Normal click**: Select row (clears other selections)
 - **Ctrl+Click**: Toggle individual row selection
 - **Shift+Click**: Select range from last selected row
+- **Drag Selection**: Click and drag to select multiple consecutive rows
 - **Click selected row**: Deselect if it's the only selected row
 
 ### **Programmatic Selection API**
@@ -386,6 +389,7 @@ For a complete interactive demo, see [Selection Demo](examples/selection-demo.ht
 - **[Complete Pagination Demo](examples/complete-pagination-demo.html)** - All pagination features
 - **[Filtering Demo](examples/filtering-demo.html)** - Data filtering capabilities
 - **[Selection Demo](examples/selection-demo.html)** - Row selection functionality 🆕
+- **[Drag Selection Demo](examples/drag-selection-demo.html)** - Advanced drag-to-select functionality 🔥
 - **[Auto Controls](examples/auto-controls.html)** - Automatic control generation
 - **[Theme Demo](examples/theme-demo.html)** - Theming and styling examples
 - **[Sorting Demo](examples/sorting-demo.html)** - Column sorting functionality

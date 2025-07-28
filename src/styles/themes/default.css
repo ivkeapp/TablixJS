@@ -133,4 +133,9 @@
   --tablix-row-last-selected-hover-bg: #9ec0e0;
   --tablix-selection-indicator-color: #9ec0e0;
   --tablix-text-muted: #6c757d;
+  
+  /* Drag selection specific */
+  --tablix-drag-hover-bg: #e8f4fd;
+  --tablix-drag-selected-bg: #bbdefb;
+  --tablix-drag-overlay-bg: rgba(33, 150, 243, 0.1);
 }
