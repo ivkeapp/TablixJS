@@ -1,6 +1,6 @@
 # TablixJS
 
-TablixJS is a lightweight, dependency-free JavaScript library for building powerful, responsive data tables with advanced pagination features. Focus on solid pagination implementation with both client-side and server-side support.
+TablixJS is a lightweight, dependency-free JavaScript library for building powerful, responsive data tables with advanced pagination, selection, and data management features. Focus on solid pagination implementation with both client-side and server-side support, plus comprehensive row selection capabilities.
 
 ## ✨ Features
 
@@ -22,6 +22,16 @@ TablixJS is a lightweight, dependency-free JavaScript library for building power
 - Export functionality (CSV)
 - Customizable control positioning (top/bottom/both)
 - Loading states and error handling
+
+### **Selection Features** 🆕
+- **Single & Multi-Row Selection** - Choose between single or multiple row selection modes
+- **Keyboard Modifiers** - Ctrl+click to toggle individual rows, Shift+click for range selection
+- **Stable Selection** - Selection preserved across pagination, filtering, and sorting
+- **Click to Deselect** - Click selected row to deselect (both single and multi modes)
+- **Event Hooks** - `beforeSelect` and `afterSelect` events for custom logic
+- **Programmatic API** - Select, deselect, and query selection programmatically
+- **Visual Feedback** - Clear styling for selected and last-selected rows
+- **Theme Support** - Consistent selection colors across light/dark themes
 
 ### **Advanced Capabilities**
 - **Async Data Loading** - URL-based loading, custom async functions, direct arrays
@@ -50,6 +60,11 @@ const table = new Table('#tableContainer', {
     mode: 'client',           // or 'server'
     showPageSizes: true,
     pageSizeOptions: [5, 10, 25, 50]
+  },
+  selection: {
+    enabled: true,            // Enable row selection
+    mode: 'multi',           // 'single' or 'multi'
+    dataIdKey: 'id'          // Key to use as stable row identifier
   },
   controls: {
     enabled: true,            // Automatically generate controls
@@ -263,6 +278,106 @@ table.on('afterFilter', (criteria) => {
 
 For more examples, see [Filtering Demo](examples/filtering-demo.html) and [Filtering Usage Examples](examples/filtering-usage-examples.js).
 
+## Row Selection 🆕
+
+TablixJS now includes powerful row selection functionality with support for both single and multi-row selection modes.
+
+### **Basic Selection Setup**
+
+```javascript
+const table = new Table('#tableContainer', {
+  data: employees,
+  columns: [...],
+  selection: {
+    enabled: true,        // Enable selection (default: false)
+    mode: 'multi',       // 'single' or 'multi' (default: 'single')
+    dataIdKey: 'id'      // Key to use as stable row identifier
+  }
+});
+```
+
+### **Selection Modes**
+
+#### **Single Mode**
+- Click any row to select it
+- Previous selection is automatically cleared
+- Click selected row to deselect it
+
+#### **Multi Mode**
+- **Normal click**: Select row (clears other selections)
+- **Ctrl+Click**: Toggle individual row selection
+- **Shift+Click**: Select range from last selected row
+- **Click selected row**: Deselect if it's the only selected row
+
+### **Programmatic Selection API**
+
+```javascript
+// Get selection information
+const selectedData = table.getSelectedData();     // Array of row objects
+const selectedIds = table.getSelectedIds();       // Array of row IDs
+const count = table.getSelectionCount();          // Number of selected rows
+
+// Check if specific row is selected
+const isSelected = table.isRowSelected('123');
+
+// Programmatic selection
+table.selectRows(['1', '3', '5']);    // Select specific rows by ID
+table.selectRows('2');                // Select single row
+table.deselectRows(['1', '3']);       // Deselect specific rows
+table.clearSelection();               // Clear all selections
+
+// Enable/disable selection
+table.enableSelection();
+table.disableSelection();
+table.setSelectionMode('single');     // Change mode dynamically
+```
+
+### **Selection Events**
+
+```javascript
+// Before selection changes
+table.eventManager.on('beforeSelect', (event) => {
+  console.log('About to select:', event.rowData);
+  console.log('Current selection:', event.currentSelection);
+  
+  // Optionally prevent selection by throwing an error
+  // if (event.rowData.locked) throw new Error('Row is locked');
+});
+
+// After selection changes
+table.eventManager.on('afterSelect', (event) => {
+  console.log('Selected rows:', event.selectedRows);
+  console.log('Selected data:', event.selectedData);
+  
+  // Update UI based on selection
+  updateToolbar(event.selectedData);
+});
+```
+
+### **Styling & Themes**
+
+Selection styles are built into the theme system with CSS custom properties:
+
+```css
+:root {
+  --tablix-row-selected-bg: #e3f2fd;           /* Selected row background */
+  --tablix-row-selected-hover-bg: #bbdefb;     /* Selected row hover */
+  --tablix-row-last-selected-bg: #42a5f5;      /* Last selected row */
+  --tablix-row-last-selected-color: #ffffff;   /* Last selected text */
+}
+```
+
+### **Selection with Pagination, Filtering & Sorting**
+
+Selection automatically works with all table features:
+
+- **Pagination**: Selection persists across page changes
+- **Filtering**: Rows hidden by filters are automatically deselected
+- **Sorting**: Selection follows the data (uses stable row IDs)
+- **Data Updates**: Selection is preserved when data is reloaded
+
+For a complete interactive demo, see [Selection Demo](examples/selection-demo.html) and [Selection Usage Examples](examples/selection-usage-examples.js).
+
 ## Examples
 
 - **[Basic Usage](examples/vanilla.html)** - Simple client-side pagination
@@ -270,6 +385,7 @@ For more examples, see [Filtering Demo](examples/filtering-demo.html) and [Filte
 - **[Column Formatting Demo](examples/column-formatting-demo.html)** - Custom column formatting
 - **[Complete Pagination Demo](examples/complete-pagination-demo.html)** - All pagination features
 - **[Filtering Demo](examples/filtering-demo.html)** - Data filtering capabilities
+- **[Selection Demo](examples/selection-demo.html)** - Row selection functionality 🆕
 - **[Auto Controls](examples/auto-controls.html)** - Automatic control generation
 - **[Theme Demo](examples/theme-demo.html)** - Theming and styling examples
 - **[Sorting Demo](examples/sorting-demo.html)** - Column sorting functionality

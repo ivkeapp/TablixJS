@@ -18,7 +18,13 @@ export default class Renderer {
       cursorPosition = existingSearchInput.selectionStart || 0;
     }
 
-    let html = '<div class="tablix-wrapper">';
+    // Determine selection attributes
+    const selectionEnabled = this.table.selectionManager && this.table.selectionManager.options.enabled;
+    const selectionAttributes = selectionEnabled 
+      ? `data-selection-enabled data-selection-mode="${this.table.selectionManager.options.mode}"` 
+      : 'data-selection-disabled';
+
+    let html = `<div class="tablix-wrapper" ${selectionAttributes}>`;
     
     // Top controls
     if (controlsOptions.enabled && (controlsOptions.position === 'top' || controlsOptions.position === 'both')) {
@@ -130,6 +136,11 @@ export default class Renderer {
       this.bindSortEvents();
     }
 
+    // Bind row click events if selection is enabled
+    if (this.table.selectionManager && this.table.selectionManager.options.enabled) {
+      this.bindRowClickEvents();
+    }
+
     // Render filter icons and bind events if filtering is enabled
     if (this.table.filterUI) {
       this.table.filterUI.renderFilterIcons();
@@ -149,14 +160,9 @@ export default class Renderer {
         });
       }
     }
-    if (this.table.sortingManager) {
-      this.bindSortEvents();
-    }
 
-    // Render filter icons and bind events if filtering is enabled
-    if (this.table.filterUI) {
-      this.table.filterUI.renderFilterIcons();
-    }
+    // Trigger afterRender event
+    this.table.eventManager.trigger('afterRender');
   }
 
   renderPagination() {
@@ -541,6 +547,45 @@ export default class Renderer {
         console.error('Failed to sort column:', error);
       }
     });
+  }
+
+  /**
+   * Bind row click events for selection
+   */
+  bindRowClickEvents() {
+    const tbody = this.table.container.querySelector('.tablix-tbody');
+    if (!tbody) return;
+
+    tbody.addEventListener('click', (e) => {
+      const row = e.target.closest('.tablix-row');
+      if (!row || row.classList.contains('tablix-empty-row')) return;
+
+      const rowIndex = parseInt(row.dataset.rowIndex, 10);
+      if (isNaN(rowIndex)) return;
+
+      // Get current page data to find the clicked row
+      const currentData = this.getCurrentPageData();
+      if (rowIndex >= 0 && rowIndex < currentData.length) {
+        const rowData = currentData[rowIndex];
+        
+        // Trigger row click event for SelectionManager
+        this.table.eventManager.trigger('rowClick', {
+          rowData,
+          rowIndex,
+          originalEvent: e
+        });
+      }
+    });
+  }
+
+  /**
+   * Get current page data (same logic as SelectionManager)
+   */
+  getCurrentPageData() {
+    if (this.table.paginationManager) {
+      return this.table.paginationManager.getCurrentPageData() || [];
+    }
+    return this.table.dataManager.getData();
   }
 
   /**

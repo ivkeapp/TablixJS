@@ -85,6 +85,20 @@ export default class PaginationManager {
   }
 
   /**
+   * Get current page data synchronously (for selection and other features)
+   * Returns the data that is currently displayed on the page
+   */
+  getCurrentPageData() {
+    if (this.options.mode === 'client') {
+      return this.getClientPageData();
+    } else {
+      // For server-side pagination, return the currently cached data
+      // This assumes the data has already been loaded by a previous getPageData call
+      return this.table.dataManager.getData();
+    }
+  }
+
+  /**
    * Get page data for server-side pagination
    */
   async getServerPageData() {

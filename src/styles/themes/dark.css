@@ -121,4 +121,13 @@
   --tablix-sort-inactive-color: #666;
   --tablix-sort-order-bg: #4db6e6;
   --tablix-sort-order-text: #1a1a1a;
+  
+  /* Selection specific */
+  --tablix-row-selected-bg: #1565c0;
+  --tablix-row-selected-hover-bg: #1976d2;
+  --tablix-row-last-selected-bg: #abd5f8;
+  --tablix-row-last-selected-color: #ffffff;
+  --tablix-row-last-selected-hover-bg: #9ec0e0;
+  --tablix-selection-indicator-color: #4db6e6;
+  --tablix-text-muted: #999;
 }

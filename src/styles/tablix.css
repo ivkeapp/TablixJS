@@ -6,6 +6,7 @@
 @import './sorting-core.css';
 @import './filtering-core.css';
 @import './search-core.css';
+@import './selection-core.css';
 
 /* Import default theme */
 @import './themes/default.css';
