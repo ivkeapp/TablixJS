@@ -72,3 +72,45 @@
   text-align: center;
   font-style: italic;
 }
+
+/* Drag selection styles */
+.tablix-wrapper.tablix-drag-selecting {
+  cursor: crosshair;
+}
+
+.tablix-wrapper.tablix-drag-selecting .tablix-table {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.tablix-wrapper.tablix-drag-selecting .tablix-row {
+  cursor: crosshair;
+}
+
+/* Drag selection visual feedback */
+.tablix-wrapper.tablix-drag-selecting .tablix-row:hover {
+  background-color: var(--tablix-drag-hover-bg, #e8f4fd);
+}
+
+.tablix-wrapper.tablix-drag-selecting .tablix-row.tablix-selected {
+  background-color: var(--tablix-drag-selected-bg, #bbdefb);
+  position: relative;
+}
+
+.tablix-wrapper.tablix-drag-selecting .tablix-row.tablix-selected::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--tablix-drag-overlay-bg, rgba(33, 150, 243, 0.1));
+  pointer-events: none;
+}
+
+/* Smooth transitions during drag */
+.tablix-wrapper.tablix-drag-selecting .tablix-row {
+  transition: background-color 0.1s ease;
+}

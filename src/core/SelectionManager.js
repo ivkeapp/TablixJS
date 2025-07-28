@@ -15,6 +15,17 @@ export default class SelectionManager {
     this.rowIdMap = new Map(); // Maps data objects to their stable IDs
     this.dataIdKey = options.dataIdKey || 'id'; // Key to use as stable row ID
     
+    // Drag selection state
+    this.dragSelection = {
+      isActive: false,
+      startRowIndex: null,
+      currentRowIndex: null,
+      startRowId: null,
+      originalSelection: null, // Backup of selection before drag started
+      isDragging: false,
+      dragThreshold: 3 // Minimum pixels to move before considering it a drag
+    };
+    
     this.init();
   }
 
@@ -31,6 +42,11 @@ export default class SelectionManager {
     this.table.eventManager.on('rowClick', (event) => {
       this.handleRowClick(event);
     });
+    
+    // Listen for drag selection events (only in multi mode)
+    if (this.options.mode === 'multi') {
+      this.setupDragSelection();
+    }
     
     // Clear selection when data changes
     this.table.eventManager.on('beforeLoad', () => {
@@ -57,6 +73,12 @@ export default class SelectionManager {
       return;
     }
 
+    // If this was a drag operation, don't process as a click
+    if (this.dragSelection.isDragging) {
+      this.dragSelection.isDragging = false;
+      return;
+    }
+
     const { rowData, rowIndex, originalEvent } = event;
     const rowId = this.getRowId(rowData);
     
@@ -71,7 +93,8 @@ export default class SelectionManager {
       rowId,
       currentSelection: Array.from(this.selectedRows),
       isCtrlClick: originalEvent && (originalEvent.ctrlKey || originalEvent.metaKey),
-      isShiftClick: originalEvent && originalEvent.shiftKey
+      isShiftClick: originalEvent && originalEvent.shiftKey,
+      isDragSelection: false
     };
     
     this.table.eventManager.trigger('beforeSelect', beforeSelectEvent);
@@ -89,7 +112,8 @@ export default class SelectionManager {
       rowData,
       rowId,
       selectedRows: Array.from(this.selectedRows),
-      selectedData: this.getSelectedData()
+      selectedData: this.getSelectedData(),
+      isDragSelection: false
     };
     
     this.table.eventManager.trigger('afterSelect', afterSelectEvent);
@@ -173,6 +197,219 @@ export default class SelectionManager {
       const rowId = this.getRowId(currentData[i]);
       this.selectedRows.add(rowId);
     }
+  }
+
+  // ===== DRAG SELECTION METHODS =====
+
+  /**
+   * Setup drag selection event listeners
+   */
+  setupDragSelection() {
+    const tableElement = this.table.container;
+    if (!tableElement) return;
+
+    let startX, startY;
+
+    // Mouse down on table body
+    tableElement.addEventListener('mousedown', (e) => {
+      if (!this.options.enabled || this.options.mode !== 'multi') return;
+      
+      const row = e.target.closest('.tablix-row');
+      if (!row || row.classList.contains('tablix-empty-row')) return;
+
+      const rowIndex = parseInt(row.dataset.rowIndex, 10);
+      if (isNaN(rowIndex)) return;
+
+      // Only start drag selection if not using modifier keys
+      if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+
+      startX = e.clientX;
+      startY = e.clientY;
+
+      this.dragSelection.isActive = true;
+      this.dragSelection.startRowIndex = rowIndex;
+      this.dragSelection.currentRowIndex = rowIndex;
+      this.dragSelection.isDragging = false;
+      
+      // Store original selection for potential restoration
+      this.dragSelection.originalSelection = new Set(this.selectedRows);
+
+      // Get start row data
+      const currentData = this.getCurrentPageData();
+      if (rowIndex < currentData.length) {
+        this.dragSelection.startRowId = this.getRowId(currentData[rowIndex]);
+      }
+
+      e.preventDefault();
+    });
+
+    // Mouse move - handle drag selection
+    tableElement.addEventListener('mousemove', (e) => {
+      if (!this.dragSelection.isActive) return;
+
+      const deltaX = Math.abs(e.clientX - startX);
+      const deltaY = Math.abs(e.clientY - startY);
+
+      // Check if we've moved enough to consider it a drag
+      if (!this.dragSelection.isDragging && 
+          (deltaX > this.dragSelection.dragThreshold || deltaY > this.dragSelection.dragThreshold)) {
+        this.dragSelection.isDragging = true;
+        this.startDragSelection();
+      }
+
+      if (this.dragSelection.isDragging) {
+        this.updateDragSelection(e);
+      }
+    });
+
+    // Mouse up - complete drag selection
+    tableElement.addEventListener('mouseup', (e) => {
+      if (this.dragSelection.isActive) {
+        this.completeDragSelection();
+      }
+    });
+
+    // Mouse leave - cancel drag selection
+    tableElement.addEventListener('mouseleave', (e) => {
+      if (this.dragSelection.isActive) {
+        this.cancelDragSelection();
+      }
+    });
+
+    // Prevent text selection during drag
+    tableElement.addEventListener('selectstart', (e) => {
+      if (this.dragSelection.isDragging) {
+        e.preventDefault();
+      }
+    });
+  }
+
+  /**
+   * Start drag selection
+   */
+  startDragSelection() {
+    // Add drag selection class to table for styling
+    const tableWrapper = this.table.container.querySelector('.tablix-wrapper');
+    if (tableWrapper) {
+      tableWrapper.classList.add('tablix-drag-selecting');
+    }
+
+    // Fire beforeSelect event for drag start
+    const currentData = this.getCurrentPageData();
+    if (this.dragSelection.startRowIndex < currentData.length) {
+      const startRowData = currentData[this.dragSelection.startRowIndex];
+      const beforeSelectEvent = {
+        rowData: startRowData,
+        rowId: this.dragSelection.startRowId,
+        currentSelection: Array.from(this.selectedRows),
+        isCtrlClick: false,
+        isShiftClick: false,
+        isDragSelection: true,
+        dragStart: true
+      };
+      
+      this.table.eventManager.trigger('beforeSelect', beforeSelectEvent);
+    }
+  }
+
+  /**
+   * Update drag selection based on current mouse position
+   */
+  updateDragSelection(event) {
+    const row = event.target.closest('.tablix-row');
+    if (!row || row.classList.contains('tablix-empty-row')) return;
+
+    const rowIndex = parseInt(row.dataset.rowIndex, 10);
+    if (isNaN(rowIndex)) return;
+
+    if (rowIndex !== this.dragSelection.currentRowIndex) {
+      this.dragSelection.currentRowIndex = rowIndex;
+      this.applyDragSelection();
+    }
+  }
+
+  /**
+   * Apply current drag selection range
+   */
+  applyDragSelection() {
+    const currentData = this.getCurrentPageData();
+    
+    // Calculate selection range
+    const startIndex = this.dragSelection.startRowIndex;
+    const endIndex = this.dragSelection.currentRowIndex;
+    const minIndex = Math.min(startIndex, endIndex);
+    const maxIndex = Math.max(startIndex, endIndex);
+
+    // Start with original selection (preserve existing selections)
+    this.selectedRows = new Set(this.dragSelection.originalSelection);
+
+    // Add drag range to selection
+    for (let i = minIndex; i <= maxIndex; i++) {
+      if (i < currentData.length) {
+        const rowId = this.getRowId(currentData[i]);
+        this.selectedRows.add(rowId);
+      }
+    }
+
+    // Update last selected row
+    if (endIndex < currentData.length) {
+      this.lastSelectedRow = this.getRowId(currentData[endIndex]);
+    }
+
+    // Update UI immediately for responsive feedback
+    this.updateUI();
+  }
+
+  /**
+   * Complete drag selection
+   */
+  completeDragSelection() {
+    const tableWrapper = this.table.container.querySelector('.tablix-wrapper');
+    if (tableWrapper) {
+      tableWrapper.classList.remove('tablix-drag-selecting');
+    }
+
+    if (this.dragSelection.isDragging) {
+      // Fire final afterSelect event
+      const afterSelectEvent = {
+        selectedRows: Array.from(this.selectedRows),
+        selectedData: this.getSelectedData(),
+        isDragSelection: true,
+        dragComplete: true
+      };
+      
+      this.table.eventManager.trigger('afterSelect', afterSelectEvent);
+    }
+
+    this.resetDragSelection();
+  }
+
+  /**
+   * Cancel drag selection and restore original state
+   */
+  cancelDragSelection() {
+    const tableWrapper = this.table.container.querySelector('.tablix-wrapper');
+    if (tableWrapper) {
+      tableWrapper.classList.remove('tablix-drag-selecting');
+    }
+
+    // Restore original selection
+    this.selectedRows = new Set(this.dragSelection.originalSelection);
+    this.updateUI();
+
+    this.resetDragSelection();
+  }
+
+  /**
+   * Reset drag selection state
+   */
+  resetDragSelection() {
+    this.dragSelection.isActive = false;
+    this.dragSelection.startRowIndex = null;
+    this.dragSelection.currentRowIndex = null;
+    this.dragSelection.startRowId = null;
+    this.dragSelection.originalSelection = null;
+    this.dragSelection.isDragging = false;
   }
 
   /**
@@ -438,6 +675,7 @@ export default class SelectionManager {
       return;
     }
 
+    const oldMode = this.options.mode;
     this.options.mode = mode;
     
     // If switching to single mode and multiple rows are selected, keep only the last selected
@@ -448,6 +686,14 @@ export default class SelectionManager {
         this.selectedRows.add(lastSelected);
       }
       this.updateUI();
+    }
+
+    // Setup or remove drag selection based on mode change
+    if (oldMode !== mode && this.options.enabled) {
+      if (mode === 'multi') {
+        this.setupDragSelection();
+      }
+      // Note: We don't need to explicitly remove drag listeners as they check mode internally
     }
   }
 

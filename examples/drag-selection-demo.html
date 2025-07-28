@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS - Drag Selection Demo</title>
+    <link rel="stylesheet" href="../src/styles/tablix.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .demo-section {
+            margin-bottom: 40px;
+        }
+        .demo-controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+        .demo-controls h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        label {
+            display: inline-block;
+            margin-right: 10px;
+            font-weight: 500;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        button:hover {
+            background: #005a99;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        select {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .selection-info {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+        }
+        .selection-info h4 {
+            margin: 0 0 10px 0;
+            color: #0c5460;
+        }
+        .selection-info pre {
+            margin: 0;
+            background: white;
+            padding: 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+        #tableContainer {
+            margin-top: 20px;
+        }
+        .instructions {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .instructions h4 {
+            margin-top: 0;
+            color: #856404;
+        }
+        .instructions ul {
+            margin-bottom: 0;
+        }
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .feature-highlight {
+            background-color: #e8f5e9;
+            border: 1px solid #4caf50;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .feature-highlight h4 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .feature-highlight .new-badge {
+            background: #4caf50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-toggle">
+        <button id="themeToggle">🌙 Dark Mode</button>
+    </div>
+
+    <div class="container">
+        <h1>TablixJS Drag Selection Demo</h1>
+        <p class="subtitle">Interactive demonstration of drag-to-select functionality</p>
+
+        <div class="feature-highlight">
+            <h4>🆕 New: Drag Selection <span class="new-badge">PHASE 2</span></h4>
+            <p>You can now click and drag to select multiple rows in one smooth motion! This feature works alongside existing selection methods.</p>
+        </div>
+
+        <div class="instructions">
+            <h4>How to Use Drag Selection:</h4>
+            <ul>
+                <li><strong>Click & Drag:</strong> Click on a row and drag to other rows to select a range</li>
+                <li><strong>Combined Selection:</strong> 
+                    <ul>
+                        <li>Use Ctrl+Click to add/remove individual rows</li>
+                        <li>Use Shift+Click for keyboard-based range selection</li>
+                        <li>Drag selection preserves existing selections</li>
+                    </ul>
+                </li>
+                <li><strong>Single Mode:</strong> Drag selection is disabled (only available in multi mode)</li>
+                <li><strong>Visual Feedback:</strong> Cursor changes to crosshair during drag operations</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <div class="demo-controls">
+                <h3>Selection Controls</h3>
+                
+                <div class="control-group">
+                    <label for="selectionMode">Selection Mode:</label>
+                    <select id="selectionMode">
+                        <option value="single">Single (no drag)</option>
+                        <option value="multi" selected>Multi (with drag)</option>
+                    </select>
+                    
+                    <button id="enableSelection">Enable Selection</button>
+                    <button id="disableSelection">Disable Selection</button>
+                </div>
+
+                <div class="control-group">
+                    <button id="selectFirst">Select First Row</button>
+                    <button id="selectRange">Select Range (2-5)</button>
+                    <button id="clearSelection">Clear Selection</button>
+                </div>
+
+                <div class="control-group">
+                    <button id="getSelected">Log Selected Data</button>
+                    <button id="addData">Add Random Row</button>
+                    <button id="testDrag">Simulate Drag (3-6)</button>
+                </div>
+            </div>
+
+            <div class="selection-info">
+                <h4>Selection Status:</h4>
+                <div id="selectionStatus">No rows selected</div>
+                <pre id="selectionData">{}</pre>
+            </div>
+        </div>
+
+        <div id="tableContainer"></div>
+    </div>
+
+    <script type="module">
+        import Table from '../src/core/Table.js';
+
+        // Generate sample data
+        function generateSampleData(count = 25) {
+            const names = ['John Doe', 'Jane Smith', 'Bob Johnson', 'Alice Williams', 'Charlie Brown', 'Diana Davis', 'Eve Wilson', 'Frank Miller', 'Grace Lee', 'Henry Taylor'];
+            const departments = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance', 'Operations', 'Legal', 'Design'];
+            const statuses = ['Active', 'Inactive', 'Pending', 'On Leave'];
+            
+            return Array.from({ length: count }, (_, i) => ({
+                id: i + 1,
+                name: names[i % names.length] + ` ${Math.floor(i / names.length) + 1}`,
+                department: departments[Math.floor(Math.random() * departments.length)],
+                salary: Math.floor(Math.random() * 100000) + 30000,
+                status: statuses[Math.floor(Math.random() * statuses.length)],
+                joinDate: new Date(2018 + Math.floor(Math.random() * 6), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
+                performance: Math.floor(Math.random() * 5) + 1
+            }));
+        }
+
+        // Initialize table with drag selection enabled
+        const sampleData = generateSampleData();
+        
+        const table = new Table('#tableContainer', {
+            data: sampleData,
+            columns: [
+                { name: 'id', title: 'ID' },
+                { name: 'name', title: 'Name' },
+                { name: 'department', title: 'Department' },
+                { 
+                    name: 'salary', 
+                    title: 'Salary',
+                    renderer: (value) => `$${value.toLocaleString()}`
+                },
+                { name: 'status', title: 'Status' },
+                { name: 'joinDate', title: 'Join Date' },
+                { 
+                    name: 'performance', 
+                    title: 'Rating',
+                    renderer: (value) => '★'.repeat(value) + '☆'.repeat(5 - value)
+                }
+            ],
+            pagination: {
+                enabled: true,
+                pageSize: 12,
+                showPageSizes: true
+            },
+            selection: {
+                enabled: true,
+                mode: 'multi',
+                dataIdKey: 'id'
+            }
+        });
+
+        // Selection event handlers
+        table.eventManager.on('beforeSelect', (event) => {
+            console.log('Before select:', event);
+            if (event.isDragSelection) {
+                console.log('🖱️ Drag selection:', event.dragStart ? 'started' : 'updated');
+            }
+        });
+
+        table.eventManager.on('afterSelect', (event) => {
+            console.log('After select:', event);
+            if (event.isDragSelection) {
+                console.log('🖱️ Drag selection:', event.dragComplete ? 'completed' : 'updated');
+            }
+            updateSelectionStatus();
+        });
+
+        // Update selection status display
+        function updateSelectionStatus() {
+            const selectedData = table.getSelectedData();
+            const selectedIds = table.getSelectedIds();
+            const count = table.getSelectionCount();
+            
+            const statusElement = document.getElementById('selectionStatus');
+            const dataElement = document.getElementById('selectionData');
+            
+            if (count === 0) {
+                statusElement.innerHTML = 'No rows selected';
+                dataElement.textContent = '{}';
+            } else {
+                const avgSalary = selectedData.reduce((sum, emp) => sum + emp.salary, 0) / count;
+                const departments = [...new Set(selectedData.map(emp => emp.department))];
+                
+                statusElement.innerHTML = `
+                    <strong>${count} row${count > 1 ? 's' : ''} selected</strong><br>
+                    IDs: ${selectedIds.join(', ')}<br>
+                    Departments: ${departments.join(', ')}<br>
+                    Average Salary: $${Math.round(avgSalary).toLocaleString()}
+                `;
+                dataElement.textContent = JSON.stringify(selectedData, null, 2);
+            }
+        }
+
+        // Control event handlers
+        document.getElementById('selectionMode').addEventListener('change', (e) => {
+            table.setSelectionMode(e.target.value);
+            const isDragEnabled = e.target.value === 'multi';
+            
+            // Show visual feedback about drag availability
+            const instructions = document.querySelector('.instructions');
+            if (isDragEnabled) {
+                instructions.style.borderColor = '#4caf50';
+                instructions.style.backgroundColor = '#e8f5e9';
+            } else {
+                instructions.style.borderColor = '#ffeaa7';
+                instructions.style.backgroundColor = '#fff3cd';
+            }
+            
+            updateSelectionStatus();
+        });
+
+        document.getElementById('enableSelection').addEventListener('click', () => {
+            table.enableSelection();
+        });
+
+        document.getElementById('disableSelection').addEventListener('click', () => {
+            table.disableSelection();
+        });
+
+        document.getElementById('selectFirst').addEventListener('click', () => {
+            table.selectRows(['1']);
+        });
+
+        document.getElementById('selectRange').addEventListener('click', () => {
+            table.selectRows(['2', '3', '4', '5']);
+        });
+
+        document.getElementById('clearSelection').addEventListener('click', () => {
+            table.clearSelection();
+        });
+
+        document.getElementById('getSelected').addEventListener('click', () => {
+            const selectedData = table.getSelectedData();
+            const selectedIds = table.getSelectedIds();
+            console.log('Selected IDs:', selectedIds);
+            console.log('Selected Data:', selectedData);
+            alert(`Selected ${selectedData.length} rows. Check console for details.`);
+        });
+
+        document.getElementById('addData').addEventListener('click', () => {
+            const newRow = {
+                id: sampleData.length + 1,
+                name: 'New User ' + (sampleData.length + 1),
+                department: 'New Department',
+                salary: 60000,
+                status: 'Active',
+                joinDate: new Date().toISOString().split('T')[0],
+                performance: 4
+            };
+            sampleData.push(newRow);
+            table.loadData([...sampleData]);
+        });
+
+        document.getElementById('testDrag').addEventListener('click', () => {
+            // Programmatically simulate drag selection
+            table.selectRows(['3', '4', '5', '6']);
+            console.log('🖱️ Simulated drag selection: rows 3-6');
+        });
+
+        // Theme toggle
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const body = document.body;
+            const button = document.getElementById('themeToggle');
+            const tableContainer = document.getElementById('tableContainer');
+            
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                tableContainer.classList.remove('dark');
+                button.textContent = '🌙 Dark Mode';
+            } else {
+                body.classList.add('dark-theme');
+                tableContainer.classList.add('dark');
+                button.textContent = '☀️ Light Mode';
+            }
+        });
+
+        // Add keyboard shortcuts for testing
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+            
+            switch (e.key) {
+                case 'r':
+                    if (e.ctrlKey) {
+                        e.preventDefault();
+                        table.selectRows(['1', '3', '5', '7', '9']);
+                        console.log('🎹 Keyboard shortcut: selected odd rows');
+                    }
+                    break;
+                case 'a':
+                    if (e.ctrlKey) {
+                        e.preventDefault();
+                        const allIds = sampleData.slice(0, 12).map(row => row.id.toString());
+                        table.selectRows(allIds);
+                        console.log('🎹 Keyboard shortcut: select all visible');
+                    }
+                    break;
+                case 'Escape':
+                    table.clearSelection();
+                    console.log('🎹 Keyboard shortcut: clear selection');
+                    break;
+            }
+        });
+
+        // Initial status update
+        updateSelectionStatus();
+
+        // Log drag selection tips
+        console.log('🖱️ Drag Selection Tips:');
+        console.log('• Click and drag across rows to select a range');
+        console.log('• Works with existing Ctrl+Click and Shift+Click');
+        console.log('• Only available in multi-selection mode');
+        console.log('• Preserves existing selections when dragging');
+        console.log('• Keyboard shortcuts: Ctrl+R (odd rows), Ctrl+A (all visible), Esc (clear)');
+        
+        console.log('TablixJS Drag Selection Demo loaded');
+        console.log('Table instance:', table);
+    </script>
+</body>
+</html>
