@@ -124,4 +124,13 @@
   --tablix-sort-order-bg: #007acc;
   --tablix-sort-order-text: #fff;
   --tablix-mobile-header-font-size: 13px;
+  
+  /* Selection specific */
+  --tablix-row-selected-bg: #e3f2fd;
+  --tablix-row-selected-hover-bg: #bbdefb;
+  --tablix-row-last-selected-bg: #abd5f8;
+  --tablix-row-last-selected-color: #ffffff;
+  --tablix-row-last-selected-hover-bg: #9ec0e0;
+  --tablix-selection-indicator-color: #9ec0e0;
+  --tablix-text-muted: #6c757d;
 }

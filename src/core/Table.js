@@ -7,6 +7,7 @@ import ColumnManager from './ColumnManager.js';
 import FilterManager from './FilterManager.js';
 import FilterUI from './FilterUI.js';
 import SearchManager from './SearchManager.js';
+import SelectionManager from './SelectionManager.js';
 
 export default class Table {
   constructor(container, options = {}) {
@@ -60,6 +61,12 @@ export default class Table {
         minLength: 1, // Minimum characters before search starts
         caseSensitive: false
       },
+      // Selection options
+      selection: {
+        enabled: false,  // Default: selection is disabled
+        mode: 'single',  // 'single' or 'multi'
+        dataIdKey: 'id'  // Key to use as stable row identifier
+      },
       ...options
     };
 
@@ -93,6 +100,11 @@ export default class Table {
     // Initialize search if enabled
     if (this.options.search && this.options.search.enabled !== false) {
       this.searchManager = new SearchManager(this, this.options.search);
+    }
+
+    // Initialize selection if enabled
+    if (this.options.selection) {
+      this.selectionManager = new SelectionManager(this, this.options.selection);
     }
 
     this.init();
@@ -542,7 +554,118 @@ export default class Table {
       this.paginationManager.options = { ...this.paginationManager.options, ...newOptions.pagination };
     }
     
+    // Update selection options if provided
+    if (newOptions.selection && this.selectionManager) {
+      this.selectionManager.options = { ...this.selectionManager.options, ...newOptions.selection };
+      
+      // Re-initialize if enabled state changed
+      if (newOptions.selection.enabled !== undefined) {
+        if (newOptions.selection.enabled) {
+          this.selectionManager.enable();
+        } else {
+          this.selectionManager.disable();
+        }
+      }
+      
+      // Update mode if provided
+      if (newOptions.selection.mode) {
+        this.selectionManager.setMode(newOptions.selection.mode);
+      }
+    }
+    
     await this.refreshTable();
+  }
+
+  // ===== SELECTION API =====
+
+  /**
+   * Get selected row data
+   * @returns {Array} Array of selected row data objects
+   */
+  getSelectedData() {
+    return this.selectionManager ? this.selectionManager.getSelectedData() : [];
+  }
+
+  /**
+   * Get selected row IDs
+   * @returns {Array} Array of selected row IDs
+   */
+  getSelectedIds() {
+    return this.selectionManager ? this.selectionManager.getSelectedIds() : [];
+  }
+
+  /**
+   * Programmatically select rows by ID
+   * @param {String|Array} rowIds - Single row ID or array of row IDs
+   */
+  selectRows(rowIds) {
+    if (this.selectionManager) {
+      this.selectionManager.selectRows(rowIds);
+    }
+  }
+
+  /**
+   * Programmatically deselect rows by ID
+   * @param {String|Array} rowIds - Single row ID or array of row IDs
+   */
+  deselectRows(rowIds) {
+    if (this.selectionManager) {
+      this.selectionManager.deselectRows(rowIds);
+    }
+  }
+
+  /**
+   * Clear all selections
+   */
+  clearSelection() {
+    if (this.selectionManager) {
+      this.selectionManager.clearSelection();
+    }
+  }
+
+  /**
+   * Check if a row is selected
+   * @param {String} rowId - Row ID to check
+   * @returns {Boolean} True if row is selected
+   */
+  isRowSelected(rowId) {
+    return this.selectionManager ? this.selectionManager.isRowSelected(rowId) : false;
+  }
+
+  /**
+   * Get selection count
+   * @returns {Number} Number of selected rows
+   */
+  getSelectionCount() {
+    return this.selectionManager ? this.selectionManager.getSelectionCount() : 0;
+  }
+
+  /**
+   * Enable selection
+   */
+  enableSelection() {
+    if (this.selectionManager) {
+      this.selectionManager.enable();
+    }
+  }
+
+  /**
+   * Disable selection
+   */
+  disableSelection() {
+    if (this.selectionManager) {
+      this.selectionManager.disable();
+    }
+  }
+
+  /**
+   * Set selection mode
+   * @param {String} mode - 'single' or 'multi'
+   */
+  setSelectionMode(mode) {
+    if (this.selectionManager) {
+      this.selectionManager.setMode(mode);
+    }
   }
 
   /**
@@ -555,6 +678,11 @@ export default class Table {
       paginationContainer.removeEventListener('click', this._paginationClickHandler);
     }
 
+    // Destroy managers
+    if (this.selectionManager) {
+      this.selectionManager.destroy();
+    }
+
     // Clear container
     this.container.innerHTML = '';
     
@@ -564,5 +692,6 @@ export default class Table {
     this.eventManager = null;
     this.paginationManager = null;
     this.sortingManager = null;
+    this.selectionManager = null;
   }
 }

@@ -1,0 +1,74 @@
+/* Selection Core Styles */
+
+/* Row selection styles */
+.tablix-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.tablix-row:hover {
+  background-color: var(--tablix-row-hover-bg, #f8f9fa);
+}
+
+/* Selected row styles */
+.tablix-row.tablix-selected {
+  background-color: var(--tablix-row-selected-bg, #e3f2fd);
+}
+
+.tablix-row.tablix-selected:hover {
+  background-color: var(--tablix-row-selected-hover-bg, #bbdefb);
+}
+
+/* Last selected row (for multi-selection) */
+.tablix-row.tablix-last-selected {
+  background-color: var(--tablix-row-last-selected-bg, #4eaaf5);
+  color: var(--tablix-row-last-selected-color, #ffffff);
+}
+
+.tablix-row.tablix-last-selected:hover {
+  background-color: var(--tablix-row-last-selected-hover-bg, #1976d2);
+}
+
+/* Selection disabled state */
+.tablix-wrapper[data-selection-disabled] .tablix-row {
+  cursor: default;
+}
+
+.tablix-wrapper[data-selection-disabled] .tablix-row:hover {
+  background-color: transparent;
+}
+
+/* Prevent text selection when clicking for row selection */
+.tablix-wrapper[data-selection-enabled] .tablix-table {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Allow text selection inside cells when needed */
+.tablix-wrapper[data-selection-enabled] .tablix-td {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* Selection indicator (optional - for future use) */
+.tablix-selection-indicator {
+  width: 4px;
+  background-color: var(--tablix-selection-indicator-color, #2196f3);
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+}
+
+/* Multi-selection hint text (for future use) */
+.tablix-selection-hint {
+  font-size: 0.875rem;
+  color: var(--tablix-text-muted, #6c757d);
+  padding: 0.5rem;
+  text-align: center;
+  font-style: italic;
+}
