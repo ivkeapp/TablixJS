@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Scroll Test</title>
+    <link rel="stylesheet" href="../src/styles/tablix.css">
+    <link rel="stylesheet" href="../src/styles/table-core.css">
+    <link rel="stylesheet" href="../src/styles/virtual-scroll-core.css">
+    <link rel="stylesheet" href="../src/styles/themes/default.css">
+</head>
+<body>
+    <div id="test-table"></div>
+    
+    <script type="module">
+        import Table from '../src/core/Table.js';
+        
+        // Generate test data
+        const data = [];
+        for (let i = 0; i < 1000; i++) {
+            data.push({
+                id: i + 1,
+                name: `User ${i + 1}`,
+                email: `user${i + 1}@example.com`,
+                value: Math.random() * 100
+            });
+        }
+        
+        // Create table with virtual scrolling
+        const table = new Table('#test-table', {
+            virtualScroll: {
+                enabled: true,
+                buffer: 5,
+                containerHeight: 300
+            },
+            pagination: { enabled: false },
+            columns: [
+                { name: 'id', title: 'ID' },
+                { name: 'name', title: 'Name' },
+                { name: 'email', title: 'Email' },
+                { name: 'value', title: 'Value', renderer: (v) => v.toFixed(2) }
+            ]
+        });
+        
+        table.loadData(data);
+        
+        console.log('Virtual scroll test loaded');
+    </script>
+</body>
+</html>

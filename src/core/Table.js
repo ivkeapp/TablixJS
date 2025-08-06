@@ -8,6 +8,7 @@ import FilterManager from './FilterManager.js';
 import FilterUI from './FilterUI.js';
 import SearchManager from './SearchManager.js';
 import SelectionManager from './SelectionManager.js';
+import VirtualScrollManager from './VirtualScroll.js';
 
 export default class Table {
   constructor(container, options = {}) {
@@ -67,6 +68,13 @@ export default class Table {
         mode: 'single',  // 'single' or 'multi'
         dataIdKey: 'id'  // Key to use as stable row identifier
       },
+      // Virtual scrolling options
+      virtualScroll: {
+        enabled: false,
+        buffer: 10, // Number of rows to render above/below viewport
+        rowHeight: null, // Auto-detected if null
+        containerHeight: 400 // Default container height in pixels
+      },
       ...options
     };
 
@@ -107,6 +115,11 @@ export default class Table {
       this.selectionManager = new SelectionManager(this, this.options.selection);
     }
 
+    // Initialize virtual scrolling
+    if (this.options.virtualScroll) {
+      this.virtualScrollManager = new VirtualScrollManager(this, this.options.virtualScroll);
+    }
+
     this.init();
   }
 
@@ -141,12 +154,28 @@ export default class Table {
    * Refresh the table with current data and pagination
    */
   async refreshTable() {
-    if (this.paginationManager) {
-      const pageData = await this.paginationManager.getPageData();
-      this.renderer.renderTable(pageData);
+    let dataToRender;
+    
+    if (this.virtualScrollManager && this.virtualScrollManager.isEnabled()) {
+      // Virtual scrolling mode - get all data for virtual scrolling manager
+      dataToRender = this.dataManager.getData();
+      
+      // Initialize or update virtual scrolling with full dataset
+      this.virtualScrollManager.updateData(dataToRender);
+      
+      // Render the table structure first (without data rows)
+      this.renderer.renderTable([], true); // Pass empty array and virtualMode flag
+      
+      // Initialize virtual scrolling after table structure is ready
+      this.virtualScrollManager.init(dataToRender);
+    } else if (this.paginationManager) {
+      // Traditional pagination mode
+      dataToRender = await this.paginationManager.getPageData();
+      this.renderer.renderTable(dataToRender);
     } else {
-      // No pagination, show all data
-      this.renderer.renderTable(this.dataManager.getData());
+      // No pagination, show all data (traditional mode)
+      dataToRender = this.dataManager.getData();
+      this.renderer.renderTable(dataToRender);
     }
   }
 
@@ -666,6 +695,53 @@ export default class Table {
     if (this.selectionManager) {
       this.selectionManager.setMode(mode);
     }
+  }
+
+  /**
+   * Destroy the table and clean up all resources
+   */
+  destroy() {
+    // Clean up virtual scrolling
+    if (this.virtualScrollManager) {
+      this.virtualScrollManager.destroy();
+    }
+
+    // Clean up other managers
+    if (this.selectionManager) {
+      this.selectionManager.destroy && this.selectionManager.destroy();
+    }
+
+    if (this.searchManager) {
+      this.searchManager.destroy && this.searchManager.destroy();
+    }
+
+    if (this.filterManager) {
+      this.filterManager.destroy && this.filterManager.destroy();
+    }
+
+    if (this.sortingManager) {
+      this.sortingManager.destroy && this.sortingManager.destroy();
+    }
+
+    if (this.paginationManager) {
+      this.paginationManager.destroy && this.paginationManager.destroy();
+    }
+
+    // Clear container
+    if (this.container) {
+      this.container.innerHTML = '';
+    }
+
+    // Clear references
+    this.virtualScrollManager = null;
+    this.selectionManager = null;
+    this.searchManager = null;
+    this.filterManager = null;
+    this.sortingManager = null;
+    this.paginationManager = null;
+    this.dataManager = null;
+    this.renderer = null;
+    this.eventManager = null;
   }
 
   /**

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Scroll Bug Fixes Test</title>
+    <link rel="stylesheet" href="../src/styles/tablix.css">
+    <link rel="stylesheet" href="../src/styles/table-core.css">
+    <link rel="stylesheet" href="../src/styles/virtual-scroll-core.css">
+    <link rel="stylesheet" href="../src/styles/selection-core.css">
+    <link rel="stylesheet" href="../src/styles/themes/default.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-container h2 {
+            margin: 0 0 15px 0;
+            color: #333;
+        }
+        
+        .controls {
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .info {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            color: white;
+        }
+        
+        .status-active { background: #28a745; }
+        .status-inactive { background: #dc3545; }
+        .status-pending { background: #ffc107; color: #000; }
+    </style>
+</head>
+<body>
+    <h1>🐛 Virtual Scroll Bug Fixes Test</h1>
+    
+    <div class="test-container">
+        <h2>Test: Row Selection, Fast Scrolling & Image Loading</h2>
+        
+        <div class="info">
+            <strong>Instructions:</strong><br>
+            1. Click on rows to test selection (multi-select with Ctrl/Cmd)<br>
+            2. Try fast scrolling by dragging the scrollbar<br>
+            3. Observe image loading during fast scroll<br>
+            4. Selected rows should remain selected even when scrolled out of view
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="createTable()">🚀 Create Test Table</button>
+            <button class="btn" onclick="selectRandomRows()">✅ Select Random Rows</button>
+            <button class="btn" onclick="clearSelection()">❌ Clear Selection</button>
+            <button class="btn" onclick="scrollToMiddle()">📍 Scroll to Middle</button>
+            <button class="btn" onclick="showSelectedCount()">📊 Show Selected Count</button>
+        </div>
+        
+        <div id="selection-info" class="info" style="display: none;"></div>
+        
+        <div id="table-container"></div>
+    </div>
+
+    <script type="module">
+        import Table from '../src/core/Table.js';
+        
+        let table;
+        
+        function updateSelectionInfo() {
+            if (!table || !table.selectionManager) return;
+            
+            const selected = table.selectionManager.getSelectedData();
+            const info = document.getElementById('selection-info');
+            
+            if (selected.length > 0) {
+                info.style.display = 'block';
+                info.innerHTML = `<strong>Selected:</strong> ${selected.length} rows - IDs: ${selected.map(r => r.id).slice(0, 10).join(', ')}${selected.length > 10 ? '...' : ''}`;
+            } else {
+                info.style.display = 'block';
+                info.innerHTML = '<strong>Selected:</strong> No rows selected';
+            }
+        }
+        
+        window.createTable = function() {
+            console.log('Creating test table...');
+            
+            // Generate test data with images
+            const data = [];
+            const statuses = ['active', 'inactive', 'pending'];
+            
+            for (let i = 0; i < 5000; i++) {
+                data.push({
+                    id: i + 1,
+                    name: `User ${i + 1}`,
+                    email: `user${i + 1}@example.com`,
+                    status: statuses[i % 3],
+                    avatar: `https://picsum.photos/32/32?random=${i}`,
+                    value: Math.floor(Math.random() * 1000),
+                    department: ['Engineering', 'Sales', 'Marketing'][i % 3]
+                });
+            }
+            
+            // Destroy existing table
+            if (table) {
+                table.destroy && table.destroy();
+            }
+            
+            table = new Table('#table-container', {
+                virtualScroll: {
+                    enabled: true,
+                    buffer: 8,
+                    containerHeight: 400
+                },
+                pagination: { enabled: false },
+                selection: {
+                    enabled: true,
+                    mode: 'multi',
+                    dataIdKey: 'id'
+                },
+                sorting: { enabled: true },
+                debug: true,
+                columns: [
+                    { name: 'id', title: 'ID', width: '60px' },
+                    {
+                        name: 'profile',
+                        title: 'Profile',
+                        renderer: (value, row) => `
+                            <div style="display: flex; align-items: center;">
+                                <img src="${row.avatar}" alt="${row.name}" class="user-avatar">
+                                <div>
+                                    <strong>${row.name}</strong><br>
+                                    <small>${row.email}</small>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        name: 'status',
+                        title: 'Status',
+                        renderer: (value) => `<span class="status-badge status-${value}">${value}</span>`
+                    },
+                    { name: 'department', title: 'Department' },
+                    { name: 'value', title: 'Value' }
+                ]
+            });
+            
+            // Listen for selection events
+            table.eventManager.on('afterSelect', (event) => {
+                console.log('Selection changed:', event);
+                updateSelectionInfo();
+            });
+            
+            table.eventManager.on('selectionCleared', () => {
+                console.log('Selection cleared');
+                updateSelectionInfo();
+            });
+            
+            table.loadData(data);
+            
+            setTimeout(() => {
+                updateSelectionInfo();
+            }, 500);
+            
+            console.log('Table created with', data.length, 'rows');
+        };
+        
+        window.selectRandomRows = function() {
+            if (!table || !table.selectionManager) return;
+            
+            // Select some random rows
+            const dataToSelect = table.dataManager.getData();
+            const randomIndices = [];
+            
+            for (let i = 0; i < 5; i++) {
+                randomIndices.push(Math.floor(Math.random() * dataToSelect.length));
+            }
+            
+            randomIndices.forEach(index => {
+                const rowData = dataToSelect[index];
+                if (rowData) {
+                    table.selectionManager.selectRow(rowData);
+                }
+            });
+            
+            updateSelectionInfo();
+            console.log('Selected random rows at indices:', randomIndices);
+        };
+        
+        window.clearSelection = function() {
+            if (table && table.selectionManager) {
+                table.selectionManager.clearSelection();
+                updateSelectionInfo();
+                console.log('Selection cleared');
+            }
+        };
+        
+        window.scrollToMiddle = function() {
+            if (table && table.virtualScrollManager) {
+                const middleRow = Math.floor(table.dataManager.getData().length / 2);
+                table.virtualScrollManager.scrollToRow(middleRow);
+                console.log('Scrolled to row', middleRow);
+            }
+        };
+        
+        window.showSelectedCount = function() {
+            if (table && table.selectionManager) {
+                const selected = table.selectionManager.getSelectedData();
+                alert(`Selected ${selected.length} rows`);
+                console.log('Selected rows:', selected);
+            }
+        };
+        
+        // Auto-create table on load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(createTable, 500);
+        });
+    </script>
+</body>
+</html>
