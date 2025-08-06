@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Scrolling - Complete Test Suite</title>
+    <link rel="stylesheet" href="../src/styles/tablix.css">
+    <link rel="stylesheet" href="../src/styles/table-core.css">
+    <link rel="stylesheet" href="../src/styles/virtual-scroll-core.css">
+    <link rel="stylesheet" href="../src/styles/themes/default.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-section h2 {
+            margin: 0 0 15px 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 8px;
+        }
+        
+        .controls {
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .table-container {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Virtual Scrolling Test Suite</h1>
+    
+    <!-- Test 1: Basic Functionality -->
+    <div class="test-section">
+        <h2>Test 1: Basic Virtual Scrolling (1,000 rows)</h2>
+        <div class="controls">
+            <button class="btn" onclick="runTest1()">🚀 Create Basic Test</button>
+            <button class="btn" onclick="scrollToRow(1, 500)">📍 Jump to Row 500</button>
+            <button class="btn" onclick="toggleVirtualScroll(1)">⚡ Toggle Virtual Scroll</button>
+        </div>
+        <div class="status" id="status1">Ready to test...</div>
+        <div class="table-container" id="test1"></div>
+    </div>
+    
+    <!-- Test 2: Large Dataset -->
+    <div class="test-section">
+        <h2>Test 2: Large Dataset Performance (50,000 rows)</h2>
+        <div class="controls">
+            <button class="btn" onclick="runTest2()">🚀 Create Large Dataset</button>
+            <button class="btn" onclick="scrollToRow(2, 25000)">📍 Jump to Row 25,000</button>
+            <button class="btn" onclick="measurePerformance(2)">📊 Show Performance</button>
+        </div>
+        <div class="status" id="status2">Ready to test...</div>
+        <div class="table-container" id="test2"></div>
+    </div>
+    
+    <!-- Test 3: Custom Renderers -->
+    <div class="test-section">
+        <h2>Test 3: Heavy Custom Renderers (10,000 rows)</h2>
+        <div class="controls">
+            <button class="btn" onclick="runTest3()">🚀 Create Complex Renderers</button>
+            <button class="btn" onclick="scrollToRow(3, 5000)">📍 Jump to Row 5,000</button>
+            <button class="btn" onclick="testSelection(3)">✅ Test Selection</button>
+        </div>
+        <div class="status" id="status3">Ready to test...</div>
+        <div class="table-container" id="test3"></div>
+    </div>
+
+    <script type="module">
+        import Table from '../src/core/Table.js';
+        
+        let tables = {};
+        
+        // Update status
+        function updateStatus(testId, message, data = null) {
+            const statusEl = document.getElementById(`status${testId}`);
+            const timestamp = new Date().toLocaleTimeString();
+            statusEl.innerHTML = `[${timestamp}] ${message}`;
+            if (data) {
+                statusEl.innerHTML += ` - ${JSON.stringify(data)}`;
+            }
+            console.log(`Test ${testId}: ${message}`, data);
+        }
+        
+        // Test 1: Basic Virtual Scrolling
+        window.runTest1 = function() {
+            updateStatus(1, 'Starting basic virtual scrolling test...');
+            const startTime = performance.now();
+            
+            // Generate 1,000 rows
+            const data = [];
+            for (let i = 0; i < 1000; i++) {
+                data.push({
+                    id: i + 1,
+                    name: `User ${i + 1}`,
+                    email: `user${i + 1}@example.com`,
+                    value: Math.floor(Math.random() * 1000),
+                    category: ['A', 'B', 'C'][i % 3]
+                });
+            }
+            
+            const dataTime = performance.now() - startTime;
+            updateStatus(1, `Generated data in ${dataTime.toFixed(2)}ms`);
+            
+            // Destroy existing table
+            if (tables[1]) {
+                tables[1].destroy && tables[1].destroy();
+            }
+            
+            const tableStartTime = performance.now();
+            tables[1] = new Table('#test1', {
+                virtualScroll: {
+                    enabled: true,
+                    buffer: 5,
+                    containerHeight: 300
+                },
+                pagination: { enabled: false },
+                sorting: { enabled: true },
+                search: { enabled: true },
+                debug: true,
+                columns: [
+                    { name: 'id', title: 'ID' },
+                    { name: 'name', title: 'Name' },
+                    { name: 'email', title: 'Email' },
+                    { name: 'value', title: 'Value' },
+                    { name: 'category', title: 'Category' }
+                ]
+            });
+            
+            tables[1].loadData(data);
+            
+            const tableTime = performance.now() - tableStartTime;
+            updateStatus(1, `Table created in ${tableTime.toFixed(2)}ms`, {
+                totalRows: data.length,
+                virtualEnabled: tables[1].virtualScrollManager?.isEnabled()
+            });
+        };
+        
+        // Test 2: Large Dataset
+        window.runTest2 = function() {
+            updateStatus(2, 'Starting large dataset test...');
+            const startTime = performance.now();
+            
+            // Generate 50,000 rows
+            const data = [];
+            const departments = ['Eng', 'Sales', 'Marketing', 'HR', 'Finance'];
+            for (let i = 0; i < 50000; i++) {
+                data.push({
+                    id: i + 1,
+                    employee: `Employee ${i + 1}`,
+                    department: departments[i % departments.length],
+                    salary: Math.floor(Math.random() * 150000) + 30000,
+                    performance: Math.floor(Math.random() * 100) + 1,
+                    startDate: new Date(Date.now() - Math.random() * 5 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                });
+            }
+            
+            const dataTime = performance.now() - startTime;
+            updateStatus(2, `Generated ${data.length.toLocaleString()} rows in ${dataTime.toFixed(2)}ms`);
+            
+            // Destroy existing table
+            if (tables[2]) {
+                tables[2].destroy && tables[2].destroy();
+            }
+            
+            const tableStartTime = performance.now();
+            tables[2] = new Table('#test2', {
+                virtualScroll: {
+                    enabled: true,
+                    buffer: 15,
+                    containerHeight: 400
+                },
+                pagination: { enabled: false },
+                sorting: { enabled: true },
+                filtering: { enabled: true },
+                selection: { enabled: true, mode: 'multi' },
+                columns: [
+                    { name: 'id', title: 'ID', width: '80px' },
+                    { name: 'employee', title: 'Employee' },
+                    { name: 'department', title: 'Department' },
+                    { 
+                        name: 'salary', 
+                        title: 'Salary',
+                        renderer: (value) => `$${value.toLocaleString()}`
+                    },
+                    { 
+                        name: 'performance', 
+                        title: 'Performance',
+                        renderer: (value) => `${value}%`
+                    },
+                    { name: 'startDate', title: 'Start Date' }
+                ]
+            });
+            
+            tables[2].loadData(data);
+            
+            const tableTime = performance.now() - tableStartTime;
+            updateStatus(2, `Large table created in ${tableTime.toFixed(2)}ms`, {
+                totalRows: data.length,
+                virtualEnabled: tables[2].virtualScrollManager?.isEnabled()
+            });
+        };
+        
+        // Test 3: Heavy Renderers
+        window.runTest3 = function() {
+            updateStatus(3, 'Starting heavy renderers test...');
+            const startTime = performance.now();
+            
+            // Generate 10,000 rows with complex data
+            const data = [];
+            const statuses = ['active', 'inactive', 'pending'];
+            for (let i = 0; i < 10000; i++) {
+                data.push({
+                    id: i + 1,
+                    name: `Complex User ${i + 1}`,
+                    email: `user${i + 1}@company.com`,
+                    avatar: `https://picsum.photos/40/40?random=${i}`,
+                    status: statuses[i % 3],
+                    progress: Math.floor(Math.random() * 101),
+                    tags: ['tag1', 'tag2', 'tag3'].slice(0, Math.floor(Math.random() * 3) + 1),
+                    score: Math.random() * 100
+                });
+            }
+            
+            const dataTime = performance.now() - startTime;
+            updateStatus(3, `Generated complex data in ${dataTime.toFixed(2)}ms`);
+            
+            // Destroy existing table
+            if (tables[3]) {
+                tables[3].destroy && tables[3].destroy();
+            }
+            
+            const tableStartTime = performance.now();
+            tables[3] = new Table('#test3', {
+                virtualScroll: {
+                    enabled: true,
+                    buffer: 10,
+                    containerHeight: 350
+                },
+                pagination: { enabled: false },
+                selection: { enabled: true, mode: 'multi' },
+                columns: [
+                    { name: 'id', title: 'ID', width: '60px' },
+                    {
+                        name: 'profile',
+                        title: 'Profile',
+                        renderer: (value, row) => `
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <img src="${row.avatar}" alt="${row.name}" 
+                                     style="width: 32px; height: 32px; border-radius: 50%;">
+                                <div>
+                                    <strong>${row.name}</strong><br>
+                                    <small style="color: #666;">${row.email}</small>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        name: 'status',
+                        title: 'Status',
+                        renderer: (value) => {
+                            const colors = { active: '#28a745', inactive: '#dc3545', pending: '#ffc107' };
+                            return `<span style="background: ${colors[value]}; color: white; padding: 3px 8px; border-radius: 10px; font-size: 0.8rem;">${value}</span>`;
+                        }
+                    },
+                    {
+                        name: 'progress',
+                        title: 'Progress',
+                        renderer: (value) => `
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 50px; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden;">
+                                    <div style="width: ${value}%; height: 100%; background: linear-gradient(90deg, #007bff, #0056b3);"></div>
+                                </div>
+                                <span style="font-size: 0.8rem;">${value}%</span>
+                            </div>
+                        `
+                    },
+                    {
+                        name: 'tags',
+                        title: 'Tags',
+                        renderer: (value) => value.map(tag => 
+                            `<span style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; margin-right: 2px;">${tag}</span>`
+                        ).join('')
+                    },
+                    {
+                        name: 'actions',
+                        title: 'Actions',
+                        renderer: (value, row) => `
+                            <div style="display: flex; gap: 4px;">
+                                <button onclick="alert('View ${row.name}')" style="padding: 2px 6px; font-size: 0.7rem; border: none; background: #007bff; color: white; border-radius: 2px; cursor: pointer;">View</button>
+                                <button onclick="alert('Edit ${row.name}')" style="padding: 2px 6px; font-size: 0.7rem; border: none; background: #28a745; color: white; border-radius: 2px; cursor: pointer;">Edit</button>
+                            </div>
+                        `
+                    }
+                ]
+            });
+            
+            tables[3].loadData(data);
+            
+            const tableTime = performance.now() - tableStartTime;
+            updateStatus(3, `Complex table created in ${tableTime.toFixed(2)}ms`, {
+                totalRows: data.length,
+                virtualEnabled: tables[3].virtualScrollManager?.isEnabled()
+            });
+        };
+        
+        // Utility functions
+        window.scrollToRow = function(testId, rowIndex) {
+            if (tables[testId] && tables[testId].virtualScrollManager) {
+                tables[testId].virtualScrollManager.scrollToRow(rowIndex - 1);
+                updateStatus(testId, `Scrolled to row ${rowIndex}`);
+            }
+        };
+        
+        window.toggleVirtualScroll = function(testId) {
+            if (tables[testId] && tables[testId].virtualScrollManager) {
+                const enabled = tables[testId].virtualScrollManager.isEnabled();
+                tables[testId].virtualScrollManager.setEnabled(!enabled);
+                updateStatus(testId, `Virtual scrolling ${!enabled ? 'enabled' : 'disabled'}`);
+            }
+        };
+        
+        window.measurePerformance = function(testId) {
+            if (tables[testId] && tables[testId].virtualScrollManager && tables[testId].virtualScrollManager.isEnabled()) {
+                const stats = tables[testId].virtualScrollManager.getPerformanceStats();
+                if (stats) {
+                    updateStatus(testId, 'Performance stats', {
+                        avgRender: stats.averageRenderTime + 'ms',
+                        maxRender: stats.maxRenderTime + 'ms',
+                        scrollUpdates: stats.scrollUpdates,
+                        totalRows: stats.totalRows,
+                        renderedRows: stats.renderedRows
+                    });
+                }
+            }
+        };
+        
+        window.testSelection = function(testId) {
+            if (tables[testId] && tables[testId].selectionManager) {
+                const selected = tables[testId].selectionManager.getSelectedData();
+                updateStatus(testId, `Selection test: ${selected.length} rows selected`);
+            }
+        };
+        
+        // Auto-run basic test on load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus(1, 'Test suite loaded - ready to run tests');
+            // Automatically run the first test
+            setTimeout(() => runTest1(), 500);
+        });
+    </script>
+</body>
+</html>

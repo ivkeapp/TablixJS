@@ -43,8 +43,8 @@ export default class SelectionManager {
       this.handleRowClick(event);
     });
     
-    // Listen for drag selection events (only in multi mode)
-    if (this.options.mode === 'multi') {
+    // Listen for drag selection events (only in multi mode and when NOT using virtual scrolling)
+    if (this.options.mode === 'multi' && !this.table.virtualScrollManager) {
       this.setupDragSelection();
     }
     
@@ -82,9 +82,20 @@ export default class SelectionManager {
     const { rowData, rowIndex, originalEvent } = event;
     const rowId = this.getRowId(rowData);
     
-    // Prevent default if we're handling selection
+    // Debug logging for modifier keys
+    console.log('SelectionManager handleRowClick:', {
+      rowId,
+      hasOriginalEvent: !!originalEvent,
+      ctrlKey: originalEvent ? originalEvent.ctrlKey : 'no event',
+      shiftKey: originalEvent ? originalEvent.shiftKey : 'no event',
+      metaKey: originalEvent ? originalEvent.metaKey : 'no event',
+      timestamp: Date.now()
+    });
+    
+    // Prevent default and stop propagation to avoid duplicate events
     if (originalEvent) {
       originalEvent.preventDefault();
+      originalEvent.stopPropagation();
     }
 
     // Fire beforeSelect event
@@ -147,28 +158,42 @@ export default class SelectionManager {
     const isCtrlClick = originalEvent && (originalEvent.ctrlKey || originalEvent.metaKey);
     const isShiftClick = originalEvent && originalEvent.shiftKey;
 
+    console.log('handleMultiSelection DETAILED:', {
+      rowId,
+      isCtrlClick,
+      isShiftClick,
+      'originalEvent.ctrlKey': originalEvent ? originalEvent.ctrlKey : 'no event',
+      'originalEvent.metaKey': originalEvent ? originalEvent.metaKey : 'no event',
+      'originalEvent.shiftKey': originalEvent ? originalEvent.shiftKey : 'no event',
+      lastSelectedRow: this.lastSelectedRow,
+      currentSelection: Array.from(this.selectedRows),
+      selectionSize: this.selectedRows.size
+    });
+
     if (isShiftClick && this.lastSelectedRow) {
       // Range selection: select all rows between last selected and current
+      console.log('Executing range selection from', this.lastSelectedRow, 'to', rowId);
       this.handleRangeSelection(rowId);
     } else if (isCtrlClick) {
       // Toggle selection of individual row
+      console.log('Executing ctrl+click toggle for', rowId);
       if (this.selectedRows.has(rowId)) {
         this.selectedRows.delete(rowId);
+        console.log('Ctrl+click: Deselected', rowId);
+        // Update lastSelectedRow to another selected row or null
+        this.lastSelectedRow = this.selectedRows.size > 0 ? Array.from(this.selectedRows)[0] : null;
       } else {
-        this.selectedRows.add(rowId);
-      }
-      this.lastSelectedRow = rowId;
-    } else {
-      // Normal click: if row is already the only selected row, deselect it
-      // Otherwise, select only this row
-      if (this.selectedRows.size === 1 && this.selectedRows.has(rowId)) {
-        this.selectedRows.clear();
-        this.lastSelectedRow = null;
-      } else {
-        this.selectedRows.clear();
         this.selectedRows.add(rowId);
         this.lastSelectedRow = rowId;
+        console.log('Ctrl+click: Added', rowId, 'to selection. Total selected:', this.selectedRows.size);
       }
+    } else {
+      // Normal click: select only this row (clear previous selection)
+      console.log('Executing normal click for', rowId);
+      this.selectedRows.clear();
+      this.selectedRows.add(rowId);
+      this.lastSelectedRow = rowId;
+      console.log('Normal click: Selected only', rowId);
     }
   }
 
@@ -177,9 +202,11 @@ export default class SelectionManager {
    * @param {String} endRowId - End row ID for range selection
    */
   handleRangeSelection(endRowId) {
-    const currentData = this.getCurrentPageData();
-    const startIndex = currentData.findIndex(row => this.getRowId(row) === this.lastSelectedRow);
-    const endIndex = currentData.findIndex(row => this.getRowId(row) === endRowId);
+    const fullData = this.getFullData();
+    
+    // Find indices in the full dataset
+    const startIndex = fullData.findIndex(row => this.getRowId(row) === this.lastSelectedRow);
+    const endIndex = fullData.findIndex(row => this.getRowId(row) === endRowId);
 
     if (startIndex === -1 || endIndex === -1) {
       // Fallback to single selection if we can't find the range
@@ -194,7 +221,7 @@ export default class SelectionManager {
     const maxIndex = Math.max(startIndex, endIndex);
     
     for (let i = minIndex; i <= maxIndex; i++) {
-      const rowId = this.getRowId(currentData[i]);
+      const rowId = this.getRowId(fullData[i]);
       this.selectedRows.add(rowId);
     }
   }
@@ -332,7 +359,8 @@ export default class SelectionManager {
    * Apply current drag selection range
    */
   applyDragSelection() {
-    const currentData = this.getCurrentPageData();
+    // Use full dataset for virtual scrolling, or current page data for pagination
+    const currentData = this.table.virtualScrollManager ? this.getFullData() : this.getCurrentPageData();
     
     // Calculate selection range
     const startIndex = this.dragSelection.startRowIndex;
@@ -447,9 +475,22 @@ export default class SelectionManager {
    * @returns {Array} Current page data
    */
   getCurrentPageData() {
+    // If using virtual scrolling, return full dataset
+    if (this.table.virtualScrollManager) {
+      return this.table.dataManager.getData();
+    }
+    // Otherwise use pagination if available
     if (this.table.paginationManager) {
       return this.table.paginationManager.getCurrentPageData() || [];
     }
+    return this.table.dataManager.getData();
+  }
+
+  /**
+   * Get the full dataset for virtual scrolling operations
+   * @returns {Array} Full dataset
+   */
+  getFullData() {
     return this.table.dataManager.getData();
   }
 
@@ -473,22 +514,46 @@ export default class SelectionManager {
     });
 
     // Apply selection classes
-    const currentData = this.getCurrentPageData();
-    allRows.forEach((row, index) => {
-      if (index < currentData.length) {
-        const rowData = currentData[index];
-        const rowId = this.getRowId(rowData);
-        
-        if (this.selectedRows.has(rowId)) {
-          row.classList.add('tablix-selected');
-          
-          // Mark the last selected row for special styling
-          if (rowId === this.lastSelectedRow) {
-            row.classList.add('tablix-last-selected');
+    if (this.table.virtualScrollManager) {
+      // For virtual scrolling: use data-virtual-index to match against full dataset
+      allRows.forEach((row) => {
+        const virtualIndex = parseInt(row.getAttribute('data-virtual-index'));
+        if (!isNaN(virtualIndex)) {
+          const fullData = this.getFullData();
+          if (virtualIndex < fullData.length) {
+            const rowData = fullData[virtualIndex];
+            const rowId = this.getRowId(rowData);
+            
+            if (this.selectedRows.has(rowId)) {
+              row.classList.add('tablix-selected');
+              
+              // Mark the last selected row for special styling
+              if (rowId === this.lastSelectedRow) {
+                row.classList.add('tablix-last-selected');
+              }
+            }
           }
         }
-      }
-    });
+      });
+    } else {
+      // For regular pagination: use current page data
+      const currentData = this.getCurrentPageData();
+      allRows.forEach((row, index) => {
+        if (index < currentData.length) {
+          const rowData = currentData[index];
+          const rowId = this.getRowId(rowData);
+          
+          if (this.selectedRows.has(rowId)) {
+            row.classList.add('tablix-selected');
+            
+            // Mark the last selected row for special styling
+            if (rowId === this.lastSelectedRow) {
+              row.classList.add('tablix-last-selected');
+            }
+          }
+        }
+      });
+    }
   }
 
   /**
@@ -499,26 +564,32 @@ export default class SelectionManager {
       return;
     }
 
-    // Keep selection for rows that are still visible
-    const currentData = this.getCurrentPageData();
-    const visibleRowIds = new Set(currentData.map(row => this.getRowId(row)));
-    
-    // Remove selections for rows that are no longer visible
-    const newSelection = new Set();
-    this.selectedRows.forEach(rowId => {
-      if (visibleRowIds.has(rowId)) {
-        newSelection.add(rowId);
+    if (this.table.virtualScrollManager) {
+      // For virtual scrolling: keep all selections as the data is the same, just rendered differently
+      // Only need to update UI
+      this.updateUI();
+    } else {
+      // For pagination: keep selection for rows that are still visible
+      const currentData = this.getCurrentPageData();
+      const visibleRowIds = new Set(currentData.map(row => this.getRowId(row)));
+      
+      // Remove selections for rows that are no longer visible
+      const newSelection = new Set();
+      this.selectedRows.forEach(rowId => {
+        if (visibleRowIds.has(rowId)) {
+          newSelection.add(rowId);
+        }
+      });
+      
+      this.selectedRows = newSelection;
+      
+      // Update last selected row if it's no longer visible
+      if (this.lastSelectedRow && !visibleRowIds.has(this.lastSelectedRow)) {
+        this.lastSelectedRow = this.selectedRows.size > 0 ? Array.from(this.selectedRows)[0] : null;
       }
-    });
-    
-    this.selectedRows = newSelection;
-    
-    // Update last selected row if it's no longer visible
-    if (this.lastSelectedRow && !visibleRowIds.has(this.lastSelectedRow)) {
-      this.lastSelectedRow = this.selectedRows.size > 0 ? Array.from(this.selectedRows)[0] : null;
+      
+      this.updateUI();
     }
-    
-    this.updateUI();
   }
 
   /**
@@ -531,7 +602,7 @@ export default class SelectionManager {
     }
 
     // Get all data (including filtered/sorted) to find selected rows
-    const allData = this.table.dataManager.getData();
+    const allData = this.getFullData();
     return allData.filter(row => this.selectedRows.has(this.getRowId(row)));
   }
 
@@ -638,6 +709,16 @@ export default class SelectionManager {
    * @returns {Boolean} True if row is selected
    */
   isRowSelected(rowId) {
+    return this.selectedRows.has(String(rowId));
+  }
+
+  /**
+   * Check if a row is selected by its data object (for virtual scrolling)
+   * @param {Object} rowData - Row data object to check
+   * @returns {Boolean} True if row is selected
+   */
+  isRowSelectedByData(rowData) {
+    const rowId = this.getRowId(rowData);
     return this.selectedRows.has(String(rowId));
   }
 

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS - Virtual Scrolling Demo (100K+ Rows)</title>
+    
+    <!-- Core TablixJS CSS -->
+    <link rel="stylesheet" href="../src/styles/tablix.css">
+    <link rel="stylesheet" href="../src/styles/table-core.css">
+    <link rel="stylesheet" href="../src/styles/pagination-core.css">
+    <link rel="stylesheet" href="../src/styles/sorting-core.css">
+    <link rel="stylesheet" href="../src/styles/filtering-core.css">
+    <link rel="stylesheet" href="../src/styles/selection-core.css">
+    <link rel="stylesheet" href="../src/styles/search-core.css">
+    <link rel="stylesheet" href="../src/styles/virtual-scroll-core.css">
+    <link rel="stylesheet" href="../src/styles/themes/default.css">
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .demo-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .demo-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .demo-header p {
+            margin: 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .demo-content {
+            padding: 30px;
+        }
+        
+        .performance-panel {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .performance-panel h3 {
+            margin: 0 0 15px 0;
+            color: #495057;
+            font-size: 1.2rem;
+        }
+        
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .performance-metric {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .performance-metric .label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .performance-metric .value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #212529;
+        }
+        
+        .controls-panel {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-group label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        
+        select, input[type="number"] {
+            padding: 6px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        /* Enhanced table styling for heavy content demo */
+        .tablix-table {
+            font-size: 0.9rem;
+        }
+        
+        .tablix-td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tablix-row:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .tablix-row:hover {
+            background-color: #e3f2fd !important;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-active { background: #d1ecf1; color: #0c5460; }
+        .status-inactive { background: #f8d7da; color: #721c24; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .action-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: all 0.2s;
+        }
+        
+        .action-btn.edit { background: #fff3cd; color: #856404; }
+        .action-btn.delete { background: #f8d7da; color: #721c24; }
+        .action-btn.view { background: #d1ecf1; color: #0c5460; }
+        
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .console-log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .console-log .timestamp {
+            color: #569cd6;
+        }
+        
+        .console-log .message {
+            color: #ce9178;
+        }
+        
+        .console-log .data {
+            color: #9cdcfe;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>🚀 Virtual Scrolling Demo</h1>
+            <p>High-performance rendering of 100,000+ rows with custom content</p>
+        </div>
+        
+        <div class="demo-content">
+            <!-- Performance Panel -->
+            <div class="performance-panel">
+                <h3>📊 Performance Metrics</h3>
+                <div class="performance-grid" id="performance-metrics">
+                    <div class="performance-metric">
+                        <div class="label">Initial Render Time</div>
+                        <div class="value" id="initial-render-time">-</div>
+                    </div>
+                    <div class="performance-metric">
+                        <div class="label">Avg Scroll Update</div>
+                        <div class="value" id="avg-scroll-time">-</div>
+                    </div>
+                    <div class="performance-metric">
+                        <div class="label">Total Rows</div>
+                        <div class="value" id="total-rows">-</div>
+                    </div>
+                    <div class="performance-metric">
+                        <div class="label">Visible Rows</div>
+                        <div class="value" id="visible-rows">-</div>
+                    </div>
+                    <div class="performance-metric">
+                        <div class="label">Rendered Rows</div>
+                        <div class="value" id="rendered-rows">-</div>
+                    </div>
+                    <div class="performance-metric">
+                        <div class="label">Scroll Updates</div>
+                        <div class="value" id="scroll-updates">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Controls Panel -->
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label for="row-count">Dataset Size:</label>
+                    <select id="row-count">
+                        <option value="1000">1,000 rows</option>
+                        <option value="10000">10,000 rows</option>
+                        <option value="50000">50,000 rows</option>
+                        <option value="100000" selected>100,000 rows</option>
+                        <option value="200000">200,000 rows</option>
+                        <option value="500000">500,000 rows</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="buffer-size">Buffer Size:</label>
+                    <input type="number" id="buffer-size" value="10" min="1" max="50">
+                </div>
+                
+                <div class="control-group">
+                    <button class="btn" onclick="regenerateData()">🔄 Regenerate Data</button>
+                    <button class="btn btn-secondary" onclick="toggleVirtualScroll()">⚡ Toggle Virtual Scroll</button>
+                    <button class="btn btn-success" onclick="scrollToRow()">📍 Jump to Row</button>
+                </div>
+            </div>
+            
+            <!-- Table Container -->
+            <div id="table-container"></div>
+            
+            <!-- Console Log -->
+            <div class="console-log" id="console-log">
+                <div><span class="timestamp">[System]</span> <span class="message">Console initialized</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import Table from '../src/core/Table.js';
+        
+        let table;
+        let performanceInterval;
+        
+        // Console logging
+        function logToConsole(message, data = null) {
+            const consoleEl = document.getElementById('console-log');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            let logEntry = `<div><span class="timestamp">[${timestamp}]</span> <span class="message">${message}</span>`;
+            if (data) {
+                logEntry += ` <span class="data">${JSON.stringify(data)}</span>`;
+            }
+            logEntry += '</div>';
+            
+            consoleEl.innerHTML += logEntry;
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            
+            // Keep only last 50 entries
+            const entries = consoleEl.querySelectorAll('div');
+            if (entries.length > 50) {
+                entries[0].remove();
+            }
+        }
+        
+        // Generate sample data with heavy content
+        function generateSampleData(count) {
+            logToConsole(`🔄 Generating ${count.toLocaleString()} sample records...`);
+            const startTime = performance.now();
+            
+            const data = [];
+            const departments = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance', 'Operations', 'Design', 'Legal'];
+            const statuses = ['active', 'inactive', 'pending'];
+            const countries = ['USA', 'Canada', 'UK', 'Germany', 'France', 'Japan', 'Australia', 'Brazil'];
+            const firstNames = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Lisa', 'Robert', 'Emily', 'James', 'Emma'];
+            const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'];
+            
+            for (let i = 0; i < count; i++) {
+                const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+                const department = departments[Math.floor(Math.random() * departments.length)];
+                const status = statuses[Math.floor(Math.random() * statuses.length)];
+                const country = countries[Math.floor(Math.random() * countries.length)];
+                
+                data.push({
+                    id: i + 1,
+                    name: `${firstName} ${lastName}`,
+                    email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i}@example.com`,
+                    department: department,
+                    salary: Math.floor(Math.random() * 150000) + 30000,
+                    status: status,
+                    country: country,
+                    joinDate: new Date(Date.now() - Math.random() * 5 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    avatar: `https://picsum.photos/32/32?random=${i}`,
+                    performanceScore: Math.floor(Math.random() * 100) + 1
+                });
+            }
+            
+            const endTime = performance.now();
+            logToConsole(`✅ Generated ${count.toLocaleString()} records in ${(endTime - startTime).toFixed(2)}ms`);
+            
+            return data;
+        }
+        
+        // Initialize table with virtual scrolling
+        function initTable(data) {
+            const startTime = performance.now();
+            logToConsole('🚀 Initializing table with virtual scrolling...');
+            
+            // Destroy existing table
+            if (table) {
+                table.destroy && table.destroy();
+            }
+            
+            table = new Table('#table-container', {
+                // Enable virtual scrolling
+                virtualScroll: {
+                    enabled: true,
+                    buffer: parseInt(document.getElementById('buffer-size').value),
+                    containerHeight: 500
+                },
+                
+                // Disable pagination for virtual scrolling
+                pagination: {
+                    enabled: false
+                },
+                
+                // Enable other features for testing compatibility
+                sorting: {
+                    enabled: true,
+                    mode: 'client'
+                },
+                
+                filtering: {
+                    enabled: true,
+                    mode: 'client'
+                },
+                
+                search: {
+                    enabled: true,
+                    placeholder: 'Search employees...'
+                },
+                
+                selection: {
+                    enabled: true,
+                    mode: 'multi'
+                },
+                
+                // Debug mode for performance logging
+                debug: true,
+                
+                // Column definitions with custom renderers
+                columns: [
+                    {
+                        name: 'id',
+                        title: 'ID',
+                        width: '80px'
+                    },
+                    {
+                        name: 'name',
+                        title: 'Employee',
+                        renderer: (value, row) => {
+                            return `
+                                <div style="display: flex; align-items: center;">
+                                    <img src="${row.avatar}" alt="${value}" class="user-avatar">
+                                    <div>
+                                        <strong>${value}</strong><br>
+                                        <small style="color: #666;">${row.email}</small>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    },
+                    {
+                        name: 'department',
+                        title: 'Department'
+                    },
+                    {
+                        name: 'salary',
+                        title: 'Salary',
+                        renderer: (value) => {
+                            return `$${value.toLocaleString()}`;
+                        }
+                    },
+                    {
+                        name: 'status',
+                        title: 'Status',
+                        renderer: (value) => {
+                            return `<span class="status-badge status-${value}">${value}</span>`;
+                        }
+                    },
+                    {
+                        name: 'country',
+                        title: 'Country'
+                    },
+                    {
+                        name: 'joinDate',
+                        title: 'Join Date'
+                    },
+                    {
+                        name: 'performanceScore',
+                        title: 'Score',
+                        renderer: (value) => {
+                            const color = value >= 80 ? '#28a745' : value >= 60 ? '#ffc107' : '#dc3545';
+                            return `<div style="color: ${color}; font-weight: bold;">${value}%</div>`;
+                        }
+                    },
+                    {
+                        name: 'actions',
+                        title: 'Actions',
+                        renderer: (value, row) => {
+                            return `
+                                <div class="action-buttons">
+                                    <button class="action-btn edit" onclick="alert('Edit ${row.name}')">Edit</button>
+                                    <button class="action-btn delete" onclick="alert('Delete ${row.name}')">Delete</button>
+                                </div>
+                            `;
+                        }
+                    }
+                ]
+            });
+            
+            // Load data
+            table.loadData(data);
+            
+            const endTime = performance.now();
+            const renderTime = (endTime - startTime).toFixed(2);
+            
+            document.getElementById('initial-render-time').textContent = `${renderTime}ms`;
+            logToConsole(`✅ Table initialized in ${renderTime}ms`);
+            
+            // Start performance monitoring
+            startPerformanceMonitoring();
+        }
+        
+        // Performance monitoring
+        function startPerformanceMonitoring() {
+            if (performanceInterval) {
+                clearInterval(performanceInterval);
+            }
+            
+            performanceInterval = setInterval(() => {
+                if (table && table.virtualScrollManager && table.virtualScrollManager.isEnabled()) {
+                    const stats = table.virtualScrollManager.getPerformanceStats();
+                    const range = table.virtualScrollManager.getVisibleRange();
+                    
+                    if (stats) {
+                        document.getElementById('avg-scroll-time').textContent = `${stats.averageRenderTime}ms`;
+                        document.getElementById('total-rows').textContent = stats.totalRows.toLocaleString();
+                        document.getElementById('visible-rows').textContent = stats.visibleRows;
+                        document.getElementById('rendered-rows').textContent = stats.renderedRows;
+                        document.getElementById('scroll-updates').textContent = stats.scrollUpdates;
+                    }
+                }
+            }, 1000);
+        }
+        
+        // Control functions
+        window.regenerateData = function() {
+            const count = parseInt(document.getElementById('row-count').value);
+            const data = generateSampleData(count);
+            initTable(data);
+        };
+        
+        window.toggleVirtualScroll = function() {
+            if (table && table.virtualScrollManager) {
+                const isEnabled = table.virtualScrollManager.isEnabled();
+                table.virtualScrollManager.setEnabled(!isEnabled);
+                logToConsole(`Virtual scrolling ${!isEnabled ? 'enabled' : 'disabled'}`);
+            }
+        };
+        
+        window.scrollToRow = function() {
+            const rowIndex = prompt('Enter row number to scroll to:');
+            if (rowIndex && table && table.virtualScrollManager) {
+                const index = parseInt(rowIndex) - 1; // Convert to 0-based index
+                table.virtualScrollManager.scrollToRow(index);
+                logToConsole(`Scrolled to row ${rowIndex}`);
+            }
+        };
+        
+        // Initialize with default data
+        document.addEventListener('DOMContentLoaded', function() {
+            logToConsole('🌟 Virtual Scrolling Demo loaded');
+            regenerateData();
+        });
+        
+        // Update buffer size
+        document.getElementById('buffer-size').addEventListener('change', function() {
+            if (table && table.virtualScrollManager) {
+                table.virtualScrollManager.options.buffer = parseInt(this.value);
+                logToConsole(`Buffer size updated to ${this.value}`);
+            }
+        });
+    </script>
+</body>
+</html>

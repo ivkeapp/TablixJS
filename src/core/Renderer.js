@@ -3,9 +3,10 @@ export default class Renderer {
     this.table = table;
   }
 
-  renderTable(data) {
+  renderTable(data, virtualMode = false) {
     const columns = this.table.columnManager ? this.table.columnManager.getColumns() : (this.table.options.columns || []);
     const controlsOptions = this.table.options.controls;
+    const isVirtualScrollEnabled = this.table.virtualScrollManager && this.table.virtualScrollManager.isEnabled();
 
     // Preserve search input value and focus state before re-rendering
     let preservedSearchValue = '';
@@ -29,6 +30,12 @@ export default class Renderer {
     // Top controls
     if (controlsOptions.enabled && (controlsOptions.position === 'top' || controlsOptions.position === 'both')) {
       html += this.renderControls('top');
+    }
+    
+    // Virtual scroll container (if enabled)
+    if (isVirtualScrollEnabled) {
+      const containerHeight = this.table.options.virtualScroll.containerHeight || 400;
+      html += `<div class="tablix-scroll-container" style="height: ${containerHeight}px; overflow: auto; position: relative; border: 1px solid #ddd;">`;
     }
     
     // Table
@@ -65,7 +72,12 @@ export default class Renderer {
 
     // Body
     html += '<tbody class="tablix-tbody">';
-    if (data.length === 0) {
+    
+    // For virtual scrolling, only render empty structure or limited rows
+    if (isVirtualScrollEnabled && virtualMode) {
+      // Empty body for virtual scrolling - rows will be added by VirtualScrollManager
+      html += `<tr class="tablix-placeholder-row" style="display: none;"><td colspan="${columns.length}"></td></tr>`;
+    } else if (data.length === 0) {
       html += `<tr class="tablix-empty-row"><td colspan="${columns.length}" class="tablix-empty-cell">No data available</td></tr>`;
     } else {
       data.forEach((row, index) => {
@@ -96,6 +108,11 @@ export default class Renderer {
     }
     html += '</tbody>';
     html += '</table>';
+    
+    // Close virtual scroll container if enabled
+    if (isVirtualScrollEnabled) {
+      html += '</div>'; // Close tablix-scroll-container
+    }
 
     // Pagination will be rendered separately
     html += '<div class="tablix-pagination-container"></div>';
