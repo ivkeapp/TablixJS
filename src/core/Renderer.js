@@ -402,12 +402,15 @@ export default class Renderer {
     
     // Search control
     if (controlsOptions.search && searchOptions.enabled) {
+      // Ensure placeholder always has a default value to prevent "undefined" display
+      const placeholderText = searchOptions.placeholder || 'Search...';
+      
       html += '<div class="tablix-control-group tablix-search-group">';
       html += `<input type="text" 
                       class="tablix-search-input" 
                       id="tablix-search-input" 
                       name="table-search"
-                      placeholder="${searchOptions.placeholder}" />`;
+                      placeholder="${placeholderText}" />`;
       html += '<button type="button" class="tablix-btn tablix-search-clear" title="Clear search" style="display: none;">✕</button>';
       html += '</div>';
     }

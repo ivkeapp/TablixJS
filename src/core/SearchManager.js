@@ -15,6 +15,11 @@ export default class SearchManager {
       ...options
     };
 
+    // Ensure placeholder is never undefined to prevent "undefined" from showing in UI
+    if (!this.options.placeholder) {
+      this.options.placeholder = 'Search...';
+    }
+
     // Current search state
     this.currentSearchTerm = '';
     this.searchTimeout = null;
@@ -308,6 +313,11 @@ export default class SearchManager {
   configure(newOptions) {
     const oldOptions = { ...this.options };
     this.options = { ...this.options, ...newOptions };
+    
+    // Ensure placeholder is never undefined
+    if (!this.options.placeholder) {
+      this.options.placeholder = 'Search...';
+    }
     
     // Update placeholder if it changed
     if (newOptions.placeholder && newOptions.placeholder !== oldOptions.placeholder) {
