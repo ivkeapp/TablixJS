@@ -110,6 +110,10 @@
   --tablix-control-btn-active-bg: #007acc;
   --tablix-control-btn-active-text: #fff;
   
+  /* Virtual scroll specific */
+  --tablix-virtual-scroll-bg: #fff;
+  --tablix-virtual-scroll-border: 1px solid #ddd;
+  
   /* Sorting specific */
   --tablix-header-hover-bg: rgba(0, 0, 0, 0.05);
   --tablix-sorted-header-bg: rgba(0, 122, 204, 0.05);

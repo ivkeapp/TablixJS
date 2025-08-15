@@ -4,8 +4,8 @@
   position: relative;
   overflow: auto;
   height: 400px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: var(--tablix-table-border, 1px solid #ddd);
+  border-radius: var(--tablix-border-radius, 4px);
 }
 
 .tablix-scroll-container .tablix-table {
@@ -17,7 +17,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background: white;
+  background: var(--tablix-header-bg, white);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
@@ -59,8 +59,8 @@
 }
 
 .tablix-scroll-container img.image-placeholder {
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
+  background-color: var(--tablix-row-even-bg, #f0f0f0);
+  border: var(--tablix-cell-border, 1px solid #ddd);
 }
 
 /* Smooth image transitions */
@@ -75,7 +75,7 @@
   justify-content: center;
   height: 100px;
   font-style: italic;
-  color: #666;
+  color: var(--tablix-loading-text-color, #666);
 }
 
 /* Virtual scroll performance indicators */
