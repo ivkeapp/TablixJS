@@ -13,12 +13,27 @@
 /* Selected row styles */
 .tablix-row.tablix-selected {
   background-color: var(--tablix-row-selected-bg, #e3f2fd) !important;
-  border-left: 4px solid #2196f3 !important;
+  border-left: 4px solid var(--tablix-selection-border-color, #2196f3) !important;
   box-shadow: inset 0 0 0 1px rgba(33, 150, 243, 0.3) !important;
 }
 
 .tablix-row.tablix-selected:hover {
   background-color: var(--tablix-row-selected-hover-bg, #bbdefb) !important;
+}
+
+/* Dark theme support for selected rows */
+[data-theme="dark"] .tablix-row.tablix-selected,
+.dark .tablix-row.tablix-selected,
+.tablix-wrapper.dark .tablix-row.tablix-selected {
+  background-color: var(--tablix-row-selected-bg, rgba(102, 126, 234, 0.3)) !important;
+  border-left: 4px solid var(--tablix-selection-border-color, #667eea) !important;
+  box-shadow: inset 0 0 0 1px rgba(102, 126, 234, 0.4) !important;
+}
+
+[data-theme="dark"] .tablix-row.tablix-selected:hover,
+.dark .tablix-row.tablix-selected:hover,
+.tablix-wrapper.dark .tablix-row.tablix-selected:hover {
+  background-color: var(--tablix-row-selected-hover-bg, rgba(102, 126, 234, 0.4)) !important;
 }
 
 /* Last selected row (for multi-selection) */

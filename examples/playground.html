@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TablixJS Playground - Interactive Feature Explorer</title>
+  <link rel="stylesheet" href="../src/styles/tablix.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #667eea;
+      --primary-dark: #5a67d8;
+      --secondary: #764ba2;
+      --accent: #f093fb;
+      --success: #48bb78;
+      --warning: #ed8936;
+      --danger: #f56565;
+      --info: #3182ce;
+      
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1a1a1a;
+      --bg-tertiary: #2d2d2d;
+      --bg-card: #1e1e1e;
+      --bg-glass: rgba(255, 255, 255, 0.05);
+      
+      --text-primary: #ffffff;
+      --text-secondary: #b3b3b3;
+      --text-muted: #666666;
+      
+      --border: rgba(255, 255, 255, 0.1);
+      --border-hover: rgba(255, 255, 255, 0.2);
+      
+      --shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.3);
+      --glow: 0 0 30px rgba(102, 126, 234, 0.3);
+      
+      --radius: 12px;
+      --radius-lg: 20px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .playground {
+      display: grid;
+      grid-template-columns: 350px 1fr 300px;
+      grid-template-rows: 60px 1fr;
+      grid-template-areas: 
+        "header header header"
+        "sidebar content panel";
+      height: 100vh;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, #1a1a2e 100%);
+    }
+
+    @media (max-width: 1200px) {
+      .playground {
+        grid-template-columns: 1fr;
+        grid-template-areas: 
+          "header"
+          "content";
+      }
+      .sidebar, .panel { display: none; }
+    }
+
+    /* Header */
+    .header {
+      grid-area: header;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      backdrop-filter: blur(20px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      grid-area: sidebar;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    .control-section {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .control-group {
+      margin-bottom: 1rem;
+    }
+
+    .control-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .control-input, .control-select {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+
+    .control-input:focus, .control-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toggle-group:last-child {
+      border-bottom: none;
+    }
+
+    .toggle-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid var(--border);
+    }
+
+    .toggle.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-color: var(--primary);
+    }
+
+    .toggle::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      transition: var(--transition);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle.active::before {
+      transform: translateX(20px);
+    }
+
+    /* Content area */
+    .content {
+      grid-area: content;
+      background: var(--bg-secondary);
+      padding: 2rem;
+      overflow: auto;
+      position: relative;
+    }
+
+    .demo-container {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      min-height: 600px;
+    }
+
+    .demo-header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      padding: 1.5rem;
+      text-align: center;
+      color: white;
+    }
+
+    .demo-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .demo-subtitle {
+      opacity: 0.9;
+      font-size: 0.95rem;
+    }
+
+    .demo-content {
+      padding: 2rem;
+      min-height: 500px;
+    }
+
+    /* Right panel */
+    .panel {
+      grid-area: panel;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-section {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .stat-card {
+      background: var(--bg-tertiary);
+      padding: 1rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .code-output {
+      background: #0d1117;
+      color: #c9d1d9;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      padding: 1rem;
+      border-radius: var(--radius);
+      border: 1px solid #21262d;
+      max-height: 300px;
+      overflow-y: auto;
+      flex: 1;
+      margin-top: 1rem;
+    }
+
+    .console-output {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      max-height: 200px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .console-line {
+      margin-bottom: 0.25rem;
+      word-break: break-all;
+    }
+
+    .console-timestamp {
+      color: var(--info);
+    }
+
+    .console-level {
+      font-weight: 600;
+    }
+
+    .console-level.info { color: var(--info); }
+    .console-level.success { color: var(--success); }
+    .console-level.warning { color: var(--warning); }
+    .console-level.error { color: var(--danger); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--glow);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-glass);
+      border-color: var(--border-hover);
+    }
+
+    .btn-small {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-full {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* Floating action button */
+    .fab {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+      z-index: 1000;
+    }
+
+    .fab:hover {
+      transform: scale(1.1);
+      box-shadow: var(--glow), var(--shadow-lg);
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .fab {
+        bottom: 1rem;
+        right: 1rem;
+      }
+    }
+
+    /* Loading states */
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+      position: relative;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid var(--primary);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Table container specific styles */
+    #tableContainer {
+      min-height: 400px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    /* Selection styles for table rows */
+    #tableContainer .tablix-row.tablix-selected {
+      background: rgba(102, 126, 234, 0.2) !important;
+      border-left: 3px solid var(--primary) !important;
+    }
+
+    #tableContainer .tablix-row.tablix-selected:hover {
+      background: rgba(102, 126, 234, 0.3) !important;
+    }
+
+    #tableContainer .table-checkbox {
+      margin-right: 8px;
+    }
+
+    #tableContainer .tablix-row:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Custom scrollbar for webkit browsers */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-tertiary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--border-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="playground">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        🎮 TablixJS Playground
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary btn-small" onclick="resetAll()">
+          🔄 Reset
+        </button>
+        <button class="btn btn-secondary btn-small" onclick="exportConfig()">
+          📥 Export
+        </button>
+        <button class="btn btn-primary btn-small" onclick="generateCode()">
+          💻 Generate Code
+        </button>
+      </div>
+    </header>
+
+    <!-- Sidebar Controls -->
+    <aside class="sidebar">
+      <!-- Data Configuration -->
+      <section class="control-section">
+        <h3 class="section-title">📊 Data Setup</h3>
+        
+        <div class="control-group">
+          <label class="control-label">Dataset Size</label>
+          <select class="control-select" id="datasetSize" onchange="updateDataset()">
+            <option value="small">Small (100 rows)</option>
+            <option value="medium" selected>Medium (1,000 rows)</option>
+            <option value="large">Large (10,000 rows)</option>
+            <option value="huge">Huge (100,000 rows)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Data Type</label>
+          <select class="control-select" id="dataType" onchange="updateDataType()">
+            <option value="employees" selected>Employee Records</option>
+            <option value="products">Product Catalog</option>
+            <option value="sales">Sales Data</option>
+            <option value="financial">Financial Records</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary btn-full" onclick="regenerateData()">
+          🔄 Regenerate Data
+        </button>
+      </section>
+
+      <!-- Core Features -->
+      <section class="control-section">
+        <h3 class="section-title">⚙️ Core Features</h3>
+        
+        <div class="toggle-group">
+          <span class="toggle-label">Pagination</span>
+          <div class="toggle active" id="paginationToggle" onclick="toggleFeature('pagination')"></div>
+        </div>
+
+        <div class="toggle-group">
+          <span class="toggle-label">Sorting</span>
+          <div class="toggle active" id="sortingToggle" onclick="toggleFeature('sorting')"></div>
+        </div>
+
+        <div class="toggle-group">
+          <span class="toggle-label">Filtering</span>
+          <div class="toggle active" id="filteringToggle" onclick="toggleFeature('filtering')"></div>
+        </div>
+
+        <div class="toggle-group">
+          <span class="toggle-label">Search</span>
+          <div class="toggle active" id="searchToggle" onclick="toggleFeature('search')"></div>
+        </div>
+
+        <div class="toggle-group">
+          <span class="toggle-label">Selection</span>
+          <div class="toggle" id="selectionToggle" onclick="toggleFeature('selection')"></div>
+        </div>
+
+        <div class="toggle-group">
+          <span class="toggle-label">Virtual Scroll</span>
+          <div class="toggle" id="virtualScrollToggle" onclick="toggleFeature('virtualScroll')"></div>
+        </div>
+      </section>
+
+      <!-- Pagination Settings -->
+      <section class="control-section" id="paginationSettings">
+        <h3 class="section-title">📄 Pagination</h3>
+        
+        <div class="control-group">
+          <label class="control-label">Page Size</label>
+          <select class="control-select" id="pageSize" onchange="updatePagination()">
+            <option value="10" selected>10 rows</option>
+            <option value="25">25 rows</option>
+            <option value="50">50 rows</option>
+            <option value="100">100 rows</option>
+          </select>
+        </div>
+
+        <div class="toggle-group">
+          <span class="toggle-label">Page Numbers</span>
+          <div class="toggle active" id="showPageNumbersToggle" onclick="togglePaginationOption('showPageNumbers')"></div>
+        </div>
+
+        <div class="toggle-group">
+          <span class="toggle-label">Page Sizes</span>
+          <div class="toggle active" id="showPageSizesToggle" onclick="togglePaginationOption('showPageSizes')"></div>
+        </div>
+      </section>
+
+      <!-- Selection Settings -->
+      <section class="control-section" id="selectionSettings" style="display: none;">
+        <h3 class="section-title">✅ Selection</h3>
+        
+        <div class="control-group">
+          <label class="control-label">Mode</label>
+          <select class="control-select" id="selectionMode" onchange="updateSelection()">
+            <option value="single">Single Row</option>
+            <option value="multi" selected>Multiple Rows</option>
+          </select>
+        </div>
+
+        <div class="toggle-group">
+          <span class="toggle-label">Select All</span>
+          <div class="toggle" id="showSelectAllToggle" onclick="toggleSelectionOption('showSelectAll')"></div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <div class="demo-container">
+        <div class="demo-header">
+          <h2 class="demo-title">🚀 Live Table Demo</h2>
+          <p class="demo-subtitle">Configure features and see changes instantly</p>
+        </div>
+        <div class="demo-content">
+          <div id="tableContainer"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Panel -->
+    <aside class="panel">
+      <!-- Performance Stats -->
+      <section class="panel-section">
+        <h3 class="panel-title">📈 Performance</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-value" id="renderTime">-</span>
+            <span class="stat-label">Render (ms)</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="dataRows">-</span>
+            <span class="stat-label">Data Rows</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="visibleRows">-</span>
+            <span class="stat-label">Visible</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="memoryUsage">-</span>
+            <span class="stat-label">Memory</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Generated Code -->
+      <section class="panel-section">
+        <h3 class="panel-title">💻 Generated Code</h3>
+        <div class="code-output" id="generatedCode">
+          <div style="color: #7c3aed;">// Configure your features above</div>
+          <div style="color: #666;">// Code will generate automatically</div>
+        </div>
+      </section>
+
+      <!-- Console -->
+      <section class="panel-section" style="flex: 1; display: flex; flex-direction: column;">
+        <h3 class="panel-title">🖥️ Console</h3>
+        <div class="console-output" id="consoleOutput">
+          <div class="console-line">
+            <span class="console-timestamp">[00:00:00]</span>
+            <span class="console-level info">[INFO]</span>
+            Playground ready
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <!-- Floating Action Button -->
+  <button class="fab" onclick="window.open('index.html', '_blank')" title="Back to Examples">
+    🏠
+  </button>
+
+  <script type="module">
+    import Table from '../src/core/Table.js';
+
+    // Playground state
+    const state = {
+      table: null,
+      config: {
+        pagination: { enabled: true, pageSize: 10, showPageNumbers: true, showPageSizes: true },
+        sorting: { enabled: true },
+        filtering: { enabled: true },
+        search: { enabled: true },
+        selection: { enabled: false, mode: 'multi', showSelectAll: false },
+        virtualScroll: { enabled: false }
+      },
+      data: [],
+      analytics: {
+        interactions: 0,
+        startTime: Date.now()
+      }
+    };
+
+    // Console logging
+    const logger = {
+      log(level, message, data = null) {
+        const console = document.getElementById('consoleOutput');
+        const time = new Date().toLocaleTimeString();
+        
+        const line = document.createElement('div');
+        line.className = 'console-line';
+        line.innerHTML = `
+          <span class="console-timestamp">[${time}]</span>
+          <span class="console-level ${level}">[${level.toUpperCase()}]</span>
+          ${message}
+          ${data ? ` ${JSON.stringify(data)}` : ''}
+        `;
+        
+        console.appendChild(line);
+        console.scrollTop = console.scrollHeight;
+        
+        // Keep only last 50 lines
+        while (console.children.length > 50) {
+          console.removeChild(console.firstChild);
+        }
+      }
+    };
+
+    // Data generators
+    const dataGenerators = {
+      employees: (count) => {
+        const departments = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance'];
+        const positions = ['Junior', 'Senior', 'Lead', 'Manager', 'Director'];
+        const firstNames = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Lisa'];
+        const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones'];
+        
+        return Array.from({ length: count }, (_, i) => ({
+          id: i + 1,
+          name: `${firstNames[i % firstNames.length]} ${lastNames[i % lastNames.length]}`,
+          email: `user${i + 1}@company.com`,
+          department: departments[i % departments.length],
+          position: positions[i % positions.length],
+          salary: 40000 + (i * 1000) % 80000,
+          joinDate: new Date(2020 + (i % 4), i % 12, (i % 28) + 1).toISOString().split('T')[0],
+          status: i % 3 === 0 ? 'Active' : i % 3 === 1 ? 'Inactive' : 'On Leave'
+        }));
+      },
+
+      products: (count) => {
+        const categories = ['Electronics', 'Clothing', 'Books', 'Home', 'Sports'];
+        const brands = ['Apple', 'Samsung', 'Nike', 'Amazon', 'Sony'];
+        
+        return Array.from({ length: count }, (_, i) => ({
+          id: i + 1,
+          name: `Product ${i + 1}`,
+          category: categories[i % categories.length],
+          brand: brands[i % brands.length],
+          price: 10 + (i * 13) % 1000,
+          stock: (i * 7) % 500,
+          rating: (3 + (i % 3)).toFixed(1),
+          available: i % 4 !== 0
+        }));
+      },
+
+      sales: (count) => {
+        const regions = ['North', 'South', 'East', 'West', 'Central'];
+        
+        return Array.from({ length: count }, (_, i) => ({
+          id: i + 1,
+          orderId: `ORD-${String(i + 1).padStart(6, '0')}`,
+          customer: `Customer ${i + 1}`,
+          region: regions[i % regions.length],
+          amount: 100 + (i * 23) % 10000,
+          date: new Date(2023, i % 12, (i % 28) + 1).toISOString().split('T')[0],
+          status: i % 5 === 0 ? 'Pending' : 'Completed'
+        }));
+      },
+
+      financial: (count) => {
+        const types = ['Income', 'Expense', 'Investment', 'Transfer'];
+        
+        return Array.from({ length: count }, (_, i) => ({
+          id: i + 1,
+          transactionId: `TXN-${String(i + 1).padStart(8, '0')}`,
+          type: types[i % types.length],
+          amount: 100 + (i * 17) % 50000,
+          date: new Date(2023, i % 12, (i % 28) + 1).toISOString().split('T')[0],
+          description: `Transaction ${i + 1}`,
+          account: `Account ${(i % 5) + 1}`
+        }));
+      }
+    };
+
+    // Column configurations
+    const columnConfigs = {
+      employees: [
+        { name: 'id', title: 'ID', width: '60px' },
+        { name: 'name', title: 'Name' },
+        { name: 'email', title: 'Email' },
+        { name: 'department', title: 'Department' },
+        { name: 'position', title: 'Position' },
+        { name: 'salary', title: 'Salary', renderer: (value) => `$${value.toLocaleString()}` },
+        { name: 'joinDate', title: 'Join Date' },
+        { name: 'status', title: 'Status' }
+      ],
+      products: [
+        { name: 'id', title: 'ID', width: '60px' },
+        { name: 'name', title: 'Product' },
+        { name: 'category', title: 'Category' },
+        { name: 'brand', title: 'Brand' },
+        { name: 'price', title: 'Price', renderer: (value) => `$${value}` },
+        { name: 'stock', title: 'Stock' },
+        { name: 'rating', title: 'Rating' },
+        { name: 'available', title: 'Available', renderer: (value) => value ? '✅' : '❌' }
+      ],
+      sales: [
+        { name: 'id', title: 'ID', width: '60px' },
+        { name: 'orderId', title: 'Order ID' },
+        { name: 'customer', title: 'Customer' },
+        { name: 'region', title: 'Region' },
+        { name: 'amount', title: 'Amount', renderer: (value) => `$${value.toLocaleString()}` },
+        { name: 'date', title: 'Date' },
+        { name: 'status', title: 'Status' }
+      ],
+      financial: [
+        { name: 'id', title: 'ID', width: '60px' },
+        { name: 'transactionId', title: 'Transaction ID' },
+        { name: 'type', title: 'Type' },
+        { name: 'amount', title: 'Amount', renderer: (value) => `$${value.toLocaleString()}` },
+        { name: 'date', title: 'Date' },
+        { name: 'description', title: 'Description' },
+        { name: 'account', title: 'Account' }
+      ]
+    };
+
+    // Initialize playground
+    function initPlayground() {
+      logger.log('info', 'Initializing playground...');
+      
+      const dataType = document.getElementById('dataType').value;
+      const dataSize = getDataSize();
+      
+      state.data = dataGenerators[dataType](dataSize);
+      createTable();
+      updateStats();
+      generateCode();
+      
+      logger.log('success', `Playground initialized with ${dataSize} ${dataType} records`);
+    }
+
+    function getDataSize() {
+      const size = document.getElementById('datasetSize').value;
+      const sizeMap = { small: 100, medium: 1000, large: 10000, huge: 100000 };
+      return sizeMap[size] || 1000;
+    }
+
+    function createTable() {
+      const startTime = performance.now();
+      
+      if (state.table) {
+        try {
+          state.table.destroy();
+        } catch (e) {
+          logger.log('warning', 'Error destroying previous table', e.message);
+        }
+      }
+
+      const dataType = document.getElementById('dataType').value;
+      const columns = columnConfigs[dataType];
+
+      // Add loading state
+      document.getElementById('tableContainer').classList.add('loading');
+
+      setTimeout(() => {
+        try {
+          state.table = new Table('#tableContainer', {
+            data: state.data,
+            columns: columns,
+            ...state.config
+          });
+
+          // Add event listeners
+          Object.entries({
+            'afterRender': () => {
+              const renderTime = performance.now() - startTime;
+              document.getElementById('renderTime').textContent = renderTime.toFixed(1);
+              logger.log('success', `Table rendered in ${renderTime.toFixed(1)}ms`);
+            },
+            'afterPageChange': (data) => logger.log('info', 'Page changed', data),
+            'afterSort': (data) => logger.log('info', 'Column sorted', data),
+            'afterFilter': (data) => logger.log('info', 'Filter applied', data),
+            'afterSearch': (data) => logger.log('info', 'Search performed', data),
+            'selectionChanged': (data) => logger.log('info', 'Selection changed', data)
+          }).forEach(([event, handler]) => {
+            state.table.on(event, handler);
+          });
+
+          document.getElementById('tableContainer').classList.remove('loading');
+          
+          state.analytics.interactions++;
+          generateCode();
+          
+        } catch (error) {
+          logger.log('error', 'Failed to create table', error.message);
+          document.getElementById('tableContainer').classList.remove('loading');
+        }
+      }, 100);
+    }
+
+    function updateStats() {
+      document.getElementById('dataRows').textContent = state.data.length.toLocaleString();
+      document.getElementById('visibleRows').textContent = state.config.pagination.enabled ? 
+        state.config.pagination.pageSize : state.data.length;
+      
+      const memoryEstimate = JSON.stringify(state.data).length / 1024;
+      document.getElementById('memoryUsage').textContent = `${memoryEstimate.toFixed(0)}KB`;
+    }
+
+    function generateCode() {
+      const dataType = document.getElementById('dataType').value;
+      const columns = columnConfigs[dataType];
+      
+      const activeFeatures = Object.entries(state.config)
+        .filter(([key, value]) => value.enabled !== false)
+        .map(([key, value]) => `  ${key}: ${JSON.stringify(value, null, 2).replace(/\n/g, '\n  ')}`)
+        .join(',\n');
+
+      const code = `import Table from './tablixjs';
+
+const data = [
+  // Your data array here
+  ${JSON.stringify(state.data.slice(0, 2), null, 2).slice(1, -1)}
+  // ... more rows
+];
+
+const table = new Table('#tableContainer', {
+  data: data,
+  columns: ${JSON.stringify(columns, null, 2).replace(/\n/g, '\n  ')},
+${activeFeatures}
+});
+
+// Event listeners
+table.on('afterRender', () => console.log('Rendered'));
+table.on('afterPageChange', (data) => console.log('Page:', data));`;
+
+      document.getElementById('generatedCode').innerHTML = 
+        code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Global functions
+    window.updateDataset = function() {
+      const size = getDataSize();
+      const dataType = document.getElementById('dataType').value;
+      
+      logger.log('info', `Updating dataset: ${size} ${dataType} records`);
+      state.data = dataGenerators[dataType](size);
+      createTable();
+      updateStats();
+    };
+
+    window.updateDataType = function() {
+      updateDataset();
+    };
+
+    window.regenerateData = function() {
+      logger.log('info', 'Regenerating data...');
+      updateDataset();
+    };
+
+    window.toggleFeature = function(feature) {
+      const toggle = document.getElementById(`${feature}Toggle`);
+      const isActive = toggle.classList.contains('active');
+      
+      toggle.classList.toggle('active');
+      state.config[feature].enabled = !isActive;
+
+      // Virtual scroll and pagination are mutually exclusive
+      if (feature === 'virtualScroll' && state.config[feature].enabled) {
+        // Disable pagination when virtual scroll is enabled
+        const paginationToggle = document.getElementById('paginationToggle');
+        const paginationSettings = document.getElementById('paginationSettings');
+        
+        paginationToggle.classList.remove('active');
+        state.config.pagination.enabled = false;
+        if (paginationSettings) {
+          paginationSettings.style.display = 'none';
+        }
+        logger.log('info', 'Pagination automatically disabled (incompatible with virtual scroll)');
+      } else if (feature === 'pagination' && state.config[feature].enabled) {
+        // Disable virtual scroll when pagination is enabled
+        const virtualScrollToggle = document.getElementById('virtualScrollToggle');
+        
+        virtualScrollToggle.classList.remove('active');
+        state.config.virtualScroll.enabled = false;
+        logger.log('info', 'Virtual scroll automatically disabled (incompatible with pagination)');
+      }
+
+      const settings = document.getElementById(`${feature}Settings`);
+      if (settings) {
+        settings.style.display = state.config[feature].enabled ? 'block' : 'none';
+      }
+
+      createTable();
+      logger.log('info', `${feature} ${state.config[feature].enabled ? 'enabled' : 'disabled'}`);
+    };
+
+    window.updatePagination = function() {
+      const pageSize = parseInt(document.getElementById('pageSize').value);
+      state.config.pagination.pageSize = pageSize;
+      createTable();
+      updateStats();
+      logger.log('info', `Page size updated to ${pageSize}`);
+    };
+
+    window.togglePaginationOption = function(option) {
+      const toggle = document.getElementById(`${option}Toggle`);
+      toggle.classList.toggle('active');
+      state.config.pagination[option] = toggle.classList.contains('active');
+      createTable();
+    };
+
+    window.updateSelection = function() {
+      const mode = document.getElementById('selectionMode').value;
+      state.config.selection.mode = mode;
+      createTable();
+      logger.log('info', `Selection mode: ${mode}`);
+    };
+
+    window.toggleSelectionOption = function(option) {
+      const toggle = document.getElementById(`${option}Toggle`);
+      toggle.classList.toggle('active');
+      state.config.selection[option] = toggle.classList.contains('active');
+      createTable();
+    };
+
+    window.resetAll = function() {
+      logger.log('warning', 'Resetting playground...');
+      
+      // Reset toggles
+      document.querySelectorAll('.toggle').forEach(toggle => toggle.classList.remove('active'));
+      ['paginationToggle', 'sortingToggle', 'filteringToggle', 'searchToggle', 
+       'showPageNumbersToggle', 'showPageSizesToggle'].forEach(id => {
+        document.getElementById(id).classList.add('active');
+      });
+
+      // Reset config
+      state.config = {
+        pagination: { enabled: true, pageSize: 10, showPageNumbers: true, showPageSizes: true },
+        sorting: { enabled: true },
+        filtering: { enabled: true },
+        search: { enabled: true },
+        selection: { enabled: false, mode: 'multi', showSelectAll: false },
+        virtualScroll: { enabled: false }
+      };
+
+      // Reset UI
+      document.getElementById('datasetSize').value = 'medium';
+      document.getElementById('dataType').value = 'employees';
+      document.getElementById('pageSize').value = '10';
+      document.getElementById('selectionSettings').style.display = 'none';
+
+      updateDataset();
+    };
+
+    window.exportConfig = function() {
+      const config = {
+        dataType: document.getElementById('dataType').value,
+        dataSize: document.getElementById('datasetSize').value,
+        tableConfig: state.config,
+        sampleData: state.data.slice(0, 10)
+      };
+      
+      const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'tablixjs-playground-config.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      logger.log('success', 'Configuration exported');
+    };
+
+    window.generateCode = generateCode;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', initPlayground);
+
+    // Export for debugging
+    window.PlaygroundState = state;
+  </script>
+</body>
+</html>

@@ -30,14 +30,21 @@ export default class SelectionManager {
   }
 
   init() {
-    if (!this.options.enabled) {
-      return;
-    }
+    this.eventListenersSetup = false; // Track if event listeners are already set up
     
-    this.setupEventListeners();
+    if (this.options.enabled) {
+      this.setupEventListeners();
+    }
   }
 
   setupEventListeners() {
+    // Prevent setting up listeners multiple times
+    if (this.eventListenersSetup) {
+      return;
+    }
+    
+    this.eventListenersSetup = true;
+    
     // Listen for row clicks
     this.table.eventManager.on('rowClick', (event) => {
       this.handleRowClick(event);
@@ -513,34 +520,38 @@ export default class SelectionManager {
       row.classList.remove('tablix-selected', 'tablix-last-selected');
     });
 
-    // Apply selection classes
-    if (this.table.virtualScrollManager) {
-      // For virtual scrolling: use data-virtual-index to match against full dataset
+    // Check if we're in virtual scroll mode by looking for data-virtual-index attributes
+    const hasVirtualIndexes = allRows.length > 0 && allRows[0].hasAttribute('data-virtual-index');
+    
+    if (hasVirtualIndexes) {
+      // Virtual scrolling mode: use data-virtual-index to match against full dataset
+      const fullData = this.getFullData();
       allRows.forEach((row) => {
         const virtualIndex = parseInt(row.getAttribute('data-virtual-index'));
-        if (!isNaN(virtualIndex)) {
-          const fullData = this.getFullData();
-          if (virtualIndex < fullData.length) {
-            const rowData = fullData[virtualIndex];
-            const rowId = this.getRowId(rowData);
+        if (!isNaN(virtualIndex) && virtualIndex < fullData.length) {
+          const rowData = fullData[virtualIndex];
+          const rowId = this.getRowId(rowData);
+          
+          if (this.selectedRows.has(rowId)) {
+            row.classList.add('tablix-selected');
             
-            if (this.selectedRows.has(rowId)) {
-              row.classList.add('tablix-selected');
-              
-              // Mark the last selected row for special styling
-              if (rowId === this.lastSelectedRow) {
-                row.classList.add('tablix-last-selected');
-              }
+            // Mark the last selected row for special styling
+            if (rowId === this.lastSelectedRow) {
+              row.classList.add('tablix-last-selected');
             }
           }
         }
       });
     } else {
-      // For regular pagination: use current page data
+      // Regular mode: match by row index with current page data
       const currentData = this.getCurrentPageData();
       allRows.forEach((row, index) => {
-        if (index < currentData.length) {
-          const rowData = currentData[index];
+        // Try to get row index from data attribute first, fall back to array index
+        const rowIndex = row.hasAttribute('data-row-index') ? 
+          parseInt(row.getAttribute('data-row-index')) : index;
+          
+        if (rowIndex >= 0 && rowIndex < currentData.length) {
+          const rowData = currentData[rowIndex];
           const rowId = this.getRowId(rowData);
           
           if (this.selectedRows.has(rowId)) {
@@ -735,7 +746,9 @@ export default class SelectionManager {
    */
   enable() {
     this.options.enabled = true;
-    this.setupEventListeners();
+    if (!this.eventListenersSetup) {
+      this.setupEventListeners();
+    }
   }
 
   /**

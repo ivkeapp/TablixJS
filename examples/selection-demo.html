@@ -176,6 +176,40 @@
             color: #fff;
             border-color: #555;
         }
+
+        /* Selection row styling */
+        #tableContainer .tablix-row.tablix-selected {
+            background-color: rgba(0, 122, 204, 0.2) !important;
+            border-left: 3px solid #007acc !important;
+        }
+
+        #tableContainer .tablix-row.tablix-selected:hover {
+            background-color: rgba(0, 122, 204, 0.3) !important;
+        }
+
+        /* Dark theme selection styling */
+        body.dark-theme #tableContainer .tablix-row.tablix-selected {
+            background-color: rgba(102, 126, 234, 0.3) !important;
+            border-left: 3px solid #667eea !important;
+        }
+
+        body.dark-theme #tableContainer .tablix-row.tablix-selected:hover {
+            background-color: rgba(102, 126, 234, 0.4) !important;
+        }
+
+        /* Checkbox styling */
+        #tableContainer .table-checkbox {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        #tableContainer .tablix-row:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-theme #tableContainer .tablix-row:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
     </style>
 </head>
 <body>
