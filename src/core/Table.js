@@ -1,6 +1,7 @@
 import DataManager from './DataManager.js';
 import Renderer from './Renderer.js';
 import EventManager from './EventManager.js';
+import PluginManager from './PluginManager.js';
 import PaginationManager from './PaginationManager.js';
 import SortingManager from './SortingManager.js';
 import ColumnManager from './ColumnManager.js';
@@ -80,6 +81,7 @@ export default class Table {
 
     // Initialize managers
     this.eventManager = new EventManager();
+    this.pluginManager = new PluginManager(this);
     this.columnManager = new ColumnManager(this);
     this.dataManager = new DataManager(this, options.data || []);
     this.renderer = new Renderer(this);
@@ -119,6 +121,9 @@ export default class Table {
     if (this.options.virtualScroll) {
       this.virtualScrollManager = new VirtualScrollManager(this, this.options.virtualScroll);
     }
+
+    // Initialize plugin manager
+    this.pluginManager.init();
 
     this.init();
   }
@@ -177,6 +182,14 @@ export default class Table {
       dataToRender = this.dataManager.getData();
       this.renderer.renderTable(dataToRender);
     }
+  }
+
+  /**
+   * Render the table (public API method)
+   * This is an alias for refreshTable() for external use
+   */
+  async render() {
+    return await this.refreshTable();
   }
 
   /**
@@ -519,6 +532,58 @@ export default class Table {
     }
   }
 
+  // ===== PLUGIN MANAGEMENT =====
+
+  /**
+   * Register and install a plugin
+   * @param {Object|Function} plugin - Plugin object or constructor
+   * @param {Object} options - Plugin configuration options
+   * @returns {Table} Returns this for chaining
+   * 
+   * @example
+   * table.use(DraggableColumnsPlugin, { axis: 'x' });
+   * table.use(InlineEditPlugin, { editableColumns: ['name', 'price'] });
+   */
+  use(plugin, options = {}) {
+    this.pluginManager.register(plugin, options);
+    return this;
+  }
+
+  /**
+   * Uninstall a plugin by name
+   * @param {string} name - Plugin name
+   * @returns {boolean} True if plugin was uninstalled
+   */
+  unuse(name) {
+    return this.pluginManager.uninstall(name);
+  }
+
+  /**
+   * Check if a plugin is installed
+   * @param {string} name - Plugin name
+   * @returns {boolean} True if plugin is installed
+   */
+  hasPlugin(name) {
+    return this.pluginManager.hasPlugin(name);
+  }
+
+  /**
+   * Get a plugin instance by name
+   * @param {string} name - Plugin name
+   * @returns {Object|null} Plugin info or null
+   */
+  getPlugin(name) {
+    return this.pluginManager.getPlugin(name);
+  }
+
+  /**
+   * Get all installed plugins
+   * @returns {Array} Array of plugin info objects
+   */
+  getPlugins() {
+    return this.pluginManager.getAllPlugins();
+  }
+
   // ===== EVENT MANAGEMENT =====
 
   /**
@@ -547,6 +612,36 @@ export default class Table {
    */
   trigger(event, data) {
     this.eventManager.trigger(event, data);
+  }
+
+  /**
+   * Trigger event with before/after hooks support
+   * @param {string} event - Event name
+   * @param {*} data - Event data
+   * @returns {*} Modified data after hooks
+   */
+  async triggerWithHooks(event, data) {
+    return await this.eventManager.triggerWithHooks(event, data);
+  }
+
+  /**
+   * Register before hook
+   * @param {string} event - Event name
+   * @param {Function} callback - Hook callback
+   * @param {Object} options - Hook options
+   */
+  before(event, callback, options = {}) {
+    this.eventManager.before(event, callback, options);
+  }
+
+  /**
+   * Register after hook
+   * @param {string} event - Event name
+   * @param {Function} callback - Hook callback
+   * @param {Object} options - Hook options
+   */
+  after(event, callback, options = {}) {
+    this.eventManager.after(event, callback, options);
   }
 
   // ===== UTILITY METHODS =====
@@ -701,6 +796,11 @@ export default class Table {
    * Destroy the table and clean up all resources
    */
   destroy() {
+    // Clean up plugins first
+    if (this.pluginManager) {
+      this.pluginManager.destroy();
+    }
+
     // Clean up virtual scrolling
     if (this.virtualScrollManager) {
       this.virtualScrollManager.destroy();
@@ -733,6 +833,7 @@ export default class Table {
     }
 
     // Clear references
+    this.pluginManager = null;
     this.virtualScrollManager = null;
     this.selectionManager = null;
     this.searchManager = null;
@@ -744,30 +845,4 @@ export default class Table {
     this.eventManager = null;
   }
 
-  /**
-   * Destroy table and clean up event listeners
-   */
-  destroy() {
-    // Clean up any event listeners
-    const paginationContainer = this.container.querySelector('.tablix-pagination');
-    if (paginationContainer) {
-      paginationContainer.removeEventListener('click', this._paginationClickHandler);
-    }
-
-    // Destroy managers
-    if (this.selectionManager) {
-      this.selectionManager.destroy();
-    }
-
-    // Clear container
-    this.container.innerHTML = '';
-    
-    // Clear references
-    this.dataManager = null;
-    this.renderer = null;
-    this.eventManager = null;
-    this.paginationManager = null;
-    this.sortingManager = null;
-    this.selectionManager = null;
-  }
 }

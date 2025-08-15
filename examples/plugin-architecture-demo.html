@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS Plugin Architecture Demo</title>
+    <link rel="stylesheet" href="../src/styles/tablix.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin: 0 0 10px 0;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 16px;
+            margin: 0;
+        }
+        
+        .demo-section {
+            margin-bottom: 40px;
+        }
+        
+        .demo-section h2 {
+            color: #495057;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .plugin-controls {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .plugin-controls label {
+            font-weight: 500;
+            margin-right: 5px;
+        }
+        
+        .plugin-controls button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .plugin-controls button:hover {
+            background: #0056b3;
+        }
+        
+        .plugin-controls button.active {
+            background: #28a745;
+        }
+        
+        .plugin-controls button.inactive {
+            background: #6c757d;
+        }
+        
+        .plugin-status {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .table-container {
+            position: relative;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .code-example {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+        }
+        
+        .feature-card h4 {
+            margin-top: 0;
+            color: #495057;
+        }
+        
+        .feature-card ul {
+            margin: 10px 0 0 0;
+            padding-left: 20px;
+        }
+        
+        .instructions {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔌 TablixJS Plugin Architecture</h1>
+            <p>Comprehensive demonstration of the modular plugin system</p>
+        </div>
+
+        <div class="demo-section">
+            <h2>📖 Overview</h2>
+            <p>TablixJS now features a powerful plugin architecture that allows you to extend functionality without modifying core code. This demo showcases three example plugins and demonstrates how to create your own.</p>
+            
+            <div class="feature-list">
+                <div class="feature-card">
+                    <h4>🎯 Core Plugin System</h4>
+                    <ul>
+                        <li>PluginManager for registration & lifecycle</li>
+                        <li>Event hooks (before/after)</li>
+                        <li>API extension capabilities</li>
+                        <li>Clean uninstall/cleanup</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>🚀 Example Plugins</h4>
+                    <ul>
+                        <li><strong>DraggableColumns:</strong> Drag & drop column reordering</li>
+                        <li><strong>InlineEdit:</strong> Edit cells directly in table</li>
+                        <li><strong>ExportCSV:</strong> Export data to CSV format</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>⚙️ Plugin Features</h4>
+                    <ul>
+                        <li>Configuration options</li>
+                        <li>Event integration</li>
+                        <li>Custom styling</li>
+                        <li>Dependency management</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🎮 Interactive Demo</h2>
+            
+            <div class="instructions">
+                <h3>Try These Features:</h3>
+                <ul>
+                    <li><strong>Drag Columns:</strong> Drag column headers to reorder them</li>
+                    <li><strong>Edit Cells:</strong> Double-click any name, email, or status cell to edit</li>
+                    <li><strong>Export Data:</strong> Click "Export CSV" to download the table data</li>
+                    <li><strong>Plugin Management:</strong> Use the controls below to enable/disable plugins</li>
+                </ul>
+            </div>
+
+            <div class="plugin-controls">
+                <label>Plugin Controls:</label>
+                <button id="toggleDraggable" class="active">📱 Draggable Columns</button>
+                <button id="toggleInlineEdit" class="active">✏️ Inline Edit</button>
+                <button id="toggleExportCSV" class="active">📁 Export CSV</button>
+                <button id="showPluginInfo">ℹ️ Plugin Info</button>
+                <button id="addSampleData">➕ Add Sample Row</button>
+            </div>
+
+            <div class="plugin-status" id="pluginStatus">
+                Loading plugins...
+            </div>
+
+            <div class="table-container" id="tableContainer">
+                <!-- Table will be rendered here -->
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>💻 Code Examples</h2>
+            
+            <h3>Basic Plugin Usage</h3>
+            <div class="code-example">
+import Tablix from './src/core/Table.js';
+import { DraggableColumns, InlineEdit, ExportCSV } from './src/plugins/index.js';
+
+const table = new Tablix('#my-table', {
+    data: sampleData,
+    columns: columns
+});
+
+// Install plugins with options
+table.use(DraggableColumns, {
+    axis: 'x',
+    animate: true,
+    ghost: true
+});
+
+table.use(InlineEdit, {
+    editableColumns: ['name', 'email', 'status'],
+    trigger: 'doubleclick',
+    saveOnBlur: true
+});
+
+table.use(ExportCSV, {
+    filename: 'my-data.csv',
+    includeHeaders: true,
+    addTimestamp: true
+});
+
+table.render();
+            </div>
+
+            <h3>Creating a Custom Plugin</h3>
+            <div class="code-example">
+const MyCustomPlugin = {
+    name: 'MyCustomPlugin',
+    
+    defaultOptions: {
+        enabled: true,
+        color: 'blue'
+    },
+    
+    install(table, options) {
+        const config = { ...this.defaultOptions, ...options };
+        
+        // Add event listeners
+        table.on('afterRender', this.onAfterRender.bind(this));
+        
+        // Extend table API
+        table.myPluginMethod = () => {
+            console.log('Custom plugin method called!');
+        };
+        
+        // Add custom styles
+        this.addStyles();
+    },
+    
+    uninstall(table) {
+        // Cleanup
+        delete table.myPluginMethod;
+        this.removeStyles();
+    },
+    
+    onAfterRender(data) {
+        console.log('Table rendered with', data.length, 'rows');
+    }
+};
+
+// Use the custom plugin
+table.use(MyCustomPlugin, { color: 'red' });
+            </div>
+
+            <h3>Plugin Presets</h3>
+            <div class="code-example">
+import { applyPreset } from './src/plugins/index.js';
+
+// Apply predefined plugin combinations
+applyPreset(table, 'AdvancedEditing', {
+    InlineEdit: { trigger: 'click' },
+    ExportCSV: { filename: 'advanced-export.csv' }
+});
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🏗️ Plugin Architecture Details</h2>
+            
+            <h3>PluginManager API</h3>
+            <div class="code-example">
+// Register plugins
+table.use(plugin, options);
+
+// Check plugin status
+table.hasPlugin('PluginName');
+table.getPlugin('PluginName');
+table.getPlugins();
+
+// Uninstall plugins
+table.unuse('PluginName');
+            </div>
+
+            <h3>Event Hooks</h3>
+            <div class="code-example">
+// Register before/after hooks
+table.before('render', (data) => {
+    console.log('About to render', data);
+    return modifiedData; // Optional data modification
+});
+
+table.after('render', (data) => {
+    console.log('Finished rendering', data);
+});
+
+// Trigger events with hooks
+await table.triggerWithHooks('customEvent', eventData);
+            </div>
+
+            <h3>Plugin Lifecycle</h3>
+            <div class="code-example">
+const AdvancedPlugin = {
+    name: 'AdvancedPlugin',
+    
+    // Optional lifecycle methods
+    init(table, options) {
+        // Called during plugin registration
+    },
+    
+    install(table, options) {
+        // Main installation logic
+    },
+    
+    uninstall(table) {
+        // Cleanup when plugin is removed
+    },
+    
+    destroy(table) {
+        // Called when table is destroyed
+    }
+};
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import Table from '../src/core/Table.js';
+        import { DraggableColumns, InlineEdit, ExportCSV } from '../src/plugins/index.js';
+
+        // Sample data
+        const sampleData = [
+            { id: 1, name: 'John Doe', email: 'john@example.com', status: 'Active', department: 'Engineering', salary: 75000 },
+            { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 'Active', department: 'Marketing', salary: 65000 },
+            { id: 3, name: 'Bob Johnson', email: 'bob@example.com', status: 'Inactive', department: 'Sales', salary: 55000 },
+            { id: 4, name: 'Alice Brown', email: 'alice@example.com', status: 'Active', department: 'HR', salary: 60000 },
+            { id: 5, name: 'Charlie Davis', email: 'charlie@example.com', status: 'Pending', department: 'Engineering', salary: 80000 }
+        ];
+
+        // Column configuration
+        const columns = [
+            { name: 'id', title: 'ID', width: '60px' },
+            { name: 'name', title: 'Full Name', width: '150px' },
+            { name: 'email', title: 'Email Address', width: '180px' },
+            { name: 'status', title: 'Status', width: '100px' },
+            { name: 'department', title: 'Department', width: '120px' },
+            { name: 'salary', title: 'Salary', width: '100px', formatter: (value) => '$' + value.toLocaleString() }
+        ];
+
+        // Initialize table
+        const table = new Table('#tableContainer', {
+            data: sampleData,
+            columns: columns,
+            pagination: { enabled: true, pageSize: 10 },
+            controls: { enabled: true }
+        });
+
+        // Install plugins
+        const plugins = {
+            draggable: DraggableColumns,
+            inlineEdit: InlineEdit,
+            exportCSV: ExportCSV
+        };
+
+        let installedPlugins = {};
+
+        function installPlugin(name, plugin, options = {}) {
+            if (!installedPlugins[name]) {
+                table.use(plugin, options);
+                installedPlugins[name] = true;
+                updatePluginStatus();
+            }
+        }
+
+        function uninstallPlugin(name) {
+            if (installedPlugins[name]) {
+                table.unuse(name);
+                delete installedPlugins[name];
+                updatePluginStatus();
+            }
+        }
+
+        // Install initial plugins
+        installPlugin('DraggableColumns', plugins.draggable, {
+            axis: 'x',
+            animate: true,
+            ghost: true
+        });
+
+        installPlugin('InlineEdit', plugins.inlineEdit, {
+            editableColumns: ['name', 'email', 'status'],
+            trigger: 'doubleclick',
+            saveOnBlur: true,
+            validators: {
+                email: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+                name: (value) => value.length > 0
+            },
+            inputTypes: {
+                status: 'select'
+            },
+            selectOptions: {
+                status: ['Active', 'Inactive', 'Pending']
+            }
+        });
+
+        installPlugin('ExportCSV', plugins.exportCSV, {
+            filename: 'employee-data.csv',
+            includeHeaders: true,
+            addTimestamp: true,
+            excludeColumns: ['id']
+        });
+
+        // Render table
+        table.render();
+
+        // Plugin status updates
+        function updatePluginStatus() {
+            const statusEl = document.getElementById('pluginStatus');
+            const tablePlugins = table.getPlugins();
+            
+            let status = `Installed Plugins: ${tablePlugins.length}\n`;
+            tablePlugins.forEach(plugin => {
+                status += `• ${plugin.plugin.name} (installed: ${plugin.installedAt?.toLocaleTimeString()})\n`;
+            });
+            
+            const stats = table.pluginManager.getStats();
+            status += `\nPlugin Statistics:\n`;
+            status += `• Total hooks: ${stats.totalHooks}\n`;
+            status += `• Hook distribution: ${JSON.stringify(stats.hooksByName)}`;
+            
+            statusEl.textContent = status;
+        }
+
+        // Control button handlers
+        document.getElementById('toggleDraggable').addEventListener('click', function() {
+            if (installedPlugins['DraggableColumns']) {
+                uninstallPlugin('DraggableColumns');
+                this.textContent = '📱 Draggable Columns (Off)';
+                this.className = 'inactive';
+            } else {
+                installPlugin('DraggableColumns', plugins.draggable);
+                this.textContent = '📱 Draggable Columns';
+                this.className = 'active';
+            }
+        });
+
+        document.getElementById('toggleInlineEdit').addEventListener('click', function() {
+            if (installedPlugins['InlineEdit']) {
+                uninstallPlugin('InlineEdit');
+                this.textContent = '✏️ Inline Edit (Off)';
+                this.className = 'inactive';
+            } else {
+                installPlugin('InlineEdit', plugins.inlineEdit, {
+                    editableColumns: ['name', 'email', 'status'],
+                    trigger: 'doubleclick'
+                });
+                this.textContent = '✏️ Inline Edit';
+                this.className = 'active';
+            }
+        });
+
+        document.getElementById('toggleExportCSV').addEventListener('click', function() {
+            if (installedPlugins['ExportCSV']) {
+                uninstallPlugin('ExportCSV');
+                this.textContent = '📁 Export CSV (Off)';
+                this.className = 'inactive';
+            } else {
+                installPlugin('ExportCSV', plugins.exportCSV);
+                this.textContent = '📁 Export CSV';
+                this.className = 'active';
+            }
+        });
+
+        document.getElementById('showPluginInfo').addEventListener('click', function() {
+            const plugins = table.getPlugins();
+            const info = plugins.map(p => `${p.plugin.name}: ${JSON.stringify(p.options, null, 2)}`).join('\n\n');
+            alert('Plugin Information:\n\n' + info);
+        });
+
+        document.getElementById('addSampleData').addEventListener('click', function() {
+            const newId = Math.max(...sampleData.map(d => d.id)) + 1;
+            const newRow = {
+                id: newId,
+                name: `User ${newId}`,
+                email: `user${newId}@example.com`,
+                status: 'Active',
+                department: 'New Dept',
+                salary: 50000
+            };
+            
+            sampleData.push(newRow);
+            table.loadData(sampleData);
+        });
+
+        // Event listeners for demonstration
+        table.on('pluginInstalled', (data) => {
+            console.log('Plugin installed:', data);
+        });
+
+        table.on('pluginUninstalled', (data) => {
+            console.log('Plugin uninstalled:', data);
+        });
+
+        table.on('columnDragStart', (data) => {
+            console.log('Column drag started:', data);
+        });
+
+        table.on('columnReorder', (data) => {
+            console.log('Columns reordered:', data);
+        });
+
+        table.on('editStart', (data) => {
+            console.log('Edit started:', data);
+        });
+
+        table.on('editSave', (data) => {
+            console.log('Edit saved:', data);
+        });
+
+        table.on('csvExportComplete', (data) => {
+            console.log('CSV export completed:', data);
+        });
+
+        // Initial status update
+        updatePluginStatus();
+    </script>
+</body>
+</html>
