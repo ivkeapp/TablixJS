@@ -81,7 +81,15 @@ export default class Renderer {
       html += `<tr class="tablix-empty-row"><td colspan="${columns.length}" class="tablix-empty-cell">No data available</td></tr>`;
     } else {
       data.forEach((row, index) => {
-        html += `<tr class="tablix-row" data-row-index="${index}">`;
+        // Calculate global row index for pagination
+        let globalIndex = index;
+        if (this.table.paginationManager && this.table.paginationManager.options.mode === 'client') {
+          const currentPage = this.table.paginationManager.currentPage;
+          const pageSize = this.table.paginationManager.pageSize;
+          globalIndex = (currentPage - 1) * pageSize + index;
+        }
+        
+        html += `<tr class="tablix-row" data-row-index="${globalIndex}">`;
         columns.forEach(col => {
           const cell = row[col.name];
           let renderedCell;
@@ -577,18 +585,27 @@ export default class Renderer {
       const row = e.target.closest('.tablix-row');
       if (!row || row.classList.contains('tablix-empty-row')) return;
 
-      const rowIndex = parseInt(row.dataset.rowIndex, 10);
-      if (isNaN(rowIndex)) return;
+      const globalRowIndex = parseInt(row.dataset.rowIndex, 10);
+      if (isNaN(globalRowIndex)) return;
+
+      // Convert global index to local index for current page data
+      let localRowIndex = globalRowIndex;
+      if (this.table.paginationManager && this.table.paginationManager.options.mode === 'client') {
+        const currentPage = this.table.paginationManager.currentPage;
+        const pageSize = this.table.paginationManager.pageSize;
+        localRowIndex = globalRowIndex - (currentPage - 1) * pageSize;
+      }
 
       // Get current page data to find the clicked row
       const currentData = this.getCurrentPageData();
-      if (rowIndex >= 0 && rowIndex < currentData.length) {
-        const rowData = currentData[rowIndex];
+      if (localRowIndex >= 0 && localRowIndex < currentData.length) {
+        const rowData = currentData[localRowIndex];
         
-        // Trigger row click event for SelectionManager
+        // Trigger row click event for SelectionManager with global index
         this.table.eventManager.trigger('rowClick', {
           rowData,
-          rowIndex,
+          rowIndex: globalRowIndex, // Pass global index
+          localRowIndex: localRowIndex, // Also pass local index if needed
           originalEvent: e
         });
       }

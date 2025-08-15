@@ -251,8 +251,8 @@ export default class SelectionManager {
       const row = e.target.closest('.tablix-row');
       if (!row || row.classList.contains('tablix-empty-row')) return;
 
-      const rowIndex = parseInt(row.dataset.rowIndex, 10);
-      if (isNaN(rowIndex)) return;
+      const globalRowIndex = parseInt(row.dataset.rowIndex, 10);
+      if (isNaN(globalRowIndex)) return;
 
       // Only start drag selection if not using modifier keys
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
@@ -261,17 +261,17 @@ export default class SelectionManager {
       startY = e.clientY;
 
       this.dragSelection.isActive = true;
-      this.dragSelection.startRowIndex = rowIndex;
-      this.dragSelection.currentRowIndex = rowIndex;
+      this.dragSelection.startRowIndex = globalRowIndex; // Store global index
+      this.dragSelection.currentRowIndex = globalRowIndex;
       this.dragSelection.isDragging = false;
       
       // Store original selection for potential restoration
       this.dragSelection.originalSelection = new Set(this.selectedRows);
 
-      // Get start row data
-      const currentData = this.getCurrentPageData();
-      if (rowIndex < currentData.length) {
-        this.dragSelection.startRowId = this.getRowId(currentData[rowIndex]);
+      // Get start row data using global index
+      const fullData = this.getFullData();
+      if (globalRowIndex < fullData.length) {
+        this.dragSelection.startRowId = this.getRowId(fullData[globalRowIndex]);
       }
 
       e.preventDefault();
@@ -329,9 +329,9 @@ export default class SelectionManager {
     }
 
     // Fire beforeSelect event for drag start
-    const currentData = this.getCurrentPageData();
-    if (this.dragSelection.startRowIndex < currentData.length) {
-      const startRowData = currentData[this.dragSelection.startRowIndex];
+    const fullData = this.getFullData();
+    if (this.dragSelection.startRowIndex < fullData.length) {
+      const startRowData = fullData[this.dragSelection.startRowIndex];
       const beforeSelectEvent = {
         rowData: startRowData,
         rowId: this.dragSelection.startRowId,
@@ -353,11 +353,11 @@ export default class SelectionManager {
     const row = event.target.closest('.tablix-row');
     if (!row || row.classList.contains('tablix-empty-row')) return;
 
-    const rowIndex = parseInt(row.dataset.rowIndex, 10);
-    if (isNaN(rowIndex)) return;
+    const globalRowIndex = parseInt(row.dataset.rowIndex, 10);
+    if (isNaN(globalRowIndex)) return;
 
-    if (rowIndex !== this.dragSelection.currentRowIndex) {
-      this.dragSelection.currentRowIndex = rowIndex;
+    if (globalRowIndex !== this.dragSelection.currentRowIndex) {
+      this.dragSelection.currentRowIndex = globalRowIndex;
       this.applyDragSelection();
     }
   }
@@ -366,10 +366,10 @@ export default class SelectionManager {
    * Apply current drag selection range
    */
   applyDragSelection() {
-    // Use full dataset for virtual scrolling, or current page data for pagination
-    const currentData = this.table.virtualScrollManager ? this.getFullData() : this.getCurrentPageData();
+    // Always use full dataset for drag selection (global indices)
+    const fullData = this.getFullData();
     
-    // Calculate selection range
+    // Calculate selection range using global indices
     const startIndex = this.dragSelection.startRowIndex;
     const endIndex = this.dragSelection.currentRowIndex;
     const minIndex = Math.min(startIndex, endIndex);
@@ -380,15 +380,15 @@ export default class SelectionManager {
 
     // Add drag range to selection
     for (let i = minIndex; i <= maxIndex; i++) {
-      if (i < currentData.length) {
-        const rowId = this.getRowId(currentData[i]);
+      if (i < fullData.length) {
+        const rowId = this.getRowId(fullData[i]);
         this.selectedRows.add(rowId);
       }
     }
 
     // Update last selected row
-    if (endIndex < currentData.length) {
-      this.lastSelectedRow = this.getRowId(currentData[endIndex]);
+    if (endIndex < fullData.length) {
+      this.lastSelectedRow = this.getRowId(fullData[endIndex]);
     }
 
     // Update UI immediately for responsive feedback
@@ -543,15 +543,15 @@ export default class SelectionManager {
         }
       });
     } else {
-      // Regular mode: match by row index with current page data
-      const currentData = this.getCurrentPageData();
-      allRows.forEach((row, index) => {
-        // Try to get row index from data attribute first, fall back to array index
-        const rowIndex = row.hasAttribute('data-row-index') ? 
-          parseInt(row.getAttribute('data-row-index')) : index;
+      // Regular mode: match by global row index with full dataset
+      const fullData = this.getFullData();
+      allRows.forEach((row) => {
+        // Get global row index from data attribute
+        const globalRowIndex = row.hasAttribute('data-row-index') ? 
+          parseInt(row.getAttribute('data-row-index')) : -1;
           
-        if (rowIndex >= 0 && rowIndex < currentData.length) {
-          const rowData = currentData[rowIndex];
+        if (globalRowIndex >= 0 && globalRowIndex < fullData.length) {
+          const rowData = fullData[globalRowIndex];
           const rowId = this.getRowId(rowData);
           
           if (this.selectedRows.has(rowId)) {
@@ -580,22 +580,22 @@ export default class SelectionManager {
       // Only need to update UI
       this.updateUI();
     } else {
-      // For pagination: keep selection for rows that are still visible
-      const currentData = this.getCurrentPageData();
-      const visibleRowIds = new Set(currentData.map(row => this.getRowId(row)));
+      // For pagination: keep all selections, but validate they still exist in the full dataset
+      const fullData = this.getFullData();
+      const allDataRowIds = new Set(fullData.map(row => this.getRowId(row)));
       
-      // Remove selections for rows that are no longer visible
+      // Remove selections for rows that no longer exist in the dataset at all
       const newSelection = new Set();
       this.selectedRows.forEach(rowId => {
-        if (visibleRowIds.has(rowId)) {
+        if (allDataRowIds.has(rowId)) {
           newSelection.add(rowId);
         }
       });
       
       this.selectedRows = newSelection;
       
-      // Update last selected row if it's no longer visible
-      if (this.lastSelectedRow && !visibleRowIds.has(this.lastSelectedRow)) {
+      // Update last selected row if it no longer exists in the dataset
+      if (this.lastSelectedRow && !allDataRowIds.has(this.lastSelectedRow)) {
         this.lastSelectedRow = this.selectedRows.size > 0 ? Array.from(this.selectedRows)[0] : null;
       }
       
