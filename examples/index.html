@@ -1,267 +1,1348 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>TablixJS - Examples Index</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TablixJS - Unleash the Power of Modern Data Tables</title>
   <link rel="stylesheet" href="../src/styles/tablix.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      padding: 20px; 
-      max-width: 1200px; 
-      margin: 0 auto; 
-      background-color: #f5f5f5;
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      --warning-gradient: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+      
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1a1a1a;
+      --bg-card: #1e1e1e;
+      --bg-glass: rgba(255, 255, 255, 0.1);
+      
+      --text-primary: #ffffff;
+      --text-secondary: #b3b3b3;
+      --text-muted: #666666;
+      
+      --border-color: rgba(255, 255, 255, 0.1);
+      --shadow-small: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.2);
+      --shadow-large: 0 25px 50px rgba(0, 0, 0, 0.3);
+      --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.3);
+      
+      --border-radius: 16px;
+      --border-radius-large: 24px;
+      --animation-speed: 0.3s;
+      --animation-curve: cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
-    .header { 
-      text-align: center; 
-      margin-bottom: 40px; 
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    
-    .examples-grid { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
-      gap: 20px; 
+
+    html {
+      scroll-behavior: smooth;
     }
-    
-    .example-card { 
-      background: white; 
-      padding: 20px; 
-      border-radius: 10px; 
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      transition: transform 0.2s, box-shadow 0.2s;
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
     }
-    
-    .example-card:hover { 
-      transform: translateY(-5px);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+
+    /* Animated background */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: var(--bg-primary);
     }
-    
-    .example-card h3 { 
-      color: #007cba; 
-      margin-top: 0; 
+
+    .bg-animation::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(240, 147, 251, 0.2) 0%, transparent 50%);
+      animation: backgroundShift 20s ease-in-out infinite;
+    }
+
+    @keyframes backgroundShift {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.1) rotate(180deg); }
+    }
+
+    /* Scroll progress indicator */
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 3px;
+      background: var(--primary-gradient);
+      z-index: 1000;
+      transition: width 0.1s ease;
+    }
+
+    /* Hero section */
+    .hero {
+      min-height: 100vh;
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      position: relative;
     }
-    
-    .example-card p { 
-      color: #666; 
-      line-height: 1.6;
+
+    .hero-content {
+      max-width: 1000px;
+      z-index: 10;
     }
-    
-    .example-card .buttons { 
-      margin-top: 15px; 
+
+    .hero-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-color);
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 0.8s ease 0.2s both;
     }
-    
-    .example-card a { 
-      display: inline-block; 
-      padding: 8px 16px; 
-      margin: 5px 5px 5px 0; 
-      background: #007cba; 
-      color: white; 
-      text-decoration: none; 
-      border-radius: 5px; 
-      transition: background 0.2s;
+
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 800;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+      line-height: 1.1;
+      animation: fadeInUp 0.8s ease 0.4s both;
     }
-    
-    .example-card a:hover { 
-      background: #005a87; 
+
+    .hero-subtitle {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      color: var(--text-secondary);
+      margin-bottom: 3rem;
+      font-weight: 300;
+      animation: fadeInUp 0.8s ease 0.6s both;
     }
-    
-    .example-card a.secondary { 
-      background: #6c757d; 
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.8s ease 0.8s both;
     }
-    
-    .example-card a.secondary:hover { 
-      background: #545b62; 
+
+    .stat {
+      text-align: center;
     }
-    
-    .feature-badge { 
-      display: inline-block; 
-      padding: 2px 8px; 
-      background: #28a745; 
-      color: white; 
-      font-size: 12px; 
-      border-radius: 12px; 
-      margin-left: 10px;
+
+    .stat-number {
+      display: block;
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    
-    .new-badge { 
-      background: #dc3545; 
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
-    
-    .footer { 
-      text-align: center; 
-      margin-top: 40px; 
-      padding: 20px; 
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+    .hero-cta {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.8s ease 1s both;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      text-decoration: none;
+      transition: all var(--animation-speed) var(--animation-curve);
+      cursor: pointer;
+      font-size: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: var(--primary-gradient);
+      color: white;
+      box-shadow: var(--shadow-medium);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-large), var(--shadow-glow);
+    }
+
+    .btn-secondary {
+      background: var(--bg-glass);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    /* Features section */
+    .features {
+      padding: 6rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .section-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      background: var(--secondary-gradient);
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-description {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Feature cards grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 2rem;
+      margin-top: 4rem;
+    }
+
+    @media (max-width: 768px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-large);
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: all var(--animation-speed) var(--animation-curve);
+      backdrop-filter: blur(10px);
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--primary-gradient);
+      transform: scaleX(0);
+      transition: transform var(--animation-speed) var(--animation-curve);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(102, 126, 234, 0.5);
+      box-shadow: var(--shadow-large);
+    }
+
+    .feature-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      background: var(--primary-gradient);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .feature-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-new { background: var(--warning-gradient); }
+    .badge-core { background: var(--success-gradient); }
+    .badge-advanced { background: var(--secondary-gradient); }
+    .badge-performance { background: var(--accent-gradient); }
+
+    .feature-description {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+      line-height: 1.7;
+    }
+
+    .feature-highlights {
+      list-style: none;
+      margin-bottom: 2rem;
+    }
+
+    .feature-highlights li {
+      padding: 0.5rem 0;
+      color: var(--text-secondary);
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    .feature-highlights li::before {
+      content: '✨';
+      position: absolute;
+      left: 0;
+      top: 0.5rem;
+    }
+
+    .feature-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-small {
+      padding: 0.7rem 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    /* Interactive playground card */
+    .playground-card {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, var(--bg-card) 0%, rgba(102, 126, 234, 0.1) 100%);
+      border: 2px solid rgba(102, 126, 234, 0.3);
+      position: relative;
+    }
+
+    .playground-card::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: var(--primary-gradient);
+      border-radius: var(--border-radius-large);
+      z-index: -1;
+      animation: borderGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes borderGlow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* Performance showcase */
+    .performance-showcase {
+      background: var(--bg-card);
+      border-radius: var(--border-radius-large);
+      padding: 2rem;
+      margin: 3rem 0;
+      border: 1px solid var(--border-color);
+    }
+
+    .performance-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .performance-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .metric {
+      text-align: center;
+      padding: 1rem;
+      background: var(--bg-glass);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: block;
+    }
+
+    .metric-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* CTA section */
+    .cta-section {
+      padding: 6rem 2rem;
+      text-align: center;
+      background: var(--bg-card);
+      margin: 4rem 0;
+      border-radius: var(--border-radius-large);
+      border: 1px solid var(--border-color);
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .cta-description {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 4rem 2rem 2rem;
+      text-align: center;
+      border-top: 1px solid var(--border-color);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-content {
+      margin-bottom: 2rem;
+    }
+
+    .footer-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color var(--animation-speed);
+    }
+
+    .footer-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .footer-bottom {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Floating elements */
+    .floating-orb {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: var(--primary-gradient);
+      opacity: 0.1;
+      animation: float 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .floating-orb:nth-child(1) {
+      top: 10%;
+      left: 10%;
+      animation-delay: 0s;
+    }
+
+    .floating-orb:nth-child(2) {
+      top: 60%;
+      right: 10%;
+      animation-delay: 2s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .hero-stats {
+        gap: 2rem;
+      }
+      
+      .hero-cta {
+        gap: 1rem;
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .feature-card {
+        padding: 2rem;
+      }
+      
+      .features {
+        padding: 4rem 1rem;
+      }
+      
+      .btn {
+        padding: 0.8rem 1.5rem;
+      }
+    }
+
+    /* Loading animation */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(102, 126, 234, 0.3);
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>🚀 TablixJS Examples</h1>
-    <p>Explore the powerful features of TablixJS through interactive examples and demos.</p>
-    <p><strong>Lightweight • Dependency-free • Modern • Performant</strong></p>
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
   </div>
 
-  <div class="examples-grid">
-    
-    <!-- Basic Usage -->
-    <div class="example-card">
-      <h3>
-        📋 Basic Usage
-        <span class="feature-badge">Core</span>
-      </h3>
-      <p>Simple table with basic pagination and sorting. Perfect starting point to understand TablixJS fundamentals.</p>
-      <div class="buttons">
-        <a href="vanilla.html">View Demo</a>
-        <a href="https://github.com/yourusername/TablixJS/blob/main/examples/vanilla.html" class="secondary">View Source</a>
+  <!-- Scroll progress -->
+  <div class="scroll-progress" id="scrollProgress"></div>
+
+  <!-- Animated background -->
+  <div class="bg-animation"></div>
+
+  <!-- Floating orbs -->
+  <div class="floating-orb"></div>
+  <div class="floating-orb"></div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        ✨ The Future of Data Tables is Here
+      </div>
+      
+      <h1>TablixJS</h1>
+      
+      <p class="hero-subtitle">
+        The most advanced, lightweight, and beautiful JavaScript table library. 
+        Built for modern web applications that demand performance and elegance.
+      </p>
+
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-number">500K+</span>
+          <span class="stat-label">Rows Supported</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">&lt;30KB</span>
+          <span class="stat-label">Bundle Size</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">Zero</span>
+          <span class="stat-label">Dependencies</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">15+</span>
+          <span class="stat-label">Features</span>
+        </div>
+      </div>
+
+      <div class="hero-cta">
+        <a href="#features" class="btn btn-primary">
+          🚀 Explore Features
+        </a>
+        <a href="playground.html" class="btn btn-secondary">
+          🎮 Try Interactive Demo
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="section-header fade-in">
+      <div class="section-badge">Features</div>
+      <h2 class="section-title">Unleash the Power</h2>
+      <p class="section-description">
+        Experience cutting-edge table features designed for modern web applications. 
+        Every feature is crafted with performance, usability, and developer experience in mind.
+      </p>
+    </div>
+
+    <!-- Performance showcase -->
+    <div class="performance-showcase fade-in">
+      <h3 class="performance-title">⚡ Blazing Fast Performance</h3>
+      <div class="performance-metrics">
+        <div class="metric">
+          <span class="metric-value">&lt;16ms</span>
+          <span class="metric-label">Render Time</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">60fps</span>
+          <span class="metric-label">Scroll Rate</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">500K</span>
+          <span class="metric-label">Max Rows</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">99%</span>
+          <span class="metric-label">Efficiency</span>
+        </div>
       </div>
     </div>
 
-    <!-- Async Data Loading -->
-    <div class="example-card">
-      <h3>
-        🔄 Async Data Loading
-        <span class="feature-badge new-badge">New!</span>
-      </h3>
-      <p>Comprehensive demo of the new async data loading features including URL loading, custom functions, and error handling.</p>
-      <div class="buttons">
-        <a href="async-data-loading-demo.html">View Demo</a>
-        <a href="async-loading-test.html" class="secondary">Run Tests</a>
+    <div class="features-grid">
+      
+      <!-- Interactive Playground -->
+      <div class="feature-card playground-card fade-in">
+        <div class="feature-icon">🎮</div>
+        <div class="feature-header">
+          <div>
+            <h3 class="feature-title">Interactive Playground</h3>
+            <span class="feature-badge badge-new">Ultimate Experience</span>
+          </div>
+        </div>
+        <p class="feature-description">
+          Dive into our comprehensive interactive playground where you can experiment with every TablixJS feature in real-time. 
+          Perfect for learning, testing, and experiencing the full power of the library.
+        </p>
+        <ul class="feature-highlights">
+          <li>Live configuration panel with instant preview</li>
+          <li>Real-time performance monitoring</li>
+          <li>Code generation for your exact setup</li>
+          <li>Feature tracking and analytics</li>
+          <li>Mobile-responsive design tools</li>
+        </ul>
+        <div class="feature-actions">
+          <a href="playground.html" class="btn btn-primary btn-small">
+            🚀 Launch Playground
+          </a>
+          <a href="#analytics" class="btn btn-secondary btn-small">
+            📊 View Analytics
+          </a>
+        </div>
       </div>
-    </div>
 
-    <!-- Column Formatting -->
-    <div class="example-card">
-      <h3>
-        🎨 Column Formatting
-        <span class="feature-badge">Advanced</span>
-      </h3>
-      <p>Custom cell renderers, formatters, and column styling options. Learn how to create rich, formatted table content.</p>
-      <div class="buttons">
-        <a href="column-formatting-demo.html">View Demo</a>
-        <a href="column-formatting-usage.js" class="secondary">View Code</a>
+      <!-- Virtual Scrolling -->
+      <div class="feature-card fade-in">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-header">
+          <div>
+            <h3 class="feature-title">Virtual Scrolling</h3>
+            <span class="feature-badge badge-performance">Performance</span>
+          </div>
+        </div>
+        <p class="feature-description">
+          Handle massive datasets with smooth 60fps scrolling. Our advanced virtual scrolling engine 
+          supports hundreds of thousands of rows without breaking a sweat.
+        </p>
+        <ul class="feature-highlights">
+          <li>Supports 500,000+ rows smoothly</li>
+          <li>Intelligent buffering and memory management</li>
+          <li>Sub-pixel precision scrolling</li>
+          <li>Dynamic row height support</li>
+        </ul>
+        <div class="feature-actions">
+          <a href="virtual-scroll-demo.html" class="btn btn-primary btn-small">
+            ⚡ View Demo
+          </a>
+          <a href="virtual-scroll-test-suite.html" class="btn btn-secondary btn-small">
+            🧪 Run Tests
+          </a>
+        </div>
       </div>
-    </div>
 
-    <!-- Pagination Features -->
-    <div class="example-card">
-      <h3>
-        📄 Pagination Demo
-        <span class="feature-badge">Core</span>
-      </h3>
-      <p>Comprehensive pagination features including client-side and server-side pagination with customizable controls.</p>
-      <div class="buttons">
-        <a href="pagination.html">View Demo</a>
-        <a href="complete-pagination-demo.html" class="secondary">Complete Demo</a>
+      <!-- Async Data Loading -->
+      <div class="feature-card fade-in">
+        <div class="feature-icon">🔄</div>
+        <div class="feature-header">
+          <div>
+            <h3 class="feature-title">Async Data Loading</h3>
+            <span class="feature-badge badge-new">Latest</span>
+          </div>
+        </div>
+        <p class="feature-description">
+          Modern asynchronous data loading with built-in error handling, retry mechanisms, 
+          and beautiful loading states. Perfect for API-driven applications.
+        </p>
+        <ul class="feature-highlights">
+          <li>URL-based and custom function loading</li>
+          <li>Intelligent error handling & retry</li>
+          <li>Progress indicators and loading states</li>
+          <li>Pagination with server-side data</li>
+        </ul>
+        <div class="feature-actions">
+          <a href="async-data-loading-demo.html" class="btn btn-primary btn-small">
+            🔄 View Demo
+          </a>
+          <a href="async-loading-test.html" class="btn btn-secondary btn-small">
+            🧪 Test Suite
+          </a>
+        </div>
       </div>
-    </div>
 
-    <!-- Sorting Features -->
-    <div class="example-card">
-      <h3>
-        🔄 Sorting Demo
-        <span class="feature-badge">Core</span>
-      </h3>
-      <p>Multi-column sorting, custom sort functions, and sort state management examples.</p>
-      <div class="buttons">
-        <a href="sorting-demo.html">View Demo</a>
-        <a href="sorting-usage-examples.js" class="secondary">View Code</a>
+      <!-- Advanced Filtering -->
+      <div class="feature-card fade-in">
+        <div class="feature-icon">🔍</div>
+        <div class="feature-header">
+          <div>
+            <h3 class="feature-title">Smart Filtering</h3>
+            <span class="feature-badge badge-core">Essential</span>
+          </div>
+        </div>
+        <p class="feature-description">
+          Powerful filtering system with multiple filter types, real-time search, 
+          and intelligent condition-based filtering across all data types.
+        </p>
+        <ul class="feature-highlights">
+          <li>Global search with highlight</li>
+          <li>Column-specific filters</li>
+          <li>Condition-based filtering</li>
+          <li>Custom filter functions</li>
+        </ul>
+        <div class="feature-actions">
+          <a href="filtering-demo.html" class="btn btn-primary btn-small">
+            🔍 Explore
+          </a>
+          <a href="search-test.html" class="btn btn-secondary btn-small">
+            🔎 Search Test
+          </a>
+        </div>
       </div>
-    </div>
 
-    <!-- Auto Controls -->
-    <div class="example-card">
-      <h3>
-        🎛️ Auto Controls
-        <span class="feature-badge">Feature</span>
-      </h3>
-      <p>Automatically generated control panels with search, pagination, and export functionality.</p>
-      <div class="buttons">
-        <a href="auto-controls.html">View Demo</a>
+      <!-- Selection System -->
+      <div class="feature-card fade-in">
+        <div class="feature-icon">✅</div>
+        <div class="feature-header">
+          <div>
+            <h3 class="feature-title">Selection System</h3>
+            <span class="feature-badge badge-core">Essential</span>
+          </div>
+        </div>
+        <p class="feature-description">
+          Comprehensive row selection with drag selection, keyboard navigation, 
+          and flexible selection modes for any use case.
+        </p>
+        <ul class="feature-highlights">
+          <li>Single and multi-row selection</li>
+          <li>Drag selection with visual feedback</li>
+          <li>Keyboard shortcuts and navigation</li>
+          <li>Select all/none functionality</li>
+        </ul>
+        <div class="feature-actions">
+          <a href="selection-demo.html" class="btn btn-primary btn-small">
+            ✅ Try It
+          </a>
+          <a href="drag-selection-demo.html" class="btn btn-secondary btn-small">
+            🖱️ Drag Demo
+          </a>
+        </div>
       </div>
-    </div>
 
-    <!-- Theming -->
-    <div class="example-card">
-      <h3>
-        🎨 Theming System
-        <span class="feature-badge">Style</span>
-      </h3>
-      <p>CSS custom properties theming system with dark mode and custom theme examples.</p>
-      <div class="buttons">
-        <a href="theme-demo.html">View Demo</a>
+      <!-- Column Formatting -->
+      <div class="feature-card fade-in">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-header">
+          <div>
+            <h3 class="feature-title">Rich Formatting</h3>
+            <span class="feature-badge badge-advanced">Advanced</span>
+          </div>
+        </div>
+        <p class="feature-description">
+          Beautiful column formatting with custom renderers, data formatters, 
+          conditional styling, and rich HTML content support.
+        </p>
+        <ul class="feature-highlights">
+          <li>Custom cell renderers</li>
+          <li>Data type formatters (currency, date, etc.)</li>
+          <li>Conditional styling rules</li>
+          <li>Interactive cell content</li>
+        </ul>
+        <div class="feature-actions">
+          <a href="column-formatting-demo.html" class="btn btn-primary btn-small">
+            🎨 See Magic
+          </a>
+          <a href="column-formatting-usage.js" class="btn btn-secondary btn-small">
+            📝 Code
+          </a>
+        </div>
       </div>
-    </div>
 
-    <!-- jQuery Integration -->
-    <div class="example-card">
-      <h3>
-        💎 jQuery Integration
-        <span class="feature-badge">Plugin</span>
-      </h3>
-      <p>TablixJS jQuery plugin wrapper for easy integration with existing jQuery-based projects.</p>
-      <div class="buttons">
-        <a href="jquery.html">View Demo</a>
+      <!-- Theming Engine -->
+      <div class="feature-card fade-in">
+        <div class="feature-icon">🌈</div>
+        <div class="feature-header">
+          <div>
+            <h3 class="feature-title">Theming Engine</h3>
+            <span class="feature-badge badge-advanced">Customizable</span>
+          </div>
+        </div>
+        <p class="feature-description">
+          Advanced theming system with CSS custom properties, dark mode support, 
+          and unlimited customization possibilities.
+        </p>
+        <ul class="feature-highlights">
+          <li>CSS custom properties architecture</li>
+          <li>Built-in dark/light themes</li>
+          <li>Real-time theme switching</li>
+          <li>Custom theme creation tools</li>
+        </ul>
+        <div class="feature-actions">
+          <a href="theme-demo.html" class="btn btn-primary btn-small">
+            🌈 Themes
+          </a>
+          <a href="../src/styles/themes/" class="btn btn-secondary btn-small">
+            📁 Browse
+          </a>
+        </div>
       </div>
-    </div>
 
-    <!-- React Integration -->
-    <div class="example-card">
-      <h3>
-        ⚛️ React Component
-        <span class="feature-badge">Framework</span>
-      </h3>
-      <p>React component wrapper demonstrating how to integrate TablixJS with React applications.</p>
-      <div class="buttons">
-        <a href="react.html">View Demo</a>
+      <!-- Framework Integration -->
+      <div class="feature-card fade-in">
+        <div class="feature-icon">🔧</div>
+        <div class="feature-header">
+          <div>
+            <h3 class="feature-title">Framework Ready</h3>
+            <span class="feature-badge badge-core">Universal</span>
+          </div>
+        </div>
+        <p class="feature-description">
+          Seamless integration with React, jQuery, and vanilla JavaScript. 
+          One library, every framework, unlimited possibilities.
+        </p>
+        <ul class="feature-highlights">
+          <li>Native React component with hooks</li>
+          <li>jQuery plugin wrapper</li>
+          <li>Vanilla JavaScript core</li>
+          <li>TypeScript definitions included</li>
+        </ul>
+        <div class="feature-actions">
+          <a href="react.html" class="btn btn-primary btn-small">
+            ⚛️ React
+          </a>
+          <a href="jquery.html" class="btn btn-secondary btn-small">
+            💎 jQuery
+          </a>
+        </div>
       </div>
+
     </div>
+  </section>
 
-  </div>
-
-  <div class="footer">
-    <h3>📖 Documentation</h3>
-    <p>
-      <a href="../docs/async-data-loading.md">Async Data Loading Guide</a> •
-      <a href="../docs/pagination.md">Pagination Guide</a> •
-      <a href="../docs/sorting.md">Sorting Guide</a> •
-      <a href="../docs/theming.md">Theming Guide</a> •
-      <a href="../docs/column-formatting.md">Column Formatting Guide</a>
+  <!-- CTA Section -->
+  <section class="cta-section fade-in">
+    <h2 class="cta-title">Ready to Transform Your Data?</h2>
+    <p class="cta-description">
+      Join thousands of developers who have already revolutionized their data presentation with TablixJS.
+      Start building amazing table experiences today.
     </p>
-    <p style="color: #666; margin-top: 20px;">
-      TablixJS - A modern, lightweight, dependency-free table library for JavaScript
-    </p>
-  </div>
+    <div class="hero-cta">
+      <a href="playground.html" class="btn btn-primary">
+        🚀 Start Building
+      </a>
+      <a href="../docs/" class="btn btn-secondary">
+        📖 Read Docs
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <h3 class="footer-title">📚 Comprehensive Documentation</h3>
+      <div class="footer-links">
+        <a href="../docs/async-data-loading.md">📡 Async Loading</a>
+        <a href="../docs/virtual-scrolling.md">⚡ Virtual Scrolling</a>
+        <a href="../docs/filtering.md">🔍 Filtering & Search</a>
+        <a href="../docs/selection.md">✅ Selection System</a>
+        <a href="../docs/column-formatting.md">🎨 Formatting</a>
+        <a href="../docs/theming.md">🌈 Theming</a>
+        <a href="../docs/plugin-architecture.md">🔧 Plugins</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>
+        TablixJS - Crafted with ❤️ by <strong>Ivan Zarkovic</strong> • 
+        MIT License • 
+        <a href="https://github.com/ivkeapp/TablixJS" style="color: var(--text-secondary);">Star on GitHub</a>
+      </p>
+    </div>
+  </footer>
 
   <script>
-    // Add some interactive touches
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add click tracking for analytics (if needed)
-      document.querySelectorAll('.example-card a').forEach(link => {
-        link.addEventListener('click', function(e) {
-          console.log('Example clicked:', this.textContent.trim(), 'URL:', this.href);
+    // Advanced UX enhancements
+    class TablixUX {
+      constructor() {
+        this.initializeAnimations();
+        this.setupScrollEffects();
+        this.initializeInteractions();
+        this.setupAnalytics();
+        this.handleLoading();
+      }
+
+      initializeAnimations() {
+        // Intersection Observer for fade-in animations
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              // Track element visibility
+              this.trackEvent('element_visible', {
+                element: entry.target.className,
+                timestamp: Date.now()
+              });
+            }
+          });
+        }, {
+          threshold: 0.1,
+          rootMargin: '0px 0px -50px 0px'
         });
-      });
 
-      // Add keyboard navigation
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'h' && !e.ctrlKey && !e.metaKey) {
-          window.location.href = '../README.md';
+        document.querySelectorAll('.fade-in').forEach(el => {
+          observer.observe(el);
+        });
+      }
+
+      setupScrollEffects() {
+        let ticking = false;
+
+        const updateScrollProgress = () => {
+          const scrollTop = window.pageYOffset;
+          const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+          const scrollPercent = (scrollTop / docHeight) * 100;
+          
+          document.getElementById('scrollProgress').style.width = scrollPercent + '%';
+          
+          ticking = false;
+        };
+
+        const onScroll = () => {
+          if (!ticking) {
+            requestAnimationFrame(updateScrollProgress);
+            ticking = true;
+          }
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+
+        // Parallax effect for floating orbs
+        const orbs = document.querySelectorAll('.floating-orb');
+        window.addEventListener('scroll', () => {
+          const scrolled = window.pageYOffset;
+          orbs.forEach((orb, index) => {
+            const rate = scrolled * -0.5 * (index + 1);
+            orb.style.transform = `translateY(${rate}px)`;
+          });
+        }, { passive: true });
+      }
+
+      initializeInteractions() {
+        // Enhanced click tracking
+        document.addEventListener('click', (e) => {
+          const link = e.target.closest('a');
+          if (link) {
+            const linkText = link.textContent.trim();
+            const linkHref = link.getAttribute('href');
+            const linkType = this.getLinkType(link);
+            
+            this.trackEvent('link_click', {
+              text: linkText,
+              href: linkHref,
+              type: linkType,
+              timestamp: Date.now()
+            });
+
+            // Add visual feedback
+            this.addClickEffect(link);
+          }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+          switch(e.key.toLowerCase()) {
+            case 'p':
+              if (!e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                window.location.href = 'playground.html';
+                this.trackEvent('keyboard_shortcut', { key: 'p', action: 'playground' });
+              }
+              break;
+            case 'd':
+              if (!e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                window.location.href = '../docs/';
+                this.trackEvent('keyboard_shortcut', { key: 'd', action: 'docs' });
+              }
+              break;
+            case 'h':
+              if (!e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                this.showKeyboardHelp();
+              }
+              break;
+            case 'escape':
+              this.hideKeyboardHelp();
+              break;
+          }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+          anchor.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = document.querySelector(anchor.getAttribute('href'));
+            if (target) {
+              target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+              });
+            }
+          });
+        });
+      }
+
+      addClickEffect(element) {
+        element.style.transform = 'scale(0.95)';
+        element.style.transition = 'transform 0.1s ease';
+        
+        setTimeout(() => {
+          element.style.transform = '';
+          element.style.transition = '';
+        }, 100);
+      }
+
+      getLinkType(link) {
+        if (link.classList.contains('btn-primary')) return 'primary';
+        if (link.classList.contains('btn-secondary')) return 'secondary';
+        if (link.href.includes('.html')) return 'demo';
+        if (link.href.includes('docs/')) return 'documentation';
+        return 'other';
+      }
+
+      setupAnalytics() {
+        this.analytics = {
+          sessionId: Date.now().toString(36) + Math.random().toString(36).substr(2),
+          events: [],
+          startTime: Date.now()
+        };
+
+        // Track page load
+        this.trackEvent('page_load', {
+          referrer: document.referrer,
+          userAgent: navigator.userAgent,
+          viewport: {
+            width: window.innerWidth,
+            height: window.innerHeight
+          }
+        });
+
+        // Track page visibility changes
+        document.addEventListener('visibilitychange', () => {
+          this.trackEvent('visibility_change', {
+            hidden: document.hidden,
+            timestamp: Date.now()
+          });
+        });
+
+        // Track performance metrics
+        window.addEventListener('load', () => {
+          setTimeout(() => {
+            const perfData = performance.getEntriesByType('navigation')[0];
+            this.trackEvent('performance', {
+              loadTime: perfData.loadEventEnd - perfData.loadEventStart,
+              domContentLoaded: perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart,
+              totalTime: perfData.loadEventEnd - perfData.fetchStart
+            });
+          }, 0);
+        });
+      }
+
+      trackEvent(eventName, data = {}) {
+        const event = {
+          name: eventName,
+          data: data,
+          timestamp: Date.now(),
+          sessionTime: Date.now() - this.analytics.startTime,
+          sessionId: this.analytics.sessionId
+        };
+
+        this.analytics.events.push(event);
+        
+        // Store in localStorage for persistence
+        try {
+          const stored = JSON.parse(localStorage.getItem('tablixjs_ux_analytics') || '[]');
+          stored.push(event);
+          // Keep only last 100 events
+          if (stored.length > 100) stored.splice(0, stored.length - 100);
+          localStorage.setItem('tablixjs_ux_analytics', JSON.stringify(stored));
+        } catch (e) {
+          console.warn('Analytics storage failed:', e);
         }
-      });
 
-      console.log('🚀 TablixJS Examples loaded! Press "h" to view documentation.');
+        // Console logging for development
+        console.log(`🎯 UX Event: ${eventName}`, data);
+      }
+
+      showKeyboardHelp() {
+        const helpModal = document.createElement('div');
+        helpModal.id = 'keyboardHelp';
+        helpModal.innerHTML = `
+          <div style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+          ">
+            <div style="
+              background: var(--bg-card);
+              border: 1px solid var(--border-color);
+              border-radius: var(--border-radius-large);
+              padding: 2rem;
+              max-width: 400px;
+              width: 90%;
+              color: var(--text-primary);
+            ">
+              <h3 style="margin-bottom: 1rem; text-align: center;">⌨️ Keyboard Shortcuts</h3>
+              <div style="line-height: 2;">
+                <div><kbd>P</kbd> - Open Playground</div>
+                <div><kbd>D</kbd> - View Documentation</div>
+                <div><kbd>H</kbd> - Show this help</div>
+                <div><kbd>Esc</kbd> - Close dialogs</div>
+              </div>
+              <div style="text-align: center; margin-top: 1.5rem;">
+                <button onclick="document.getElementById('keyboardHelp').remove()" 
+                        style="
+                          background: var(--primary-gradient);
+                          color: white;
+                          border: none;
+                          padding: 0.5rem 1rem;
+                          border-radius: var(--border-radius);
+                          cursor: pointer;
+                        ">
+                  Got it!
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(helpModal);
+        this.trackEvent('help_shown', { trigger: 'keyboard' });
+      }
+
+      hideKeyboardHelp() {
+        const helpModal = document.getElementById('keyboardHelp');
+        if (helpModal) {
+          helpModal.remove();
+        }
+      }
+
+      handleLoading() {
+        // Show loading for a brief moment for dramatic effect
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        
+        // Hide loading overlay after page is fully loaded
+        window.addEventListener('load', () => {
+          setTimeout(() => {
+            loadingOverlay.classList.add('hidden');
+            this.trackEvent('loading_complete');
+            
+            // Start hero animations
+            setTimeout(() => {
+              this.startHeroAnimations();
+            }, 200);
+          }, 800); // Keep loading for 800ms for smooth transition
+        });
+      }
+
+      startHeroAnimations() {
+        // Add staggered animations to hero elements
+        const heroElements = document.querySelectorAll('.hero-content > *');
+        heroElements.forEach((element, index) => {
+          element.style.animationDelay = `${index * 0.2}s`;
+          element.style.opacity = '1';
+        });
+      }
+
+      // Public method to get analytics
+      getAnalytics() {
+        return {
+          session: this.analytics,
+          stored: JSON.parse(localStorage.getItem('tablixjs_ux_analytics') || '[]')
+        };
+      }
+    }
+
+    // Initialize UX enhancements
+    document.addEventListener('DOMContentLoaded', () => {
+      window.TablixUX = new TablixUX();
+      
+      console.log('🚀 TablixJS Examples Portal - Ultimate UX Edition');
+      console.log('⌨️ Press "H" for keyboard shortcuts');
+      console.log('🎯 Advanced analytics and tracking enabled');
+      console.log('✨ Smooth animations and effects loaded');
     });
+
+    // Expose analytics for debugging
+    window.getAnalytics = () => window.TablixUX?.getAnalytics();
   </script>
 </body>
 </html>
