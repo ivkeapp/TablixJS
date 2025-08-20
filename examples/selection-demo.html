@@ -551,40 +551,49 @@
                 <div class="documentation-content">
                     <!-- Select All Documentation -->
                     <div class="doc-section active" id="doc-select-all">
-                        <h4>Select All Rows Implementation</h4>
-                        <p>TablixJS doesn't have a built-in <code>selectAll()</code> method, but you can easily implement it using existing APIs:</p>
+                        <h4>🎯 Select All Rows Implementation</h4>
+                        <p>TablixJS now includes a built-in <code>selectAllRows()</code> method in the API for easy implementation:</p>
                         
                         <div class="code-example">
-                            <h5>JavaScript Implementation:</h5>
-                            <pre><code>// Method 1: Select all visible/filtered rows
-function selectAllRows() {
-    const allData = table.getData();
-    const allIds = allData.map(row => row.id.toString());
-    table.selectRows(allIds);
-}
+                            <h5>Built-in API Method (Recommended):</h5>
+                            <pre><code>// Method 1: Using built-in selectAllRows() API
+const selectedCount = table.selectAllRows();
+console.log(`Selected ${selectedCount} rows`);
 
-// Method 2: Select all with keyboard shortcut
+// Method 2: With keyboard shortcut
 document.addEventListener('keydown', (e) => {
     if (e.key === 'a' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
-        selectAllRows();
+        table.selectAllRows();
     }
 });</code></pre>
                         </div>
 
                         <div class="code-example">
+                            <h5>Manual Implementation (Alternative):</h5>
+                            <pre><code>// Alternative: Manual implementation using existing APIs
+function selectAllRows() {
+    const allData = table.getData();
+    const allIds = allData.map(row => row.id.toString());
+    table.selectRows(allIds);
+}</code></pre>
+                        </div>
+
+                        <div class="code-example">
                             <h5>HTML Button:</h5>
-                            <pre><code>&lt;button id="selectAll" onclick="selectAllRows()"&gt;
+                            <pre><code>&lt;button onclick="table.selectAllRows()"&gt;
     Select All Rows
 &lt;/button&gt;</code></pre>
                         </div>
 
                         <div class="tips">
-                            <h5>Tips:</h5>
+                            <h5>💡 Tips:</h5>
                             <ul>
-                                <li><code>table.getData()</code> returns currently visible/filtered data</li>
-                                <li><code>table.selectRows()</code> accepts array of row IDs or single ID</li>
-                                <li>Selection works across pagination automatically</li>
+                                <li><code>table.selectAllRows()</code> returns the number of rows selected</li>
+                                <li>Only selects currently visible/filtered data (not hidden rows)</li>
+                                <li>Triggers a custom 'selectAll' event with selected data</li>
+                                <li>Works seamlessly with pagination - selects all data across pages</li>
+                                <li>Respects current filters and search terms</li>
                                 <li>Use <code>dataIdKey</code> option to specify which field to use as row ID</li>
                             </ul>
                         </div>

@@ -652,6 +652,24 @@
             <option value="sr">Srpski</option>
           </select>
         </div>
+
+        <div class="control-group">
+          <button class="btn btn-primary btn-full" onclick="selectAllRows()" id="selectAllBtn">
+            🎯 Select All Rows
+          </button>
+        </div>
+
+        <div class="control-group">
+          <button class="btn btn-secondary btn-full" onclick="clearSelection()">
+            🗑️ Clear Selection
+          </button>
+        </div>
+
+        <div class="control-group">
+          <button class="btn btn-secondary btn-full" onclick="logSelectedData()">
+            📝 Log Selected
+          </button>
+        </div>
       </section>
     </aside>
 
@@ -932,7 +950,21 @@
             'afterSort': (data) => logger.log('info', 'Column sorted', data),
             'afterFilter': (data) => logger.log('info', 'Filter applied', data),
             'afterSearch': (data) => logger.log('info', 'Search performed', data),
-            'selectionChanged': (data) => logger.log('info', 'Selection changed', data)
+            'selectionChanged': (data) => logger.log('info', 'Selection changed', data),
+            'afterSelect': (event) => {
+              logger.log('info', 'Selection updated', { 
+                count: event.selectedData.length,
+                ids: event.selectedIds 
+              });
+              updateSelectionButtons();
+            },
+            'selectAll': (event) => {
+              logger.log('success', 'Select All triggered', { 
+                count: event.count,
+                data: event.selectedData.length 
+              });
+              updateSelectionButtons();
+            }
           }).forEach(([event, handler]) => {
             state.table.on(event, handler);
           });
@@ -956,6 +988,19 @@
       
       const memoryEstimate = JSON.stringify(state.data).length / 1024;
       document.getElementById('memoryUsage').textContent = `${memoryEstimate.toFixed(0)}KB`;
+    }
+
+    function updateSelectionButtons() {
+      if (!state.table || !state.config.selection.enabled) return;
+      
+      const selectedCount = state.table.getSelectionCount ? state.table.getSelectionCount() : 0;
+      const selectAllBtn = document.getElementById('selectAllBtn');
+      
+      if (selectAllBtn) {
+        selectAllBtn.textContent = selectedCount > 0 ? 
+          `🎯 Select All (${selectedCount} selected)` : 
+          '🎯 Select All Rows';
+      }
     }
 
     function generateCode() {
@@ -1094,6 +1139,57 @@ table.on('afterPageChange', (data) => console.log('Page:', data));`;
       }
     };
 
+    window.selectAllRows = function() {
+      if (!state.table || !state.config.selection.enabled) {
+        logger.log('warning', 'Selection is not enabled');
+        return;
+      }
+
+      try {
+        const count = state.table.selectAllRows();
+        logger.log('success', `Selected ${count} rows using selectAllRows() API`);
+      } catch (error) {
+        logger.log('error', 'Failed to select all rows', error.message);
+      }
+    };
+
+    window.clearSelection = function() {
+      if (!state.table || !state.config.selection.enabled) {
+        logger.log('warning', 'Selection is not enabled');
+        return;
+      }
+
+      try {
+        state.table.clearSelection();
+        logger.log('info', 'Selection cleared');
+      } catch (error) {
+        logger.log('error', 'Failed to clear selection', error.message);
+      }
+    };
+
+    window.logSelectedData = function() {
+      if (!state.table || !state.config.selection.enabled) {
+        logger.log('warning', 'Selection is not enabled');
+        return;
+      }
+
+      try {
+        const selectedData = state.table.getSelectedData();
+        const selectedIds = state.table.getSelectedIds();
+        const count = state.table.getSelectionCount();
+
+        logger.log('info', `Selection Summary: ${count} rows selected`);
+        console.log('Selected IDs:', selectedIds);
+        console.log('Selected Data:', selectedData);
+        
+        if (count > 0) {
+          logger.log('info', `IDs: [${selectedIds.join(', ')}]`);
+        }
+      } catch (error) {
+        logger.log('error', 'Failed to get selected data', error.message);
+      }
+    };
+
     window.resetAll = function() {
       logger.log('warning', 'Resetting playground...');
       
@@ -1148,6 +1244,38 @@ table.on('afterPageChange', (data) => console.log('Page:', data));`;
 
     // Initialize
     document.addEventListener('DOMContentLoaded', initPlayground);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Only handle shortcuts when table area is focused or no input is focused
+      const activeElement = document.activeElement;
+      if (activeElement && (activeElement.tagName === 'INPUT' || 
+                           activeElement.tagName === 'TEXTAREA' || 
+                           activeElement.tagName === 'SELECT')) {
+        return;
+      }
+      
+      switch (e.key) {
+        case 'a':
+        case 'A':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            if (state.config.selection.enabled) {
+              selectAllRows();
+              logger.log('info', 'Keyboard shortcut: Ctrl+A - Select All');
+            }
+          }
+          break;
+          
+        case 'Escape':
+          e.preventDefault();
+          if (state.config.selection.enabled) {
+            clearSelection();
+            logger.log('info', 'Keyboard shortcut: Escape - Clear Selection');
+          }
+          break;
+      }
+    });
 
     // Export for debugging
     window.PlaygroundState = state;
