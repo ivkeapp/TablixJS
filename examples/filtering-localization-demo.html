@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS - Filtering Localization Demo</title>
+    
+    <!-- TablixJS CSS -->
+    <link rel="stylesheet" href="../src/styles/tablix.css">
+    <link rel="stylesheet" href="../src/styles/filtering-core.css">
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .demo-header h1 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+        }
+
+        .demo-header p {
+            color: #666;
+            margin: 0;
+        }
+
+        .language-selector {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .language-selector h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+        }
+
+        .language-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .language-btn {
+            padding: 8px 16px;
+            border: 2px solid #007acc;
+            background: white;
+            color: #007acc;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .language-btn:hover {
+            background: #f0f8ff;
+        }
+
+        .language-btn.active {
+            background: #007acc;
+            color: white;
+        }
+
+        .current-language {
+            margin-top: 15px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .table-container {
+            margin-top: 30px;
+        }
+
+        .demo-note {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .demo-note h4 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+
+        .demo-note ul {
+            margin: 10px 0 0 20px;
+            color: #555;
+        }
+
+        .demo-note li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>🌐 TablixJS Filtering Localization Demo</h1>
+            <p>Experience filtering with multi-language support</p>
+        </div>
+
+        <div class="language-selector">
+            <h3>Choose Language / Choisir la langue / Elegir idioma</h3>
+            <div class="language-buttons">
+                <button class="language-btn active" data-lang="en">🇺🇸 English</button>
+                <button class="language-btn" data-lang="fr">🇫🇷 Français</button>
+                <button class="language-btn" data-lang="es">🇪🇸 Español</button>
+            </div>
+            <div class="current-language">
+                Current Language: <span id="currentLang">English</span>
+            </div>
+        </div>
+
+        <div class="demo-note">
+            <h4>🔍 How to Test Filtering Localization:</h4>
+            <ul>
+                <li><strong>Click filter icons</strong> in the column headers to open filter dropdowns</li>
+                <li><strong>Switch languages</strong> using the buttons above to see all UI elements translated</li>
+                <li><strong>Try different filter types:</strong> "Filter by Value" and "Filter by Condition"</li>
+                <li><strong>Test filter operations:</strong> Contains, Starts with, Equals, Greater than, etc.</li>
+                <li><strong>Use search</strong> in value filters to find specific items</li>
+            </ul>
+        </div>
+
+        <div class="table-container">
+            <table id="filterTable"></table>
+        </div>
+    </div>
+
+    <script type="module">
+        import Table from '../src/core/Table.js';
+        import { frenchTranslations } from '../src/locales/fr.js';
+        import { spanishTranslations } from '../src/locales/es.js';
+
+        // Sample data with various data types for filtering
+        const sampleData = [
+            { id: 1, name: 'John Doe', age: 28, department: 'Engineering', salary: 75000, startDate: '2023-01-15', active: true },
+            { id: 2, name: 'Jane Smith', age: 34, department: 'Marketing', salary: 65000, startDate: '2022-03-22', active: true },
+            { id: 3, name: 'Mike Johnson', age: 41, department: 'Sales', salary: 58000, startDate: '2021-07-08', active: false },
+            { id: 4, name: 'Sarah Wilson', age: 29, department: 'Engineering', salary: 82000, startDate: '2023-02-01', active: true },
+            { id: 5, name: 'Robert Brown', age: 35, department: 'HR', salary: 55000, startDate: '2020-11-12', active: true },
+            { id: 6, name: 'Emily Davis', age: 26, department: 'Marketing', salary: 48000, startDate: '2023-04-10', active: true },
+            { id: 7, name: 'David Miller', age: 45, department: 'Sales', salary: 72000, startDate: '2019-08-30', active: false },
+            { id: 8, name: 'Lisa Garcia', age: 31, department: 'Engineering', salary: 78000, startDate: '2022-09-15', active: true },
+            { id: 9, name: 'James Rodriguez', age: 38, department: 'Marketing', salary: 61000, startDate: '2021-12-05', active: true },
+            { id: 10, name: 'Maria Lopez', age: 27, department: 'HR', salary: 52000, startDate: '2023-03-18', active: true }
+        ];
+
+        // Column configuration
+        const columns = [
+            { key: 'id', title: 'ID', width: 80, sortable: true, filterable: true },
+            { key: 'name', title: 'Name', width: 150, sortable: true, filterable: true },
+            { key: 'age', title: 'Age', width: 80, sortable: true, filterable: true },
+            { key: 'department', title: 'Department', width: 130, sortable: true, filterable: true },
+            { 
+                key: 'salary', 
+                title: 'Salary', 
+                width: 100, 
+                sortable: true, 
+                filterable: true,
+                renderer: (value) => `$${value.toLocaleString()}`
+            },
+            { key: 'startDate', title: 'Start Date', width: 120, sortable: true, filterable: true },
+            { 
+                key: 'active', 
+                title: 'Active', 
+                width: 80, 
+                sortable: true, 
+                filterable: true,
+                renderer: (value) => value ? '✅ Yes' : '❌ No'
+            }
+        ];
+
+        // Language names for display
+        const languageNames = {
+            'en': 'English',
+            'fr': 'Français',
+            'es': 'Español'
+        };
+
+        // Initialize the table with filtering enabled
+        let table = new Table('#filterTable', {
+            data: sampleData,
+            columns: columns,
+            language: 'en',
+            translations: {
+                fr: frenchTranslations,
+                es: spanishTranslations
+            },
+            pagination: {
+                enabled: true,
+                pageSize: 8,
+                showPageSizes: true,
+                pageSizeOptions: [5, 8, 10, 20]
+            },
+            filtering: {
+                enabled: true
+            },
+            sorting: {
+                enabled: true
+            },
+            selection: {
+                enabled: true,
+                mode: 'multi'
+            },
+            search: {
+                enabled: true
+            },
+            controls: {
+                enabled: true,
+                position: 'top',
+                search: true,
+                pagination: true,
+                refresh: true
+            }
+        });
+
+        // Language switching
+        const languageButtons = document.querySelectorAll('.language-btn');
+        const currentLangSpan = document.getElementById('currentLang');
+
+        languageButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const lang = btn.dataset.lang;
+                
+                // Update active button
+                languageButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Switch language
+                table.setLanguage(lang);
+                currentLangSpan.textContent = languageNames[lang];
+            });
+        });
+
+        console.log('TablixJS Filtering Localization Demo loaded successfully!');
+        console.log('Available languages:', table.getAvailableLanguages());
+        console.log('Current language:', table.getCurrentLanguage());
+    </script>
+</body>
+</html>

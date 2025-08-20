@@ -44,17 +44,26 @@ export default class FilterUI {
       const columnName = header.dataset.column;
       if (!columnName) return;
       
-      // Skip if filter icon already exists
-      if (header.querySelector('.tablix-filter-indicator')) return;
-      
       const thContent = header.querySelector('.tablix-th-content');
       if (!thContent) return;
       
-      // Create filter indicator
-      const filterIndicator = document.createElement('span');
+      // Check if filter icon already exists
+      let filterIndicator = header.querySelector('.tablix-filter-indicator');
+      
+      if (filterIndicator) {
+        // Update existing filter indicator with new translations
+        const filterIcon = filterIndicator.querySelector('.tablix-filter-icon');
+        if (filterIcon) {
+          filterIcon.title = this.table.t('filter.filterColumn');
+        }
+        return;
+      }
+      
+      // Create new filter indicator
+      filterIndicator = document.createElement('span');
       filterIndicator.className = 'tablix-filter-indicator';
       filterIndicator.innerHTML = `
-        <span class="tablix-filter-icon" title="Filter column">⚪</span>
+        <span class="tablix-filter-icon" title="${this.table.t('filter.filterColumn')}">⚪</span>
       `;
       
       // Add click handler
@@ -127,15 +136,15 @@ export default class FilterUI {
     
     return `
       <div class="tablix-filter-dropdown-header">
-        <h4>Filter: ${columnName}</h4>
+        <h4>${this.table.t('filter.filter')}: ${columnName}</h4>
         <button class="tablix-filter-close" type="button">×</button>
       </div>
       
       <div class="tablix-filter-tabs">
         <button class="tablix-filter-tab ${!currentFilter || currentFilter.type === 'value' ? 'active' : ''}" 
-                data-tab="value">Filter by Value</button>
+                data-tab="value">${this.table.t('filter.filterByValue')}</button>
         <button class="tablix-filter-tab ${currentFilter && currentFilter.type === 'condition' ? 'active' : ''}" 
-                data-tab="condition">Filter by Condition</button>
+                data-tab="condition">${this.table.t('filter.filterByCondition')}</button>
       </div>
       
       <div class="tablix-filter-content">
@@ -149,9 +158,9 @@ export default class FilterUI {
       </div>
       
       <div class="tablix-filter-actions">
-        <button class="tablix-filter-apply" type="button">Apply</button>
-        <button class="tablix-filter-clear" type="button">Clear</button>
-        <button class="tablix-filter-cancel" type="button">Cancel</button>
+        <button class="tablix-filter-apply" type="button">${this.table.t('filter.apply')}</button>
+        <button class="tablix-filter-clear" type="button">${this.table.t('filter.clear')}</button>
+        <button class="tablix-filter-cancel" type="button">${this.table.t('filter.cancel')}</button>
       </div>
     `;
   }
@@ -168,7 +177,7 @@ export default class FilterUI {
       currentFilter.config.values : [];
     
     if (uniqueValues.length === 0) {
-      return '<p class="tablix-filter-empty">No values available</p>';
+      return `<p class="tablix-filter-empty">${this.table.t('filter.noValuesAvailable')}</p>`;
     }
     
     let html = `
@@ -176,7 +185,7 @@ export default class FilterUI {
         <input type="text" 
                id="tablix-filter-search-${columnName}" 
                name="filter-search-${columnName}"
-               placeholder="Search values..." 
+               placeholder="${this.table.t('filter.searchValues')}" 
                class="tablix-filter-search-input">
       </div>
       <div class="tablix-filter-select-all">
@@ -184,7 +193,7 @@ export default class FilterUI {
           <input type="checkbox" 
                  id="tablix-filter-select-all-${columnName}" 
                  name="filter-select-all-${columnName}"
-                 class="tablix-filter-select-all-checkbox"> Select All
+                 class="tablix-filter-select-all-checkbox"> ${this.table.t('filter.selectAll')}
         </label>
       </div>
       <div class="tablix-filter-values">
@@ -227,7 +236,7 @@ export default class FilterUI {
     
     html += `
       </div>
-      <button class="tablix-filter-add-condition" type="button">+ Add Condition</button>
+      <button class="tablix-filter-add-condition" type="button">+ ${this.table.t('filter.addCondition')}</button>
     `;
     
     return html;
@@ -262,13 +271,13 @@ export default class FilterUI {
                id="tablix-filter-value-${index}" 
                name="filter-value-${index}"
                class="tablix-filter-value" 
-               placeholder="Value" 
+               placeholder="${this.table.t('filter.value')}" 
                value="${this.escapeHtml(condition.value || '')}"
                ${needsValue ? '' : 'disabled'}>
         <button class="tablix-filter-remove-condition" 
                 type="button" 
                 data-index="${index}"
-                title="Remove condition">×</button>
+                title="${this.table.t('filter.removeCondition')}">×</button>
       </div>
     `;
     
@@ -600,25 +609,40 @@ export default class FilterUI {
   showDropdown(dropdown, trigger) {
     document.body.appendChild(dropdown);
     
-    // Position dropdown
+    // Make dropdown visible but off-screen to measure it
+    dropdown.style.position = 'absolute';
+    dropdown.style.top = '-9999px';
+    dropdown.style.left = '-9999px';
+    dropdown.style.display = 'block';
+    dropdown.style.visibility = 'hidden';
+    
+    // Force reflow to ensure accurate measurements
+    dropdown.offsetHeight;
+    
+    // Get accurate measurements
     const triggerRect = trigger.getBoundingClientRect();
     const dropdownRect = dropdown.getBoundingClientRect();
     
-    let left = triggerRect.left;
-    let top = triggerRect.bottom + 5;
+    let left = triggerRect.left + window.scrollX;
+    let top = triggerRect.bottom + window.scrollY + 5;
     
     // Adjust if dropdown goes off screen
-    if (left + dropdownRect.width > window.innerWidth) {
-      left = window.innerWidth - dropdownRect.width - 10;
+    if (left + dropdownRect.width > window.innerWidth + window.scrollX) {
+      left = window.innerWidth + window.scrollX - dropdownRect.width - 10;
     }
     
-    if (top + dropdownRect.height > window.innerHeight) {
-      top = triggerRect.top - dropdownRect.height - 5;
+    if (top + dropdownRect.height > window.innerHeight + window.scrollY) {
+      top = triggerRect.top + window.scrollY - dropdownRect.height - 5;
     }
     
-    dropdown.style.left = `${Math.max(10, left)}px`;
-    dropdown.style.top = `${Math.max(10, top)}px`;
-    dropdown.style.display = 'block';
+    // Ensure dropdown stays within viewport
+    left = Math.max(window.scrollX + 10, left);
+    top = Math.max(window.scrollY + 10, top);
+    
+    // Apply final positioning and make visible
+    dropdown.style.left = `${left}px`;
+    dropdown.style.top = `${top}px`;
+    dropdown.style.visibility = 'visible';
   }
 
   /**
