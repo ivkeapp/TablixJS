@@ -9,6 +9,10 @@ import FilterUI from './FilterUI.js';
 import SearchManager from './SearchManager.js';
 import SelectionManager from './SelectionManager.js';
 import VirtualScrollManager from './VirtualScroll.js';
+import Localization from './Localization.js';
+import { frenchTranslations } from '../locales/fr.js';
+import { spanishTranslations } from '../locales/es.js';
+import { serbianTranslations } from '../locales/sr.js';
 
 export default class Table {
   constructor(container, options = {}) {
@@ -57,7 +61,7 @@ export default class Table {
       },
       search: {
         enabled: true,
-        placeholder: 'Search...',
+        placeholder: null, // Will use localized string if not provided
         searchDelay: 300, // Debounce delay in milliseconds
         minLength: 1, // Minimum characters before search starts
         caseSensitive: false
@@ -75,8 +79,31 @@ export default class Table {
         rowHeight: null, // Auto-detected if null
         containerHeight: 400 // Default container height in pixels
       },
+      // Localization options
+      language: 'en',
+      translations: {},
       ...options
     };
+
+    // Initialize localization first (before other managers that might use it)
+    this.localization = new Localization();
+    
+    // Auto-load common language packs for developer convenience
+    this.localization.addTranslations('fr', frenchTranslations);
+    this.localization.addTranslations('es', spanishTranslations);
+    this.localization.addTranslations('sr', serbianTranslations);
+    
+    // Set language and translations if provided
+    if (this.options.language) {
+      this.localization.setLanguage(this.options.language);
+    }
+    
+    // Add custom translations if provided (these will override auto-loaded ones)
+    if (this.options.translations) {
+      Object.keys(this.options.translations).forEach(lang => {
+        this.localization.addTranslations(lang, this.options.translations[lang]);
+      });
+    }
 
     // Initialize managers
     this.eventManager = new EventManager();
@@ -731,6 +758,144 @@ export default class Table {
     });
 
     return allData.length;
+  }
+
+  // ===== LOCALIZATION API =====
+
+  /**
+   * Get localized string by key
+   * @param {string} key - Translation key (e.g., 'pagination.next')
+   * @param {Object} params - Parameters to substitute in the translation
+   * @returns {string} Localized string
+   */
+  t(key, params = {}) {
+    return this.localization.t(key, params);
+  }
+
+  /**
+   * Set the current language
+   * @param {string} language - Language code (e.g., 'en', 'fr', 'es')
+   */
+  setLanguage(language) {
+    // Close any open filter dropdowns before changing language
+    if (this.filterUI && this.filterUI.activeDropdown) {
+      this.filterUI.closeAllDropdowns();
+    }
+    
+    this.localization.setLanguage(language);
+    this.options.language = language;
+    
+    // Ensure language translations are available
+    this.ensureLanguageTranslations(language);
+    
+    // Re-render table to apply new translations
+    this.refreshTable();
+  }
+
+  /**
+   * Ensure language translations are loaded
+   * @private
+   * @param {string} language - Language code
+   */
+  ensureLanguageTranslations(language) {
+    // If translations are already available, no need to reload
+    if (this.localization.hasLanguage(language)) {
+      return;
+    }
+    
+    // Auto-load translations for common languages
+    const languageLoaders = {
+      'fr': () => frenchTranslations,
+      'es': () => spanishTranslations,
+      'sr': () => serbianTranslations
+    };
+    
+    if (languageLoaders[language]) {
+      try {
+        const translations = languageLoaders[language]();
+        this.localization.addTranslations(language, translations);
+        console.log(`TablixJS: Auto-loaded ${language} translations`);
+      } catch (error) {
+        console.warn(`TablixJS: Failed to auto-load ${language} translations:`, error);
+      }
+    }
+  }
+
+  /**
+   * Add translations for a specific language
+   * @param {string} language - Language code
+   * @param {Object} translations - Translations object
+   */
+  addTranslations(language, translations) {
+    this.localization.addTranslations(language, translations);
+    // If we just added translations for the current language, re-render
+    if (language === this.localization.getCurrentLanguage()) {
+      this.refreshTable();
+    }
+  }
+
+  /**
+   * Add a complete language pack (convenience method for developers)
+   * This method helps developers add a new language with all required translations
+   * @param {string} language - Language code (e.g., 'de', 'it', 'pt')
+   * @param {Object} translations - Complete translations object
+   * @param {boolean} setAsCurrent - Whether to immediately set this as the current language
+   */
+  addLanguagePack(language, translations, setAsCurrent = false) {
+    // Add the translations
+    this.addTranslations(language, translations);
+    
+    // Optionally set as current language
+    if (setAsCurrent) {
+      this.setLanguage(language);
+    }
+    
+    console.log(`TablixJS: Language pack '${language}' added successfully`);
+  }
+
+  /**
+   * Get current language
+   * @returns {string} Current language code
+   */
+  getCurrentLanguage() {
+    return this.localization.getCurrentLanguage();
+  }
+
+  /**
+   * Get available languages
+   * @returns {Array<string>} Array of available language codes
+   */
+  getAvailableLanguages() {
+    return this.localization.getAvailableLanguages();
+  }
+
+  /**
+   * Check if a language is available
+   * @param {string} language - Language code to check
+   * @returns {boolean} True if language is available
+   */
+  hasLanguage(language) {
+    return this.localization.hasLanguage(language);
+  }
+
+  /**
+   * Format number using current locale
+   * @param {number} number - Number to format
+   * @param {Object} options - Formatting options
+   * @returns {string} Formatted number
+   */
+  formatNumber(number, options = {}) {
+    return this.localization.formatNumber(number, options);
+  }
+
+  /**
+   * Format date using current locale
+   * @param {Date|string|number} date - Date to format
+   * @param {Object} options - Formatting options
+   * @returns {string} Formatted date
+   */
+  formatDate(date, options = {}) {
+    return this.localization.formatDate(date, options);
   }
 
   /**

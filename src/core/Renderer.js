@@ -56,11 +56,11 @@ export default class Renderer {
       if (isSortable) {
         html += `<span class="tablix-sort-indicator">`;
         if (sortDirection === 'asc') {
-          html += `<span class="tablix-sort-arrow tablix-sort-asc" aria-label="Sorted ascending">↑</span>`;
+          html += `<span class="tablix-sort-arrow tablix-sort-asc" aria-label="${this.table.t('sort.sortedAscending')}">↑</span>`;
         } else if (sortDirection === 'desc') {
-          html += `<span class="tablix-sort-arrow tablix-sort-desc" aria-label="Sorted descending">↓</span>`;
+          html += `<span class="tablix-sort-arrow tablix-sort-desc" aria-label="${this.table.t('sort.sortedDescending')}">↓</span>`;
         } else {
-          html += `<span class="tablix-sort-arrow tablix-sort-none" aria-label="Not sorted">↕</span>`;
+          html += `<span class="tablix-sort-arrow tablix-sort-none" aria-label="${this.table.t('sort.notSorted')}">↕</span>`;
         }
         html += `</span>`;
       }
@@ -78,7 +78,7 @@ export default class Renderer {
       // Empty body for virtual scrolling - rows will be added by VirtualScrollManager
       html += `<tr class="tablix-placeholder-row" style="display: none;"><td colspan="${columns.length}"></td></tr>`;
     } else if (data.length === 0) {
-      html += `<tr class="tablix-empty-row"><td colspan="${columns.length}" class="tablix-empty-cell">No data available</td></tr>`;
+      html += `<tr class="tablix-empty-row"><td colspan="${columns.length}" class="tablix-empty-cell">${this.table.t('general.noData')}</td></tr>`;
     } else {
       data.forEach((row, index) => {
         // Calculate global row index for pagination
@@ -215,23 +215,27 @@ export default class Renderer {
     // Page info
     html += `<div class="tablix-pagination-info">`;
     if (info.totalRows === 0) {
-      html += 'No records found';
+      html += this.table.t('pagination.noRecords');
     } else {
-      html += `Showing ${info.startRow}-${info.endRow} of ${info.totalRows} records`;
+      html += this.table.t('pagination.showingRecords', {
+        startRow: info.startRow,
+        endRow: info.endRow,
+        totalRows: info.totalRows
+      });
     }
     html += '</div>';
 
     // Page size selector
     if (paginationManager.options.showPageSizes && paginationManager.options.pageSizeOptions.length > 1) {
       html += '<div class="tablix-pagination-page-size">';
-      html += 'Show ';
+      html += this.table.t('general.show') + ' ';
       html += '<select class="tablix-page-size-select">';
       paginationManager.options.pageSizeOptions.forEach(size => {
         const selected = size === info.pageSize ? ' selected' : '';
         html += `<option value="${size}"${selected}>${size}</option>`;
       });
       html += '</select>';
-      html += ' records per page';
+      html += ' ' + this.table.t('general.records') + ' ' + this.table.t('general.perPage');
       html += '</div>';
     }
 
@@ -242,13 +246,13 @@ export default class Renderer {
       // First page
       if (paginationManager.options.showFirstLast) {
         const disabled = info.currentPage === 1 ? ' disabled' : '';
-        html += `<button class="tablix-pagination-btn tablix-pagination-first" data-page="1"${disabled}>First</button>`;
+        html += `<button class="tablix-pagination-btn tablix-pagination-first" data-page="1"${disabled}>${this.table.t('pagination.first')}</button>`;
       }
       
       // Previous page
       if (paginationManager.options.showPrevNext) {
         const disabled = !info.hasPrevPage ? ' disabled' : '';
-        html += `<button class="tablix-pagination-btn tablix-pagination-prev" data-page="${info.currentPage - 1}"${disabled}>Previous</button>`;
+        html += `<button class="tablix-pagination-btn tablix-pagination-prev" data-page="${info.currentPage - 1}"${disabled}>${this.table.t('pagination.previous')}</button>`;
       }
       
       // Page numbers
@@ -267,13 +271,13 @@ export default class Renderer {
       // Next page
       if (paginationManager.options.showPrevNext) {
         const disabled = !info.hasNextPage ? ' disabled' : '';
-        html += `<button class="tablix-pagination-btn tablix-pagination-next" data-page="${info.currentPage + 1}"${disabled}>Next</button>`;
+        html += `<button class="tablix-pagination-btn tablix-pagination-next" data-page="${info.currentPage + 1}"${disabled}>${this.table.t('pagination.next')}</button>`;
       }
       
       // Last page
       if (paginationManager.options.showFirstLast) {
         const disabled = info.currentPage === info.totalPages ? ' disabled' : '';
-        html += `<button class="tablix-pagination-btn tablix-pagination-last" data-page="${info.totalPages}"${disabled}>Last</button>`;
+        html += `<button class="tablix-pagination-btn tablix-pagination-last" data-page="${info.totalPages}"${disabled}>${this.table.t('pagination.last')}</button>`;
       }
       
       html += '</div>';
@@ -281,7 +285,7 @@ export default class Renderer {
 
     // Loading indicator
     if (info.isLoading) {
-      html += '<div class="tablix-pagination-loading">Loading...</div>';
+      html += `<div class="tablix-pagination-loading">${this.table.t('general.loading')}</div>`;
     }
     
     html += '</div>';
@@ -339,14 +343,14 @@ export default class Renderer {
    * Render loading state
    */
   renderLoading() {
-    this.table.container.innerHTML = '<div class="tablix-loading">Loading...</div>';
+    this.table.container.innerHTML = `<div class="tablix-loading">${this.table.t('general.loading')}</div>`;
   }
 
   /**
    * Render error state
    */
   renderError(error) {
-    this.table.container.innerHTML = `<div class="tablix-error">Error: ${this.escapeHtml(error.message || error)}</div>`;
+    this.table.container.innerHTML = `<div class="tablix-error">${this.table.t('general.error')}: ${this.escapeHtml(error.message || error)}</div>`;
   }
 
   /**
@@ -354,7 +358,7 @@ export default class Renderer {
    */
   renderControls(position) {
     const controlsOptions = this.table.options.controls;
-    const searchOptions = this.table.options.search || { enabled: false, placeholder: 'Search...' };
+    const searchOptions = this.table.options.search || { enabled: false, placeholder: null };
     
     let html = `<div class="tablix-controls tablix-controls-${position}">`;
     
@@ -364,10 +368,10 @@ export default class Renderer {
     // Pagination controls
     if (controlsOptions.pagination && this.table.paginationManager) {
       html += '<div class="tablix-control-group tablix-pagination-controls">';
-      html += '<button type="button" class="tablix-btn tablix-control-btn" data-action="firstPage">First</button>';
-      html += '<button type="button" class="tablix-btn tablix-control-btn" data-action="prevPage">Previous</button>';
-      html += '<button type="button" class="tablix-btn tablix-control-btn" data-action="nextPage">Next</button>';
-      html += '<button type="button" class="tablix-btn tablix-control-btn" data-action="lastPage">Last</button>';
+      html += `<button type="button" class="tablix-btn tablix-control-btn" data-action="firstPage">${this.table.t('pagination.first')}</button>`;
+      html += `<button type="button" class="tablix-btn tablix-control-btn" data-action="prevPage">${this.table.t('pagination.previous')}</button>`;
+      html += `<button type="button" class="tablix-btn tablix-control-btn" data-action="nextPage">${this.table.t('pagination.next')}</button>`;
+      html += `<button type="button" class="tablix-btn tablix-control-btn" data-action="lastPage">${this.table.t('pagination.last')}</button>`;
       html += '</div>';
     }
     
@@ -377,21 +381,21 @@ export default class Renderer {
       const currentPageSize = this.table.paginationManager.pageSize;
       
       html += '<div class="tablix-control-group tablix-page-size-group">';
-      html += '<label for="tablix-page-size-select">Show:</label>';
+      html += `<label for="tablix-page-size-select">${this.table.t('general.show')}:</label>`;
       html += '<select class="tablix-page-size-select" id="tablix-page-size-select">';
       pageSizeOptions.forEach(size => {
         const selected = size === currentPageSize ? ' selected' : '';
         html += `<option value="${size}"${selected}>${size}</option>`;
       });
       html += '</select>';
-      html += '<span>entries</span>';
+      html += `<span>${this.table.t('general.entries')}</span>`;
       html += '</div>';
     }
     
     // Refresh control
     if (controlsOptions.refresh) {
       html += '<div class="tablix-control-group tablix-refresh-group">';
-      html += '<button type="button" class="tablix-btn tablix-control-btn" data-action="refresh" title="Refresh data">⟳</button>';
+      html += `<button type="button" class="tablix-btn tablix-control-btn" data-action="refresh" title="${this.table.t('controls.refresh')}">⟳</button>`;
       html += '</div>';
     }
     
@@ -402,8 +406,8 @@ export default class Renderer {
     
     // Search control
     if (controlsOptions.search && searchOptions.enabled) {
-      // Ensure placeholder always has a default value to prevent "undefined" display
-      const placeholderText = searchOptions.placeholder || 'Search...';
+      // Use localized placeholder or provided one
+      const placeholderText = searchOptions.placeholder || this.table.t('search.placeholder');
       
       html += '<div class="tablix-control-group tablix-search-group">';
       html += `<input type="text" 
@@ -411,7 +415,7 @@ export default class Renderer {
                       id="tablix-search-input" 
                       name="table-search"
                       placeholder="${placeholderText}" />`;
-      html += '<button type="button" class="tablix-btn tablix-search-clear" title="Clear search" style="display: none;">✕</button>';
+      html += `<button type="button" class="tablix-btn tablix-search-clear" title="${this.table.t('search.clear')}" style="display: none;">✕</button>`;
       html += '</div>';
     }
     
@@ -650,14 +654,14 @@ export default class Renderer {
         arrow.classList.remove('tablix-sort-none', 'tablix-sort-asc', 'tablix-sort-desc');
         arrow.classList.add(`tablix-sort-${currentSort.direction}`);
         arrow.textContent = currentSort.direction === 'asc' ? '↑' : '↓';
-        arrow.setAttribute('aria-label', `Sorted ${currentSort.direction === 'asc' ? 'ascending' : 'descending'}`);
+        arrow.setAttribute('aria-label', `${this.table.t('sort.sorted')}${currentSort.direction === 'asc' ? this.table.t('sort.sortedAscending') : this.table.t('sort.sortedDescending')}`);
         arrow.removeAttribute('data-sort-order');
       } else {
         // Column is not sorted
         arrow.classList.remove('tablix-sort-asc', 'tablix-sort-desc');
         arrow.classList.add('tablix-sort-none');
         arrow.textContent = '↕';
-        arrow.setAttribute('aria-label', 'Not sorted');
+        arrow.setAttribute('aria-label', this.table.t('sort.notSorted'));
         arrow.removeAttribute('data-sort-order');
       }
     });

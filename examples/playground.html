@@ -632,9 +632,25 @@
           </select>
         </div>
 
-        <div class="toggle-group">
-          <span class="toggle-label">Select All</span>
-          <div class="toggle" id="showSelectAllToggle" onclick="toggleSelectionOption('showSelectAll')"></div>
+        
+        <div style="margin-top: 15px;">
+          <button id="testSelectAll" onclick="testSelectAll()" style="background: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; width: 100%;">Select All Rows</button>
+          <button id="testClearAll" onclick="testClearAll()" style="background: #dc3545; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; width: 100%; margin-top: 8px;">Clear Selection</button>
+        </div>
+      </section>
+
+      <!-- Localization Settings -->
+      <section class="control-section">
+        <h3 class="section-title">🌐 Localization</h3>
+        
+        <div class="control-group">
+          <label class="control-label">Language</label>
+          <select class="control-select" id="languageSelect" onchange="updateLanguage()">
+            <option value="en" selected>English</option>
+            <option value="fr">Français</option>
+            <option value="es">Español</option>
+            <option value="sr">Srpski</option>
+          </select>
         </div>
 
         <div class="control-group">
@@ -735,7 +751,8 @@
         filtering: { enabled: true },
         search: { enabled: true },
         selection: { enabled: false, mode: 'multi', showSelectAll: false },
-        virtualScroll: { enabled: false }
+        virtualScroll: { enabled: false },
+        language: 'en'
       },
       data: [],
       analytics: {
@@ -1096,11 +1113,30 @@ table.on('afterPageChange', (data) => console.log('Page:', data));`;
       logger.log('info', `Selection mode: ${mode}`);
     };
 
-    window.toggleSelectionOption = function(option) {
-      const toggle = document.getElementById(`${option}Toggle`);
-      toggle.classList.toggle('active');
-      state.config.selection[option] = toggle.classList.contains('active');
+
+    window.updateLanguage = function() {
+      const language = document.getElementById('languageSelect').value;
+      state.config.language = language;
       createTable();
+      logger.log('info', `Language changed to: ${language}`);
+    };
+
+    window.testSelectAll = function() {
+      if (state.table && state.table.selectAllRows) {
+        logger.log('info', 'Testing select all...');
+        state.table.selectAllRows();
+      } else {
+        logger.log('warning', 'Table or selectAllRows method not available');
+      }
+    };
+
+    window.testClearAll = function() {
+      if (state.table && state.table.clearSelection) {
+        logger.log('info', 'Testing clear selection...');
+        state.table.clearSelection();
+      } else {
+        logger.log('warning', 'Table or clearSelection method not available');
+      }
     };
 
     window.selectAllRows = function() {
@@ -1171,13 +1207,15 @@ table.on('afterPageChange', (data) => console.log('Page:', data));`;
         filtering: { enabled: true },
         search: { enabled: true },
         selection: { enabled: false, mode: 'multi', showSelectAll: false },
-        virtualScroll: { enabled: false }
+        virtualScroll: { enabled: false },
+        language: 'en'
       };
 
       // Reset UI
       document.getElementById('datasetSize').value = 'medium';
       document.getElementById('dataType').value = 'employees';
       document.getElementById('pageSize').value = '10';
+      document.getElementById('languageSelect').value = 'en';
       document.getElementById('selectionSettings').style.display = 'none';
 
       updateDataset();

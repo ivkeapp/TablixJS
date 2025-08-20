@@ -63,6 +63,14 @@ TablixJS is a modern, lightweight, and dependency-free JavaScript library for bu
 - **Component Styling** - Modular CSS for easy customization
 - **Framework Integration** - Works seamlessly with existing CSS frameworks
 
+### **🌍 Localization System** ⭐ **NEW**
+- **Built-in Multi-language Support** - English, French, and Spanish translations included
+- **Dynamic Language Switching** - Change languages without table recreation
+- **Fallback System** - Missing translations automatically fall back to English
+- **Plugin-friendly** - Easy for plugin developers to add their own translations
+- **Number & Date Formatting** - Locale-aware formatting using native `Intl` APIs
+- **Zero Dependencies** - No external i18n libraries required
+
 ### **⚡ Performance Features**
 - **Virtual Scrolling** - Handle thousands of rows with smooth scrolling
 - **Lazy Loading** - Load data on demand for better performance
@@ -450,6 +458,52 @@ table.on('loadError', (payload) => {
 
 > **Learn More:** See [Async Data Loading Guide](docs/async-data-loading.md) for complete documentation and [live demo](examples/async-data-loading-demo.html).
 
+### **Localization with Multiple Languages**
+
+```javascript
+import { frenchTranslations } from './src/locales/fr.js';
+import { spanishTranslations } from './src/locales/es.js';
+
+const table = new Table('#multiLangTable', {
+  data: employees,
+  columns: [...],
+  language: 'fr',
+  translations: {
+    fr: frenchTranslations,
+    es: spanishTranslations
+  },
+  pagination: {
+    enabled: true,
+    pageSize: 10
+  },
+  selection: {
+    enabled: true,
+    mode: 'multi'
+  }
+});
+
+// Dynamic language switching
+table.setLanguage('es'); // Switch to Spanish
+table.setLanguage('fr'); // Switch to French
+
+// Add custom translations
+table.addTranslations('de', {
+  'pagination.next': 'Nächste',
+  'pagination.previous': 'Vorherige',
+  'search.placeholder': 'Suchen...'
+});
+
+// Use translations in your code
+console.log(table.t('pagination.next')); // "Suivant" in French
+console.log(table.t('pagination.showingRecords', {
+  startRow: 1, endRow: 10, totalRows: 100
+})); // "Affichage de 1 à 10 sur 100 enregistrements"
+
+// Format numbers with locale
+const price = table.formatNumber(1234.56, { style: 'currency', currency: 'EUR' });
+console.log(price); // "1 234,56 €" in French locale
+```
+```javascript
 ### **Event System**
 ```javascript
 // Pagination events
@@ -576,6 +630,7 @@ Selection automatically works with all table features:
 - **[Filtering Demo](examples/filtering-demo.html)** - Data filtering capabilities
 - **[Selection Demo](examples/selection-demo.html)** - Row selection functionality 🆕
 - **[Drag Selection Demo](examples/drag-selection-demo.html)** - Advanced drag-to-select functionality 🔥
+- **[Localization Demo](examples/localization-demo.html)** - Multi-language support and dynamic language switching ⭐
 - **[Auto Controls](examples/auto-controls.html)** - Automatic control generation
 - **[Theme Demo](examples/theme-demo.html)** - Theming and styling examples
 - **[Sorting Demo](examples/sorting-demo.html)** - Column sorting functionality
@@ -810,6 +865,7 @@ For production, simply include the files directly (no build process required):
 ### **Customization**
 - **[Column Formatting](examples/column-formatting-demo.html)** - Custom column formatting and renderers
 - **[Theme Demo](examples/theme-demo.html)** - Theming and styling examples
+- **[Localization Demo](examples/localization-demo.html)** - Multi-language support with language switching ⭐
 
 ### **Performance**
 - **[Virtual Scrolling](examples/virtual-scroll-demo.html)** - Handle large datasets efficiently
@@ -834,6 +890,7 @@ For production, simply include the files directly (no build process required):
 - **[Simple Sorting](docs/sorting-simple.md)** - Basic sorting implementation
 - **[Virtual Scrolling](docs/virtual-scrolling.md)** - Virtual scrolling for large datasets
 - **[Virtual Scroll Bugfixes](docs/virtual-scrolling-bugfixes.md)** - Known issues and fixes
+- **[Localization System](docs/localization.md)** - Comprehensive internationalization guide ⭐
 
 ### **Customization Guides**
 - **[Theming Guide](docs/theming.md)** - CSS customization and theme system
@@ -883,6 +940,14 @@ table.getFilterState()            // Get current filter state
 table.search(query)               // Apply global search
 table.clearSearch()               // Clear search
 table.getSearchQuery()            // Get current search query
+
+// Localization methods
+table.t(key, params)              // Get translated string
+table.setLanguage(language)       // Change current language
+table.addTranslations(lang, obj)  // Add language translations
+table.getCurrentLanguage()        // Get current language
+table.formatNumber(num, options)  // Format number with locale
+table.formatDate(date, options)   // Format date with locale
 
 // Event methods
 table.on(event, callback)         // Add event listener
@@ -987,6 +1052,7 @@ TablixJS is released under the **MIT License**. See [LICENSE](LICENSE) file for 
 - ✅ Async data loading
 - ✅ Theming system
 - ✅ Virtual scrolling
+- ✅ Localization system with multi-language support
 
 ### **Next Major Release: 0.2.0**
 - 🔄 Enhanced jQuery wrapper
