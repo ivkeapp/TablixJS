@@ -210,6 +210,225 @@
         body.dark-theme #tableContainer .tablix-row:hover {
             background-color: rgba(255, 255, 255, 0.05);
         }
+
+        /* Custom action buttons styling */
+        .control-group button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .control-group button.danger {
+            background: #dc3545;
+        }
+
+        .control-group button.danger:hover {
+            background: #c82333;
+        }
+
+        .control-group button.success {
+            background: #28a745;
+        }
+
+        .control-group button.success:hover {
+            background: #218838;
+        }
+
+        /* Keyboard shortcuts styling */
+        kbd {
+            background-color: #f8f9fa;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 2px 5px;
+            font-size: 12px;
+            font-family: monospace;
+        }
+
+        body.dark-theme kbd {
+            background-color: #333;
+            border-color: #555;
+            color: #fff;
+        }
+
+        /* Documentation styling */
+        .documentation-tabs {
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .doc-tab {
+            background: transparent;
+            border: none;
+            padding: 10px 15px;
+            margin-right: 5px;
+            margin-bottom: -2px;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .doc-tab:hover {
+            background: #f8f9fa;
+            color: #495057;
+        }
+
+        .doc-tab.active {
+            color: #007acc;
+            border-bottom-color: #007acc;
+            background: #f8f9fa;
+        }
+
+        .documentation-content {
+            min-height: 400px;
+        }
+
+        .doc-section {
+            display: none;
+        }
+
+        .doc-section.active {
+            display: block;
+        }
+
+        .doc-section h4 {
+            color: #495057;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .doc-section h5 {
+            color: #666;
+            margin: 20px 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .code-example {
+            margin: 20px 0;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .code-example h5 {
+            background: #e9ecef;
+            margin: 0;
+            padding: 10px 15px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 13px;
+            color: #495057;
+        }
+
+        .code-example pre {
+            margin: 0;
+            padding: 15px;
+            background: white;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .code-example code {
+            color: #e83e8c;
+            font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+        }
+
+        .tips {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .tips h5 {
+            color: #0d47a1;
+            margin: 0 0 10px 0;
+        }
+
+        .tips ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .tips li {
+            margin-bottom: 5px;
+            color: #1565c0;
+        }
+
+        .tips code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #e91e63;
+            font-size: 12px;
+        }
+
+        /* Dark theme documentation styles */
+        body.dark-theme .documentation-tabs {
+            border-bottom-color: #444;
+        }
+
+        body.dark-theme .doc-tab {
+            color: #ccc;
+        }
+
+        body.dark-theme .doc-tab:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        body.dark-theme .doc-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: #333;
+        }
+
+        body.dark-theme .doc-section h4 {
+            color: #fff;
+            border-bottom-color: #444;
+        }
+
+        body.dark-theme .doc-section h5 {
+            color: #ccc;
+        }
+
+        body.dark-theme .code-example {
+            background: #1a1a1a;
+            border-color: #444;
+        }
+
+        body.dark-theme .code-example h5 {
+            background: #333;
+            border-bottom-color: #444;
+            color: #fff;
+        }
+
+        body.dark-theme .code-example pre {
+            background: #2a2a2a;
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .tips {
+            background: #0d47a1;
+            border-color: #1565c0;
+        }
+
+        body.dark-theme .tips h5 {
+            color: #e3f2fd;
+        }
+
+        body.dark-theme .tips li {
+            color: #bbdefb;
+        }
+
+        body.dark-theme .tips code {
+            background: #1a1a1a;
+            color: #f06292;
+        }
     </style>
 </head>
 <body>
@@ -218,11 +437,11 @@
     </div>
 
     <div class="container">
-        <h1>TablixJS Selection Demo</h1>
-        <p class="subtitle">Interactive demonstration of row selection functionality</p>
+        <h1>TablixJS Selection & Custom Actions Demo</h1>
+        <p class="subtitle">Interactive demonstration of row selection functionality with custom action buttons</p>
 
         <div class="instructions">
-            <h4>How to Use Selection:</h4>
+            <h4>How to Use Selection & Custom Actions:</h4>
             <ul>
                 <li><strong>Single Mode:</strong> 
                     <ul>
@@ -236,6 +455,16 @@
                         <li>Click the only selected row to deselect it</li>
                         <li>Ctrl+Click to add/remove individual rows</li>
                         <li>Shift+Click to select a range from the last selected row</li>
+                        <li><strong>Select All:</strong> Use the "Select All Rows" button or Ctrl+A</li>
+                    </ul>
+                </li>
+                <li><strong>Custom Actions:</strong> 
+                    <ul>
+                        <li><strong>Export to PHP:</strong> Sends selected data to a server endpoint</li>
+                        <li><strong>Calculate Salary:</strong> Shows salary statistics for selected employees</li>
+                        <li><strong>Promote Selected:</strong> Increases salary by 10% for selected employees</li>
+                        <li><strong>Delete Selected:</strong> Removes selected employees (use Delete key)</li>
+                        <li><strong>Generate Report:</strong> Downloads a CSV report of selected employees</li>
                     </ul>
                 </li>
             </ul>
@@ -257,6 +486,7 @@
                 </div>
 
                 <div class="control-group">
+                    <button id="selectAll">Select All Rows</button>
                     <button id="selectFirst">Select First Row</button>
                     <button id="selectMultiple">Select Multiple (1,3,5)</button>
                     <button id="clearSelection">Clear Selection</button>
@@ -269,6 +499,31 @@
                 </div>
             </div>
 
+            <div class="demo-controls">
+                <h3>Custom Actions</h3>
+                
+                <div class="control-group">
+                    <button id="exportToPHP" disabled>Export to PHP Script</button>
+                    <button id="calculateSalary" disabled>Calculate Total Salary</button>
+                    <button id="promoteSelected" disabled>Promote Selected</button>
+                </div>
+
+                <div class="control-group">
+                    <button id="deleteSelected" disabled>Delete Selected</button>
+                    <button id="filterByDepartment" disabled>Filter by Department</button>
+                    <button id="generateReport" disabled>Generate Report</button>
+                </div>
+            </div>
+
+            <div class="demo-controls">
+                <h3>Keyboard Shortcuts</h3>
+                <p style="margin: 5px 0; font-size: 14px; color: #666;">
+                    <kbd>Ctrl+A</kbd> Select All | 
+                    <kbd>Escape</kbd> Clear Selection | 
+                    <kbd>Delete</kbd> Delete Selected
+                </p>
+            </div>
+
             <div class="selection-info">
                 <h4>Selection Status:</h4>
                 <div id="selectionStatus">No rows selected</div>
@@ -277,6 +532,278 @@
         </div>
 
         <div id="tableContainer"></div>
+
+        <!-- Documentation Section -->
+        <div class="demo-section">
+            <div class="demo-controls">
+                <h3>Documentation & Code Examples</h3>
+                <p style="margin-bottom: 15px; color: #666;">
+                    Click the sections below to view implementation details and code examples for each feature.
+                </p>
+                
+                <div class="documentation-tabs">
+                    <button class="doc-tab active" data-section="select-all">Select All Implementation</button>
+                    <button class="doc-tab" data-section="custom-actions">Custom Actions</button>
+                    <button class="doc-tab" data-section="php-integration">PHP Integration</button>
+                    <button class="doc-tab" data-section="keyboard-shortcuts">Keyboard Shortcuts</button>
+                </div>
+
+                <div class="documentation-content">
+                    <!-- Select All Documentation -->
+                    <div class="doc-section active" id="doc-select-all">
+                        <h4>Select All Rows Implementation</h4>
+                        <p>TablixJS doesn't have a built-in <code>selectAll()</code> method, but you can easily implement it using existing APIs:</p>
+                        
+                        <div class="code-example">
+                            <h5>JavaScript Implementation:</h5>
+                            <pre><code>// Method 1: Select all visible/filtered rows
+function selectAllRows() {
+    const allData = table.getData();
+    const allIds = allData.map(row => row.id.toString());
+    table.selectRows(allIds);
+}
+
+// Method 2: Select all with keyboard shortcut
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'a' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        selectAllRows();
+    }
+});</code></pre>
+                        </div>
+
+                        <div class="code-example">
+                            <h5>HTML Button:</h5>
+                            <pre><code>&lt;button id="selectAll" onclick="selectAllRows()"&gt;
+    Select All Rows
+&lt;/button&gt;</code></pre>
+                        </div>
+
+                        <div class="tips">
+                            <h5>Tips:</h5>
+                            <ul>
+                                <li><code>table.getData()</code> returns currently visible/filtered data</li>
+                                <li><code>table.selectRows()</code> accepts array of row IDs or single ID</li>
+                                <li>Selection works across pagination automatically</li>
+                                <li>Use <code>dataIdKey</code> option to specify which field to use as row ID</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Custom Actions Documentation -->
+                    <div class="doc-section" id="doc-custom-actions">
+                        <h4>Custom Action Buttons</h4>
+                        <p>Create powerful custom actions that operate on selected rows:</p>
+                        
+                        <div class="code-example">
+                            <h5>Basic Custom Action Pattern:</h5>
+                            <pre><code>// 1. Get selected data
+const selectedData = table.getSelectedData();
+const selectedIds = table.getSelectedIds();
+
+// 2. Validate selection
+if (selectedData.length === 0) {
+    alert('No rows selected');
+    return;
+}
+
+// 3. Process the data
+selectedData.forEach((row, index) => {
+    console.log(`Processing row ${index + 1}:`, row);
+    // Your custom logic here
+});
+
+// 4. Update table if needed
+table.loadData(updatedData);</code></pre>
+                        </div>
+
+                        <div class="code-example">
+                            <h5>Smart Button State Management:</h5>
+                            <pre><code>// Update buttons when selection changes
+table.eventManager.on('afterSelect', (event) => {
+    const count = event.selectedData.length;
+    updateActionButtons(count);
+});
+
+function updateActionButtons(selectedCount) {
+    const buttons = ['exportBtn', 'deleteBtn', 'processBtn'];
+    buttons.forEach(buttonId => {
+        document.getElementById(buttonId).disabled = selectedCount === 0;
+    });
+}</code></pre>
+                        </div>
+
+                        <div class="tips">
+                            <h5>Available Selection APIs:</h5>
+                            <ul>
+                                <li><code>table.getSelectedData()</code> - Array of selected row objects</li>
+                                <li><code>table.getSelectedIds()</code> - Array of selected row IDs</li>
+                                <li><code>table.getSelectionCount()</code> - Number of selected rows</li>
+                                <li><code>table.isRowSelected(id)</code> - Check if specific row is selected</li>
+                                <li><code>table.clearSelection()</code> - Clear all selections</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- PHP Integration Documentation -->
+                    <div class="doc-section" id="doc-php-integration">
+                        <h4>🔗 PHP Server Integration</h4>
+                        <p>Send selected data to PHP scripts for server-side processing:</p>
+                        
+                        <div class="code-example">
+                            <h5>JavaScript - Send Data to PHP:</h5>
+                            <pre><code>async function exportToPHP() {
+    const selectedData = table.getSelectedData();
+    
+    try {
+        const response = await fetch('/api/process-data.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: 'export_employees',
+                data: selectedData,
+                timestamp: new Date().toISOString()
+            })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(`Processed ${selectedData.length} rows successfully!`);
+        }
+    } catch (error) {
+        console.error('Server error:', error);
+    }
+}</code></pre>
+                        </div>
+
+                        <div class="code-example">
+                            <h5>PHP - Receive and Process Data:</h5>
+                            <pre><code>&lt;?php
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Headers: Content-Type');
+
+try {
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    if ($input['action'] === 'export_employees') {
+        $selectedData = $input['selectedData'];
+        
+        // Process each selected row
+        foreach ($selectedData as $employee) {
+            // Save to database
+            $stmt = $pdo->prepare("INSERT INTO processed_employees 
+                (name, department, salary) VALUES (?, ?, ?)");
+            $stmt->execute([
+                $employee['name'], 
+                $employee['department'], 
+                $employee['salary']
+            ]);
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'Employees processed successfully',
+            'count' => count($selectedData)
+        ]);
+    }
+} catch (Exception $e) {
+    echo json_encode([
+        'success' => false, 
+        'message' => $e->getMessage()
+    ]);
+}
+?&gt;</code></pre>
+                        </div>
+
+                        <div class="tips">
+                            <h5>Integration Tips:</h5>
+                            <ul>
+                                <li>Always validate data on the server side</li>
+                                <li>Use proper error handling and user feedback</li>
+                                <li>Consider batch processing for large selections</li>
+                                <li>Implement loading states for better UX</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Keyboard Shortcuts Documentation -->
+                    <div class="doc-section" id="doc-keyboard-shortcuts">
+                        <h4>Keyboard Shortcuts Implementation</h4>
+                        <p>Add keyboard shortcuts to improve user experience:</p>
+                        
+                        <div class="code-example">
+                            <h5>Keyboard Event Handler:</h5>
+                            <pre><code>document.addEventListener('keydown', (e) => {
+    // Only handle when no input is focused
+    const activeElement = document.activeElement;
+    if (activeElement && (activeElement.tagName === 'INPUT' || 
+                         activeElement.tagName === 'TEXTAREA')) {
+        return;
+    }
+    
+    switch (e.key) {
+        case 'a':
+        case 'A':
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                selectAllRows();
+            }
+            break;
+            
+        case 'Escape':
+            e.preventDefault();
+            table.clearSelection();
+            break;
+            
+        case 'Delete':
+            if (table.getSelectionCount() > 0) {
+                deleteSelectedRows();
+            }
+            break;
+    }
+});</code></pre>
+                        </div>
+
+                        <div class="code-example">
+                            <h5>Display Shortcuts to Users:</h5>
+                            <pre><code>&lt;div class="keyboard-help"&gt;
+    &lt;p&gt;
+        &lt;kbd&gt;Ctrl+A&lt;/kbd&gt; Select All | 
+        &lt;kbd&gt;Escape&lt;/kbd&gt; Clear Selection | 
+        &lt;kbd&gt;Delete&lt;/kbd&gt; Delete Selected
+    &lt;/p&gt;
+&lt;/div&gt;
+
+&lt;style&gt;
+kbd {
+    background-color: #f8f9fa;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 2px 5px;
+    font-family: monospace;
+}
+&lt;/style&gt;</code></pre>
+                        </div>
+
+                        <div class="tips">
+                            <h5>💡 Best Practices:</h5>
+                            <ul>
+                                <li>Don't interfere with native browser shortcuts</li>
+                                <li>Check if input fields are focused before handling</li>
+                                <li>Provide visual feedback when shortcuts are used</li>
+                                <li>Document shortcuts clearly for users</li>
+                                <li>Test on different operating systems (Ctrl vs Cmd)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script type="module">
@@ -354,6 +881,31 @@
                 statusElement.textContent = `${count} row${count > 1 ? 's' : ''} selected (IDs: ${selectedIds.join(', ')})`;
                 dataElement.textContent = JSON.stringify(selectedData, null, 2);
             }
+
+            // Update custom action buttons state
+            updateActionButtons(count);
+        }
+
+        // Update action buttons based on selection count
+        function updateActionButtons(selectedCount) {
+            const actionButtons = [
+                'exportToPHP', 'calculateSalary', 'promoteSelected', 
+                'deleteSelected', 'filterByDepartment', 'generateReport'
+            ];
+            
+            actionButtons.forEach(buttonId => {
+                const button = document.getElementById(buttonId);
+                if (button) {
+                    button.disabled = selectedCount === 0;
+                }
+            });
+        }
+
+        // Select all rows function
+        function selectAllRows() {
+            const allData = table.getData();
+            const allIds = allData.map(row => row.id.toString());
+            table.selectRows(allIds);
         }
 
         // Control event handlers
@@ -368,6 +920,10 @@
 
         document.getElementById('disableSelection').addEventListener('click', () => {
             table.disableSelection();
+        });
+
+        document.getElementById('selectAll').addEventListener('click', () => {
+            selectAllRows();
         });
 
         document.getElementById('selectFirst').addEventListener('click', () => {
@@ -410,6 +966,232 @@
             table.loadData(newData);
         });
 
+        // ===== CUSTOM ACTION BUTTON HANDLERS =====
+
+        // Export to PHP Script
+        document.getElementById('exportToPHP').addEventListener('click', async () => {
+            const selectedData = table.getSelectedData();
+            
+            if (selectedData.length === 0) {
+                alert('No rows selected for export');
+                return;
+            }
+
+            // Show loading state
+            const button = document.getElementById('exportToPHP');
+            const originalText = button.textContent;
+            button.textContent = 'Exporting...';
+            button.disabled = true;
+
+            try {
+                // Simulate API call to PHP script
+                const response = await fetch('/api/export-employees.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'export_employees',
+                        data: selectedData,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                // For demo purposes, simulate a successful response
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                alert(`Successfully exported ${selectedData.length} employees to PHP script!\n\nData would be sent to: /api/export-employees.php`);
+                console.log('Export data:', selectedData);
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Export failed: Could not connect to PHP script');
+            } finally {
+                button.textContent = originalText;
+                button.disabled = selectedData.length === 0;
+            }
+        });
+
+        // Calculate Total Salary
+        document.getElementById('calculateSalary').addEventListener('click', () => {
+            const selectedData = table.getSelectedData();
+            
+            if (selectedData.length === 0) {
+                alert('No employees selected');
+                return;
+            }
+
+            const totalSalary = selectedData.reduce((sum, emp) => sum + emp.salary, 0);
+            const avgSalary = totalSalary / selectedData.length;
+            const departments = [...new Set(selectedData.map(emp => emp.department))];
+
+            alert(`💰 Salary Analysis for ${selectedData.length} selected employees:
+            
+Total Salary: $${totalSalary.toLocaleString()}
+Average Salary: $${Math.round(avgSalary).toLocaleString()}
+Departments: ${departments.join(', ')}
+
+Check console for detailed breakdown.`);
+
+            console.log('Salary Breakdown:', selectedData.map(emp => ({
+                name: emp.name,
+                department: emp.department,
+                salary: `$${emp.salary.toLocaleString()}`
+            })));
+        });
+
+        // Promote Selected Employees
+        document.getElementById('promoteSelected').addEventListener('click', () => {
+            const selectedData = table.getSelectedData();
+            const selectedIds = table.getSelectedIds();
+            
+            if (selectedData.length === 0) {
+                alert('No employees selected for promotion');
+                return;
+            }
+
+            if (!confirm(`Promote ${selectedData.length} selected employee(s)? This will increase their salary by 10%.`)) {
+                return;
+            }
+
+            // Update salary for selected employees
+            const updatedData = sampleData.map(emp => {
+                if (selectedIds.includes(emp.id.toString())) {
+                    return {
+                        ...emp,
+                        salary: Math.round(emp.salary * 1.1) // 10% increase
+                    };
+                }
+                return emp;
+            });
+
+            // Update the table data
+            sampleData.length = 0;
+            sampleData.push(...updatedData);
+            table.loadData(updatedData);
+
+            alert(`✅ Successfully promoted ${selectedData.length} employee(s)! Their salaries have been increased by 10%.`);
+        });
+
+        // Delete Selected Employees
+        document.getElementById('deleteSelected').addEventListener('click', () => {
+            const selectedIds = table.getSelectedIds();
+            
+            if (selectedIds.length === 0) {
+                alert('No employees selected for deletion');
+                return;
+            }
+
+            if (!confirm(`⚠️ Are you sure you want to delete ${selectedIds.length} selected employee(s)? This action cannot be undone.`)) {
+                return;
+            }
+
+            // Remove selected employees from data
+            const updatedData = sampleData.filter(emp => 
+                !selectedIds.includes(emp.id.toString())
+            );
+
+            // Update the table data
+            sampleData.length = 0;
+            sampleData.push(...updatedData);
+            table.loadData(updatedData);
+
+            alert(`🗑️ Successfully deleted ${selectedIds.length} employee(s).`);
+        });
+
+        // Filter by Department of Selected
+        document.getElementById('filterByDepartment').addEventListener('click', () => {
+            const selectedData = table.getSelectedData();
+            
+            if (selectedData.length === 0) {
+                alert('No employees selected');
+                return;
+            }
+
+            const departments = [...new Set(selectedData.map(emp => emp.department))];
+            
+            if (departments.length === 1) {
+                // Filter table to show only the selected department
+                table.setSearchTerm(departments[0]);
+                alert(`🔍 Filtered table to show only employees from: ${departments[0]}`);
+            } else {
+                alert(`Multiple departments selected: ${departments.join(', ')}\n\nPlease select employees from a single department to filter.`);
+            }
+        });
+
+        // Generate Report
+        document.getElementById('generateReport').addEventListener('click', () => {
+            const selectedData = table.getSelectedData();
+            
+            if (selectedData.length === 0) {
+                alert('No employees selected for report');
+                return;
+            }
+
+            // Generate CSV report
+            const headers = ['ID', 'Name', 'Department', 'Salary', 'Status', 'Join Date'];
+            const csvContent = [
+                headers.join(','),
+                ...selectedData.map(emp => [
+                    emp.id,
+                    `"${emp.name}"`,
+                    `"${emp.department}"`,
+                    emp.salary,
+                    `"${emp.status}"`,
+                    emp.joinDate
+                ].join(','))
+            ].join('\n');
+
+            // Create and download CSV file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `employee_report_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            alert(`📊 Generated report for ${selectedData.length} selected employees!\n\nReport downloaded as CSV file.`);
+        });
+
+        // ===== KEYBOARD SHORTCUTS =====
+        document.addEventListener('keydown', (e) => {
+            // Only handle shortcuts when table area is focused or no input is focused
+            const activeElement = document.activeElement;
+            if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+                return;
+            }
+            
+            switch (e.key) {
+                case 'a':
+                case 'A':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        selectAllRows();
+                        console.log('🎹 Keyboard shortcut: Ctrl+A - Select All');
+                    }
+                    break;
+                    
+                case 'Escape':
+                    e.preventDefault();
+                    table.clearSelection();
+                    console.log('🎹 Keyboard shortcut: Escape - Clear Selection');
+                    break;
+                    
+                case 'Delete':
+                    const selectedCount = table.getSelectionCount();
+                    if (selectedCount > 0) {
+                        document.getElementById('deleteSelected').click();
+                        console.log('🎹 Keyboard shortcut: Delete - Delete Selected');
+                    }
+                    break;
+            }
+        });
+
         // Theme toggle
         document.getElementById('themeToggle').addEventListener('click', () => {
             const body = document.body;
@@ -432,6 +1214,28 @@
 
         // Set initial mode
         document.getElementById('selectionMode').value = 'multi';
+
+        // Apply danger styling to delete button
+        document.getElementById('deleteSelected').classList.add('danger');
+
+        // Apply success styling to promote button  
+        document.getElementById('promoteSelected').classList.add('success');
+
+        // Documentation tabs functionality
+        document.querySelectorAll('.doc-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                // Remove active class from all tabs and sections
+                document.querySelectorAll('.doc-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.doc-section').forEach(s => s.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                e.target.classList.add('active');
+                
+                // Show corresponding section
+                const sectionId = 'doc-' + e.target.dataset.section;
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
 
         console.log('TablixJS Selection Demo loaded');
         console.log('Table instance:', table);
