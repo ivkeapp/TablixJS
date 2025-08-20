@@ -634,13 +634,14 @@ function updateActionButtons(selectedCount) {
                         </div>
 
                         <div class="tips">
-                            <h5>Available Selection APIs:</h5>
+                            <h5>💡 Available Selection APIs:</h5>
                             <ul>
                                 <li><code>table.getSelectedData()</code> - Array of selected row objects</li>
                                 <li><code>table.getSelectedIds()</code> - Array of selected row IDs</li>
                                 <li><code>table.getSelectionCount()</code> - Number of selected rows</li>
                                 <li><code>table.isRowSelected(id)</code> - Check if specific row is selected</li>
                                 <li><code>table.clearSelection()</code> - Clear all selections</li>
+                                <li><code>table.selectAllRows()</code> - Select all visible/filtered rows (NEW!)</li>
                             </ul>
                         </div>
                     </div>
@@ -865,6 +866,13 @@ kbd {
             updateSelectionStatus();
         });
 
+        // Listen for the new selectAll event
+        table.eventManager.on('selectAll', (event) => {
+            console.log('Select All triggered:', event);
+            console.log(`✅ Selected ${event.count} rows using selectAllRows() API`);
+            updateSelectionStatus();
+        });
+
         // Update selection status display
         function updateSelectionStatus() {
             const selectedData = table.getSelectedData();
@@ -901,11 +909,10 @@ kbd {
             });
         }
 
-        // Select all rows function
+        // Select all rows function - now using built-in API method
         function selectAllRows() {
-            const allData = table.getData();
-            const allIds = allData.map(row => row.id.toString());
-            table.selectRows(allIds);
+            const count = table.selectAllRows();
+            console.log(`Selected ${count} rows using built-in selectAllRows() API`);
         }
 
         // Control event handlers
