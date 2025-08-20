@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS - selectAllRows() API Demo</title>
+    <link rel="stylesheet" href="../src/styles/tablix.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .demo-controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        button:hover {
+            background: #005a99;
+        }
+        .api-info {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .api-info h3 {
+            margin-top: 0;
+            color: #0c5460;
+        }
+        .api-info code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #e91e63;
+        }
+        .output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TablixJS selectAllRows() API Demo</h1>
+        <p>This demo showcases the new built-in <code>selectAllRows()</code> API method.</p>
+
+        <div class="api-info">
+            <h3>🎯 New API Method</h3>
+            <p><strong>Method:</strong> <code>table.selectAllRows()</code></p>
+            <p><strong>Returns:</strong> <code>Number</code> - Count of rows selected</p>
+            <p><strong>Description:</strong> Selects all currently visible/filtered rows in the table. Respects pagination, search filters, and column filters.</p>
+            <p><strong>Events:</strong> Triggers a custom <code>'selectAll'</code> event with selection details.</p>
+        </div>
+
+        <div class="demo-controls">
+            <h3>Try the API</h3>
+            <button id="selectAllBtn">🔥 selectAllRows()</button>
+            <button id="clearSelectionBtn">Clear Selection</button>
+            <button id="filterEngineeringBtn">Filter Engineering</button>
+            <button id="clearFiltersBtn">Clear Filters</button>
+            <button id="searchJohnBtn">Search "John"</button>
+            <button id="clearSearchBtn">Clear Search</button>
+        </div>
+
+        <div class="demo-controls">
+            <h3>Output Log</h3>
+            <div id="output" class="output">Ready to test selectAllRows() API...\n</div>
+        </div>
+
+        <div id="tableContainer"></div>
+    </div>
+
+    <script type="module">
+        import Table from '../src/core/Table.js';
+
+        // Sample data
+        const sampleData = [
+            { id: 1, name: 'John Doe', department: 'Engineering', salary: 75000 },
+            { id: 2, name: 'Jane Smith', department: 'Marketing', salary: 65000 },
+            { id: 3, name: 'Bob Johnson', department: 'Engineering', salary: 80000 },
+            { id: 4, name: 'Alice Williams', department: 'HR', salary: 60000 },
+            { id: 5, name: 'Charlie Brown', department: 'Engineering', salary: 70000 },
+            { id: 6, name: 'Diana Davis', department: 'Sales', salary: 68000 },
+            { id: 7, name: 'Eve Wilson', department: 'Engineering', salary: 85000 },
+            { id: 8, name: 'Frank Miller', department: 'Marketing', salary: 62000 },
+            { id: 9, name: 'John Smith', department: 'Engineering', salary: 90000 },
+            { id: 10, name: 'Mary Johnson', department: 'HR', salary: 58000 }
+        ];
+
+        // Initialize table
+        const table = new Table('#tableContainer', {
+            data: sampleData,
+            columns: [
+                { name: 'id', title: 'ID' },
+                { name: 'name', title: 'Name' },
+                { name: 'department', title: 'Department' },
+                { 
+                    name: 'salary', 
+                    title: 'Salary',
+                    renderer: (value) => `$${value.toLocaleString()}`
+                }
+            ],
+            selection: {
+                enabled: true,
+                mode: 'multi',
+                dataIdKey: 'id'
+            },
+            pagination: {
+                enabled: true,
+                pageSize: 5
+            },
+            search: {
+                enabled: true
+            },
+            filtering: {
+                enabled: true
+            }
+        });
+
+        // Output logging
+        const outputDiv = document.getElementById('output');
+        function log(message) {
+            outputDiv.textContent += `${new Date().toLocaleTimeString()}: ${message}\n`;
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+
+        // Listen to selectAll event
+        table.eventManager.on('selectAll', (event) => {
+            log(`✅ selectAll event triggered: ${event.count} rows selected`);
+            log(`📋 Selected IDs: [${event.selectedIds.join(', ')}]`);
+        });
+
+        // Listen to selection changes
+        table.eventManager.on('afterSelect', (event) => {
+            const count = table.getSelectionCount();
+            log(`🔄 Selection changed: ${count} rows selected`);
+        });
+
+        // Test functions
+        function testSelectAll() {
+            log('🎯 Calling table.selectAllRows()...');
+            const selectedCount = table.selectAllRows();
+            log(`📊 API returned: ${selectedCount} rows selected`);
+        }
+
+        function filterEngineering() {
+            log('🔍 Applying filter: department = Engineering');
+            table.applyFilter('department', { 
+                type: 'value', 
+                values: ['Engineering'] 
+            }).then(() => {
+                log('✅ Filter applied - only Engineering rows visible');
+            });
+        }
+
+        function clearFilters() {
+            log('🧹 Clearing all filters');
+            table.clearAllFilters().then(() => {
+                log('✅ All filters cleared');
+            });
+        }
+
+        function searchJohn() {
+            log('🔎 Searching for "John"');
+            table.setSearchTerm('John').then(() => {
+                log('✅ Search applied - only "John" matches visible');
+            });
+        }
+
+        function clearSearch() {
+            log('🧹 Clearing search');
+            table.clearSearch().then(() => {
+                log('✅ Search cleared');
+            });
+        }
+
+        // Add event listeners to buttons
+        document.getElementById('selectAllBtn').addEventListener('click', testSelectAll);
+        document.getElementById('clearSelectionBtn').addEventListener('click', () => {
+            log('🧹 Clearing selection');
+            table.clearSelection();
+            log('✅ Selection cleared');
+        });
+        document.getElementById('filterEngineeringBtn').addEventListener('click', filterEngineering);
+        document.getElementById('clearFiltersBtn').addEventListener('click', clearFilters);
+        document.getElementById('searchJohnBtn').addEventListener('click', searchJohn);
+        document.getElementById('clearSearchBtn').addEventListener('click', clearSearch);
+
+        log('🚀 TablixJS selectAllRows() API Demo loaded');
+        log('💡 Try filtering/searching then use selectAllRows() to see it respect filters!');
+    </script>
+</body>
+</html>

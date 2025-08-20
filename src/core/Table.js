@@ -698,6 +698,42 @@ export default class Table {
   }
 
   /**
+   * Select all rows (currently visible/filtered rows)
+   * This will select all rows that are currently visible based on applied filters and search
+   * @returns {Number} Number of rows selected
+   */
+  selectAllRows() {
+    if (!this.selectionManager) {
+      console.warn('TablixJS: Selection is not enabled. Set selection.enabled to true in options.');
+      return 0;
+    }
+
+    // Get currently visible/filtered data
+    const allData = this.getData();
+    
+    if (allData.length === 0) {
+      console.warn('TablixJS: No rows available to select.');
+      return 0;
+    }
+
+    // Extract all IDs from current data
+    const dataIdKey = this.options.selection.dataIdKey || 'id';
+    const allIds = allData.map(row => String(row[dataIdKey]));
+
+    // Select all rows
+    this.selectionManager.selectRows(allIds);
+
+    // Trigger custom event for select all action
+    this.eventManager.trigger('selectAll', { 
+      selectedIds: allIds, 
+      selectedData: allData,
+      count: allData.length 
+    });
+
+    return allData.length;
+  }
+
+  /**
    * Destroy the table and clean up all resources
    */
   destroy() {
