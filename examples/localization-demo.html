@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS Localization Demo</title>
+    <link rel="stylesheet" href="../src/styles/tablix.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .demo-header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .demo-header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .language-controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .language-controls h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .language-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .language-btn:hover {
+            background: #0056b3;
+        }
+
+        .language-btn.active {
+            background: #28a745;
+        }
+
+        .current-language {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .table-container {
+            margin-top: 20px;
+        }
+
+        .features-demo {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 30px;
+        }
+
+        .features-demo h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .demo-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .demo-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .demo-btn:hover {
+            background: #5a6268;
+        }
+
+        .info-panel {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .code-example {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>🌍 TablixJS Localization Demo</h1>
+            <p>Experience TablixJS in multiple languages with comprehensive internationalization support</p>
+        </div>
+
+        <div class="info-panel">
+            <strong>🚀 Features Demonstrated:</strong>
+            <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                <li>Multi-language support with fallback</li>
+                <li>Dynamic language switching</li>
+                <li>Localized pagination, search, sorting, and selection</li>
+                <li>Custom translation loading</li>
+                <li>Plugin compatibility</li>
+            </ul>
+        </div>
+
+        <div class="language-controls">
+            <h3>🌐 Language Selection</h3>
+            <button class="language-btn active" data-lang="en">🇺🇸 English</button>
+            <button class="language-btn" data-lang="fr">🇫🇷 Français</button>
+            <button class="language-btn" data-lang="es">🇪🇸 Español</button>
+            <button class="language-btn" data-lang="de">🇩🇪 Deutsch (Custom)</button>
+            <div class="current-language">
+                Current Language: <span id="currentLang">English</span>
+            </div>
+        </div>
+
+        <div class="features-demo">
+            <h3>🎮 Interactive Features</h3>
+            <div class="demo-actions">
+                <button class="demo-btn" onclick="toggleSelection()">Toggle Selection</button>
+                <button class="demo-btn" onclick="selectAllRows()">Select All</button>
+                <button class="demo-btn" onclick="clearSelection()">Clear Selection</button>
+                <button class="demo-btn" onclick="addMoreData()">Add More Data</button>
+                <button class="demo-btn" onclick="simulateError()">Simulate Error</button>
+                <button class="demo-btn" onclick="simulateLoading()">Show Loading</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="tablixTable"></div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <h3>📝 Code Example</h3>
+            <div class="code-example" id="codeExample">
+// Creating a table with localization
+const table = new Tablix('#tablixTable', {
+    data: sampleData,
+    columns: columns,
+    language: 'fr',
+    translations: {
+        fr: frenchTranslations
+    },
+    pagination: { enabled: true, pageSize: 5 },
+    selection: { enabled: true, mode: 'multi' },
+    search: { enabled: true }
+});
+
+// Dynamic language switching
+table.setLanguage('es');
+
+// Add custom translations
+table.addTranslations('de', germanTranslations);
+
+// Use localization in your code
+console.log(table.t('pagination.next')); // "Suivant" in French
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import Table from '../src/core/Table.js';
+        import { frenchTranslations } from '../src/locales/fr.js';
+        import { spanishTranslations } from '../src/locales/es.js';
+
+        // German translations (custom example)
+        const germanTranslations = {
+            'general.loading': 'Laden...',
+            'general.error': 'Fehler',
+            'general.noData': 'Keine Daten verfügbar',
+            'general.show': 'Zeige',
+            'general.entries': 'Einträge',
+            'general.of': 'von',
+            'general.records': 'Datensätze',
+            'general.perPage': 'pro Seite',
+            'general.showing': 'Zeige',
+            'search.placeholder': 'Suchen...',
+            'search.clear': 'Suche löschen',
+            'pagination.first': 'Erste',
+            'pagination.previous': 'Vorherige',
+            'pagination.next': 'Nächste',
+            'pagination.last': 'Letzte',
+            'pagination.showingRecords': 'Zeige {startRow}-{endRow} von {totalRows} Datensätzen',
+            'pagination.noRecords': 'Keine Datensätze gefunden',
+            'selection.selectAll': 'Alle auswählen',
+            'selection.clearSelection': 'Auswahl löschen',
+            'sort.sortedAscending': 'Aufsteigend sortiert',
+            'sort.sortedDescending': 'Absteigend sortiert',
+            'sort.notSorted': 'Nicht sortiert',
+            'controls.refresh': 'Daten aktualisieren'
+        };
+
+        // Sample data for the demo
+        const sampleData = [
+            { id: 1, name: 'John Smith', email: 'john@example.com', age: 28, department: 'Engineering', salary: 75000, startDate: '2021-03-15' },
+            { id: 2, name: 'Sarah Johnson', email: 'sarah@example.com', age: 32, department: 'Marketing', salary: 68000, startDate: '2020-08-22' },
+            { id: 3, name: 'Michael Brown', email: 'michael@example.com', age: 29, department: 'Engineering', salary: 82000, startDate: '2021-01-10' },
+            { id: 4, name: 'Emily Davis', email: 'emily@example.com', age: 26, department: 'HR', salary: 58000, startDate: '2022-05-03' },
+            { id: 5, name: 'David Wilson', email: 'david@example.com', age: 35, department: 'Sales', salary: 71000, startDate: '2019-11-18' },
+            { id: 6, name: 'Lisa Anderson', email: 'lisa@example.com', age: 31, department: 'Marketing', salary: 64000, startDate: '2020-12-07' },
+            { id: 7, name: 'Robert Taylor', email: 'robert@example.com', age: 27, department: 'Engineering', salary: 79000, startDate: '2021-09-12' },
+            { id: 8, name: 'Jennifer Martinez', email: 'jennifer@example.com', age: 33, department: 'HR', salary: 62000, startDate: '2020-04-25' },
+            { id: 9, name: 'William Garcia', email: 'william@example.com', age: 30, department: 'Sales', salary: 73000, startDate: '2021-07-08' },
+            { id: 10, name: 'Amanda Rodriguez', email: 'amanda@example.com', age: 28, department: 'Marketing', salary: 66000, startDate: '2022-01-14' }
+        ];
+
+        // Define table columns
+        const columns = [
+            { name: 'id', title: 'ID', sortable: true },
+            { name: 'name', title: 'Name', sortable: true },
+            { name: 'email', title: 'Email', sortable: true },
+            { name: 'age', title: 'Age', sortable: true },
+            { name: 'department', title: 'Department', sortable: true },
+            { name: 'salary', title: 'Salary', sortable: true, 
+              formatter: (value) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value) 
+            },
+            { name: 'startDate', title: 'Start Date', sortable: true,
+              formatter: (value) => new Date(value).toLocaleDateString()
+            }
+        ];
+
+        // Debug: Log the imported translations
+        console.log('French translations loaded:', frenchTranslations);
+        console.log('Spanish translations loaded:', spanishTranslations);
+        console.log('French pagination.first:', frenchTranslations['pagination.first']);
+
+        // Initialize the table with English
+        let table = new Table('#tablixTable', {
+            data: sampleData,
+            columns: columns,
+            language: 'en',
+            translations: {
+                fr: frenchTranslations,
+                es: spanishTranslations
+            },
+            pagination: {
+                enabled: true,
+                pageSize: 5,
+                showPageSizes: true,
+                pageSizeOptions: [5, 10, 25]
+            },
+            selection: {
+                enabled: true,
+                mode: 'multi'
+            },
+            search: {
+                enabled: true
+            },
+            sorting: {
+                enabled: true
+            }
+        });
+
+        // Add German translations
+        table.addTranslations('de', germanTranslations);
+
+        // Language switching functionality
+        const languageButtons = document.querySelectorAll('.language-btn');
+        const currentLangSpan = document.getElementById('currentLang');
+
+        const languageNames = {
+            'en': 'English',
+            'fr': 'Français',
+            'es': 'Español',
+            'de': 'Deutsch'
+        };
+
+        languageButtons.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const lang = btn.dataset.lang;
+                
+                console.log(`Switching to language: ${lang}`);
+                console.log(`Available languages:`, table.getAvailableLanguages());
+                console.log(`Has language ${lang}:`, table.hasLanguage(lang));
+                
+                // Update active button
+                languageButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Switch language
+                table.setLanguage(lang);
+                
+                // Test translation after switch
+                console.log(`After switch - Current language:`, table.getCurrentLanguage());
+                console.log(`Test translation pagination.first:`, table.t('pagination.first'));
+                console.log(`Test translation general.show:`, table.t('general.show'));
+                
+                currentLangSpan.textContent = languageNames[lang];
+                
+                // Update code example
+                updateCodeExample(lang);
+            });
+        });
+
+        // Demo functions
+        window.toggleSelection = () => {
+            const isEnabled = table.selectionManager?.options.enabled;
+            table.setOptions({
+                selection: { enabled: !isEnabled, mode: 'multi' }
+            });
+        };
+
+        window.selectAllRows = () => {
+            table.selectAllRows();
+        };
+
+        window.clearSelection = () => {
+            table.clearSelection();
+        };
+
+        window.addMoreData = () => {
+            const newData = [...sampleData];
+            for (let i = 11; i <= 20; i++) {
+                newData.push({
+                    id: i,
+                    name: `User ${i}`,
+                    email: `user${i}@example.com`,
+                    age: 20 + Math.floor(Math.random() * 40),
+                    department: ['Engineering', 'Marketing', 'Sales', 'HR'][Math.floor(Math.random() * 4)],
+                    salary: 50000 + Math.floor(Math.random() * 50000),
+                    startDate: '2022-01-01'
+                });
+            }
+            table.loadData(newData);
+        };
+
+        window.simulateError = () => {
+            table.renderer.renderError(new Error(table.t('error.loadingData')));
+        };
+
+        window.simulateLoading = () => {
+            table.renderer.renderLoading();
+            setTimeout(() => {
+                table.refreshTable();
+            }, 2000);
+        };
+
+        function updateCodeExample(lang) {
+            const codeExample = document.getElementById('codeExample');
+            codeExample.innerHTML = `// Creating a table with ${languageNames[lang]} localization
+const table = new Tablix('#tablixTable', {
+    data: sampleData,
+    columns: columns,
+    language: '${lang}',
+    pagination: { enabled: true, pageSize: 5 },
+    selection: { enabled: true, mode: 'multi' },
+    search: { enabled: true }
+});
+
+// Dynamic language switching
+table.setLanguage('${lang}');
+
+// Use localization in your code  
+console.log(table.t('pagination.next')); // "${table.t('pagination.next')}"
+console.log(table.t('general.loading')); // "${table.t('general.loading')}"
+
+// Format numbers and dates with locale
+table.formatNumber(1234.56, { style: 'currency', currency: 'EUR' });
+table.formatDate(new Date(), { dateStyle: 'medium' });`;
+        }
+
+        // Show events
+        table.on('afterSelect', (data) => {
+            console.log(`Selected ${data.selectedData.length} rows:`, data.selectedData);
+        });
+
+        table.on('afterSort', (data) => {
+            console.log('Sort changed:', data);
+        });
+
+        table.on('afterFilter', (data) => {
+            console.log('Filter applied:', data);
+        });
+
+        // Initial code example
+        updateCodeExample('en');
+    </script>
+</body>
+</html>

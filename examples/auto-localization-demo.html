@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS - Auto Localization Test</title>
+    <link rel="stylesheet" href="../src/styles/tablix.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .language-buttons {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .language-btn {
+            margin: 5px;
+            padding: 10px 20px;
+            border: 2px solid #007acc;
+            background: white;
+            color: #007acc;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .language-btn.active {
+            background: #007acc;
+            color: white;
+        }
+        .demo-note {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .demo-note h4 {
+            margin: 0 0 10px 0;
+            color: #2e7d32;
+        }
+        .code-example {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🌍 TablixJS Auto-Localization Test</h1>
+        <p>This demonstrates the new auto-loading localization feature - no manual translation imports needed!</p>
+
+        <div class="demo-note">
+            <h4>✨ What's New:</h4>
+            <p>Simply set <code>language: 'fr'</code> or <code>language: 'es'</code> in your table configuration. 
+            French and Spanish translations are now automatically included!</p>
+        </div>
+
+        <div class="code-example">
+// OLD WAY (still works, but not required for common languages):
+import { frenchTranslations } from '../src/locales/fr.js';
+
+const table = new Table('#table', {
+    data: data,
+    language: 'fr',
+    translations: { fr: frenchTranslations } // ❌ No longer needed!
+});
+
+// NEW WAY (automatic):
+const table = new Table('#table', {
+    data: data,
+    language: 'fr' // ✅ That's it! French is auto-loaded
+});
+        </div>
+
+        <div class="language-buttons">
+            <button class="language-btn active" data-lang="en">🇺🇸 English</button>
+            <button class="language-btn" data-lang="fr">🇫🇷 Français</button>
+            <button class="language-btn" data-lang="es">🇪🇸 Español</button>
+        </div>
+
+        <div id="testTable"></div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #fff3cd; border-radius: 5px;">
+            <h4>🔄 Test Language Switching:</h4>
+            <p>Click the language buttons above to see the table interface change languages instantly. 
+            Notice how pagination, search, and other UI elements are automatically translated!</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import Table from '../src/core/Table.js';
+
+        // Sample data
+        const sampleData = [
+            { id: 1, name: 'Alice Johnson', department: 'Engineering', salary: 75000 },
+            { id: 2, name: 'Bob Smith', department: 'Marketing', salary: 62000 },
+            { id: 3, name: 'Carol Davis', department: 'Sales', salary: 58000 },
+            { id: 4, name: 'David Wilson', department: 'HR', salary: 55000 },
+            { id: 5, name: 'Eva Brown', department: 'Finance', salary: 68000 },
+            { id: 6, name: 'Frank Miller', department: 'Engineering', salary: 72000 },
+            { id: 7, name: 'Grace Lee', department: 'Marketing', salary: 59000 },
+            { id: 8, name: 'Henry Taylor', department: 'Sales', salary: 61000 }
+        ];
+
+        const columns = [
+            { name: 'id', title: 'ID', width: 80 },
+            { name: 'name', title: 'Name', width: 150 },
+            { name: 'department', title: 'Department', width: 120 },
+            { name: 'salary', title: 'Salary', width: 100, renderer: (value) => `$${value.toLocaleString()}` }
+        ];
+
+        // ✨ NEW: Simply specify the language - no manual imports needed!
+        const table = new Table('#testTable', {
+            data: sampleData,
+            columns: columns,
+            language: 'en', // Will be changed dynamically
+            pagination: {
+                enabled: true,
+                pageSize: 4,
+                showPageSizes: true,
+                pageSizeOptions: [4, 6, 8]
+            },
+            search: {
+                enabled: true
+            },
+            sorting: {
+                enabled: true
+            },
+            selection: {
+                enabled: true,
+                mode: 'multi'
+            }
+        });
+
+        // Language switching
+        const languageButtons = document.querySelectorAll('.language-btn');
+        const languageNames = {
+            'en': 'English',
+            'fr': 'Français',
+            'es': 'Español'
+        };
+
+        languageButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const lang = btn.dataset.lang;
+                
+                // Update active button
+                languageButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Change table language - it just works! ✨
+                table.setLanguage(lang);
+                
+                console.log(`Language changed to: ${lang}`);
+                console.log(`Available languages:`, table.getAvailableLanguages());
+                console.log(`Test translation:`, table.t('pagination.showingRecords'));
+            });
+        });
+
+        console.log('🎉 TablixJS Auto-Localization Demo loaded!');
+        console.log('Available languages:', table.getAvailableLanguages());
+        console.log('Current language:', table.getCurrentLanguage());
+    </script>
+</body>
+</html>

@@ -26,6 +26,9 @@ export default class SelectionManager {
       dragThreshold: 3 // Minimum pixels to move before considering it a drag
     };
     
+    // Track event listeners for proper cleanup
+    this.eventListeners = [];
+    
     this.init();
   }
 
@@ -76,7 +79,8 @@ export default class SelectionManager {
    * @param {Object} event - Row click event data
    */
   handleRowClick(event) {
-    if (!this.options.enabled) {
+    // Safety check - ensure table and managers are still available
+    if (!this.table || !this.options.enabled) {
       return;
     }
 
@@ -115,7 +119,9 @@ export default class SelectionManager {
       isDragSelection: false
     };
     
-    this.table.eventManager.trigger('beforeSelect', beforeSelectEvent);
+    if (this.table && this.table.eventManager) {
+      this.table.eventManager.trigger('beforeSelect', beforeSelectEvent);
+    }
 
     if (this.options.mode === 'single') {
       this.handleSingleSelection(rowId, rowData);
@@ -134,7 +140,9 @@ export default class SelectionManager {
       isDragSelection: false
     };
     
-    this.table.eventManager.trigger('afterSelect', afterSelectEvent);
+    if (this.table && this.table.eventManager) {
+      this.table.eventManager.trigger('afterSelect', afterSelectEvent);
+    }
   }
 
   /**
@@ -246,7 +254,7 @@ export default class SelectionManager {
 
     // Mouse down on table body
     tableElement.addEventListener('mousedown', (e) => {
-      if (!this.options.enabled || this.options.mode !== 'multi') return;
+      if (!this.table || !this.options.enabled || this.options.mode !== 'multi') return;
       
       const row = e.target.closest('.tablix-row');
       if (!row || row.classList.contains('tablix-empty-row')) return;
@@ -279,7 +287,7 @@ export default class SelectionManager {
 
     // Mouse move - handle drag selection
     tableElement.addEventListener('mousemove', (e) => {
-      if (!this.dragSelection.isActive) return;
+      if (!this.table || !this.dragSelection.isActive) return;
 
       const deltaX = Math.abs(e.clientX - startX);
       const deltaY = Math.abs(e.clientY - startY);
@@ -298,16 +306,14 @@ export default class SelectionManager {
 
     // Mouse up - complete drag selection
     tableElement.addEventListener('mouseup', (e) => {
-      if (this.dragSelection.isActive) {
-        this.completeDragSelection();
-      }
+      if (!this.table || !this.dragSelection.isActive) return;
+      this.completeDragSelection();
     });
 
     // Mouse leave - cancel drag selection
     tableElement.addEventListener('mouseleave', (e) => {
-      if (this.dragSelection.isActive) {
-        this.cancelDragSelection();
-      }
+      if (!this.table || !this.dragSelection.isActive) return;
+      this.cancelDragSelection();
     });
 
     // Prevent text selection during drag
@@ -322,6 +328,11 @@ export default class SelectionManager {
    * Start drag selection
    */
   startDragSelection() {
+    if (!this.table || !this.table.container) {
+      console.warn('SelectionManager: Cannot start drag selection - table not available');
+      return;
+    }
+    
     // Add drag selection class to table for styling
     const tableWrapper = this.table.container.querySelector('.tablix-wrapper');
     if (tableWrapper) {
@@ -399,6 +410,11 @@ export default class SelectionManager {
    * Complete drag selection
    */
   completeDragSelection() {
+    if (!this.table || !this.table.container) {
+      console.warn('SelectionManager: Cannot complete drag selection - table not available');
+      return;
+    }
+    
     const tableWrapper = this.table.container.querySelector('.tablix-wrapper');
     if (tableWrapper) {
       tableWrapper.classList.remove('tablix-drag-selecting');
@@ -423,6 +439,11 @@ export default class SelectionManager {
    * Cancel drag selection and restore original state
    */
   cancelDragSelection() {
+    if (!this.table || !this.table.container) {
+      console.warn('SelectionManager: Cannot cancel drag selection - table not available');
+      return;
+    }
+    
     const tableWrapper = this.table.container.querySelector('.tablix-wrapper');
     if (tableWrapper) {
       tableWrapper.classList.remove('tablix-drag-selecting');
@@ -482,6 +503,11 @@ export default class SelectionManager {
    * @returns {Array} Current page data
    */
   getCurrentPageData() {
+    if (!this.table || !this.table.dataManager) {
+      console.warn('SelectionManager: Table or dataManager is not available');
+      return [];
+    }
+    
     // If using virtual scrolling, return full dataset
     if (this.table.virtualScrollManager) {
       return this.table.dataManager.getData();
@@ -498,6 +524,10 @@ export default class SelectionManager {
    * @returns {Array} Full dataset
    */
   getFullData() {
+    if (!this.table || !this.table.dataManager) {
+      console.warn('SelectionManager: Table or dataManager is not available');
+      return [];
+    }
     return this.table.dataManager.getData();
   }
 
@@ -505,7 +535,7 @@ export default class SelectionManager {
    * Update UI to reflect current selection
    */
   updateUI() {
-    if (!this.options.enabled) {
+    if (!this.options.enabled || !this.table || !this.table.container) {
       return;
     }
 
@@ -796,6 +826,19 @@ export default class SelectionManager {
    */
   destroy() {
     this.clearSelection();
-    // Remove event listeners would go here if we tracked them
+    
+    // Clear references to prevent memory leaks and null reference errors
+    this.table = null;
+    this.selectedRows.clear();
+    this.rowIdMap.clear();
+    this.lastSelectedRow = null;
+    
+    // Reset drag selection state
+    this.dragSelection.isActive = false;
+    this.dragSelection.isDragging = false;
+    this.dragSelection.startRowIndex = null;
+    this.dragSelection.currentRowIndex = null;
+    this.dragSelection.startRowId = null;
+    this.dragSelection.originalSelection = null;
   }
 }

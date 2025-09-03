@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS Localization Test</title>
+    <link rel="stylesheet" href="../src/styles/tablix.css">
+    <link rel="stylesheet" href="../src/styles/filtering-core.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .language-btn {
+            margin-right: 10px;
+            padding: 8px 16px;
+            border: 1px solid #007bff;
+            background: white;
+            color: #007bff;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .language-btn.active {
+            background: #007bff;
+            color: white;
+        }
+        .test-info {
+            margin: 15px 0;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🌍 TablixJS Localization Test</h1>
+        
+        <div class="test-controls">
+            <h3>Language Selection:</h3>
+            <button class="language-btn active" data-lang="en">English</button>
+            <button class="language-btn" data-lang="fr">Français</button>
+            <button class="language-btn" data-lang="es">Español</button>
+        </div>
+
+        <div class="test-info">
+            <strong>Current Language:</strong> <span id="current-lang">English</span><br>
+            <strong>Test Translation:</strong> <span id="test-translation"></span>
+        </div>
+
+        <div id="test-table"></div>
+    </div>
+
+    <script type="module">
+        // Import the Table class and translations
+        import Table from '../src/core/Table.js';
+        
+        // French translations (inline for testing)
+        const frenchTranslations = {
+            'general.noData': 'Aucune donnée disponible',
+            'search.placeholder': 'Rechercher...',
+            'pagination.first': 'Premier',
+            'pagination.previous': 'Précédent',
+            'pagination.next': 'Suivant',
+            'pagination.last': 'Dernier',
+            'pagination.showingRecords': 'Affichage de {startRow} à {endRow} sur {totalRows} enregistrements',
+            'selection.selectAll': 'Tout sélectionner',
+            // Filtering translations
+            'filter.filterColumn': 'Filtrer la colonne',
+            'filter.filterByValue': 'Filtrer par valeur',
+            'filter.filterByCondition': 'Filtrer par condition',
+            'filter.searchValues': 'Rechercher des valeurs...',
+            'filter.selectAll': 'Tout sélectionner',
+            'filter.apply': 'Appliquer',
+            'filter.clear': 'Effacer',
+            'filter.cancel': 'Annuler',
+            'filter.addCondition': 'Ajouter une condition'
+        };
+
+        // Spanish translations (inline for testing)
+        const spanishTranslations = {
+            'general.noData': 'No hay datos disponibles',
+            'search.placeholder': 'Buscar...',
+            'pagination.first': 'Primero',
+            'pagination.previous': 'Anterior',
+            'pagination.next': 'Siguiente',
+            'pagination.last': 'Último',
+            'pagination.showingRecords': 'Mostrando {startRow} a {endRow} de {totalRows} registros',
+            'selection.selectAll': 'Seleccionar todo',
+            // Filtering translations
+            'filter.filterColumn': 'Filtrar columna',
+            'filter.filterByValue': 'Filtrar por valor',
+            'filter.filterByCondition': 'Filtrar por condición',
+            'filter.searchValues': 'Buscar valores...',
+            'filter.selectAll': 'Seleccionar todo',
+            'filter.apply': 'Aplicar',
+            'filter.clear': 'Limpiar',
+            'filter.cancel': 'Cancelar',
+            'filter.addCondition': 'Agregar condición'
+        };
+
+        // Sample data
+        const sampleData = [
+            { id: 1, name: 'John Smith', email: 'john@example.com', department: 'Engineering' },
+            { id: 2, name: 'Sarah Johnson', email: 'sarah@example.com', department: 'Marketing' },
+            { id: 3, name: 'Michael Brown', email: 'michael@example.com', department: 'Engineering' },
+            { id: 4, name: 'Emily Davis', email: 'emily@example.com', department: 'HR' },
+            { id: 5, name: 'David Wilson', email: 'david@example.com', department: 'Sales' },
+            { id: 6, name: 'Lisa Anderson', email: 'lisa@example.com', department: 'Marketing' },
+            { id: 7, name: 'Robert Taylor', email: 'robert@example.com', department: 'Engineering' }
+        ];
+
+        const columns = [
+            { name: 'id', title: 'ID', sortable: true, filterable: true },
+            { name: 'name', title: 'Name', sortable: true, filterable: true },
+            { name: 'email', title: 'Email', sortable: true, filterable: true },
+            { name: 'department', title: 'Department', sortable: true, filterable: true }
+        ];
+
+        // Initialize table
+        const table = new Table('#test-table', {
+            data: sampleData,
+            columns: columns,
+            language: 'en',
+            pagination: {
+                enabled: true,
+                pageSize: 5,
+                showPageSizes: true,
+                pageSizeOptions: [3, 5, 10]
+            },
+            selection: {
+                enabled: true,
+                mode: 'multi'
+            },
+            search: {
+                enabled: true
+            },
+            filtering: {
+                enabled: true
+            },
+            sorting: {
+                enabled: true
+            }
+        });
+
+        // Add translations
+        table.addTranslations('fr', frenchTranslations);
+        table.addTranslations('es', spanishTranslations);
+
+        // Update test translation display
+        function updateTestTranslation() {
+            const testKey = 'pagination.showingRecords';
+            const translation = table.t(testKey, { startRow: 1, endRow: 5, totalRows: 7 });
+            document.getElementById('test-translation').textContent = translation;
+        }
+
+        // Language switching
+        const languageButtons = document.querySelectorAll('.language-btn');
+        const currentLangSpan = document.getElementById('current-lang');
+
+        const languageNames = {
+            'en': 'English',
+            'fr': 'Français', 
+            'es': 'Español'
+        };
+
+        languageButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const lang = btn.dataset.lang;
+                
+                // Update active button
+                languageButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Change language
+                table.setLanguage(lang);
+                currentLangSpan.textContent = languageNames[lang];
+                
+                // Update test translation
+                updateTestTranslation();
+                
+                console.log(`Language switched to: ${lang}`);
+                console.log(`Test translation: ${table.t('pagination.next')}`);
+            });
+        });
+
+        // Initial test translation
+        updateTestTranslation();
+
+        // Log some test translations
+        console.log('=== TablixJS Localization Test ===');
+        console.log('English - pagination.next:', table.t('pagination.next'));
+        console.log('English - search.placeholder:', table.t('search.placeholder'));
+        
+        // Test dynamic parameters
+        console.log('English with params:', table.t('pagination.showingRecords', {
+            startRow: 1, endRow: 5, totalRows: 100
+        }));
+
+        // Test fallback behavior
+        console.log('Missing key fallback:', table.t('nonexistent.key'));
+        
+        // Test available languages
+        console.log('Available languages:', table.getAvailableLanguages());
+        console.log('Current language:', table.getCurrentLanguage());
+        console.log('Has French?', table.hasLanguage('fr'));
+        console.log('Has German?', table.hasLanguage('de'));
+    </script>
+</body>
+</html>
