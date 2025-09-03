@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS Built Version Test - All Features Demo</title>
+    
+    <!-- Load built CSS from dist -->
+    <link rel="stylesheet" href="../dist/tablixjs.css">
+    <link rel="stylesheet" href="../dist/tablixjs-theme-default.css">
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+        }
+        
+        .header p {
+            color: #6c757d;
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        .feature-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .feature-section h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+        }
+        
+        .controls-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+        
+        .control-group button {
+            padding: 8px 16px;
+            border: 1px solid #007bff;
+            background: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .control-group button:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+        }
+        
+        .control-group button.secondary {
+            background: white;
+            color: #007bff;
+        }
+        
+        .control-group button.secondary:hover {
+            color: #111;
+            background: #e7f3ff;
+        }
+        
+        .control-group button.disabled {
+            background: #6c757d !important;
+            color: white !important;
+            border-color: #6c757d !important;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .control-group button.active {
+            background: #28a745 !important;
+            border-color: #28a745 !important;
+            color: #fff !important;
+        }
+        
+        .control-group button.active:hover {
+            background: #218838 !important;
+            border-color: #1e7e34 !important;
+        }
+        
+        .control-group select, .control-group input {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .info-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #e8f5e8;
+            border-radius: 6px;
+            border: 1px solid #28a745;
+        }
+        
+        .info-item {
+            text-align: center;
+        }
+        
+        .info-item .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #155724;
+            display: block;
+        }
+        
+        .info-item .label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .table-wrapper {
+            margin-top: 20px;
+        }
+        
+        #testTable {
+            width: 100%;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 10px;
+            }
+            
+            .controls-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 TablixJS Built Version Test</h1>
+            <p>Comprehensive test of all major features using the production build</p>
+        </div>
+
+        <div id="status" class="status success">
+            ✅ TablixJS library loaded successfully from dist build
+        </div>
+
+        <div class="feature-section">
+            <h3>🎛️ Interactive Controls</h3>
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>Data Management</label>
+                    <button onclick="loadSampleData()">Load Sample Data</button>
+                    <button onclick="loadAsyncData()" class="secondary">Load Async Data</button>
+                    <button onclick="clearData()" class="secondary">Clear Data</button>
+                </div>
+                
+                <div class="control-group">
+                    <label>Selection</label>
+                    <button onclick="enableSelection()">Enable Selection</button>
+                    <button onclick="selectAll()" class="secondary">Select All</button>
+                    <button onclick="clearSelection()" class="secondary">Clear Selection</button>
+                </div>
+                
+                <div class="control-group">
+                    <label>Pagination</label>
+                    <select onchange="changePageSize(this.value)">
+                        <option value="10">10 per page</option>
+                        <option value="25">25 per page</option>
+                        <option value="50">50 per page</option>
+                        <option value="100">100 per page</option>
+                    </select>
+                    <button onclick="togglePagination()" class="secondary">Toggle Pagination</button>
+                </div>
+                
+                <div class="control-group">
+                    <label>Virtual Scrolling</label>
+                    <button onclick="toggleVirtualScroll()">Enable Virtual Scroll</button>
+                    <button onclick="loadLargeDataset()" class="secondary">Load 10K Rows</button>
+                    <button onclick="scrollToRow()" class="secondary">Scroll to Row 500</button>
+                </div>
+                
+                <div class="control-group">
+                    <label>Search & Filter</label>
+                    <input type="text" placeholder="Search..." onkeyup="searchTable(this.value)">
+                    <button onclick="applyStatusFilter()" class="secondary">Filter Active</button>
+                    <button onclick="clearFilters()" class="secondary">Clear Filters</button>
+                </div>
+                
+                <div class="control-group">
+                    <label>Themes</label>
+                    <button onclick="switchTheme('default')">Default Theme</button>
+                    <button onclick="switchTheme('dark')" class="secondary">Dark Theme</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-item">
+                <span id="totalRows" class="value">0</span>
+                <span class="label">Total Rows</span>
+            </div>
+            <div class="info-item">
+                <span id="selectedRows" class="value">0</span>
+                <span class="label">Selected</span>
+            </div>
+            <div class="info-item">
+                <span id="currentPage" class="value">1</span>
+                <span class="label">Current Page</span>
+            </div>
+            <div class="info-item">
+                <span id="searchResults" class="value">-</span>
+                <span class="label">Search Results</span>
+            </div>
+            <div class="info-item">
+                <span id="loadTime" class="value">-</span>
+                <span class="label">Load Time (ms)</span>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <div id="testTable" class="loading">
+                Click "Load Sample Data" to begin testing...
+            </div>
+        </div>
+    </div>
+
+    <!-- Load built JavaScript from dist -->
+    <script src="../dist/tablixjs.umd.min.js"></script>
+    
+    <script>
+        // Test the built version
+        console.log('TablixJS Version:', TablixJS.version || 'Version info not available');
+        console.log('TablixJS Constructor:', typeof TablixJS.default);
+        
+        let table = null;
+        let currentTheme = 'default';
+        
+        // State tracking for better UI feedback
+        let paginationEnabled = true;
+        let virtualScrollEnabled = false;
+        let selectionEnabled = false;
+        
+        // Initialize with built version
+        function initializeTable(data = [], options = {}) {
+            const startTime = performance.now();
+            
+            // Clean up previous instance
+            if (table) {
+                try {
+                    table.destroy();
+                } catch (e) {
+                    console.log('Previous table cleanup:', e.message);
+                }
+            }
+            
+            // Use the built version (UMD export)
+            table = new TablixJS.default('#testTable', {
+                data: data,
+                columns: [
+                    { 
+                        name: 'id', 
+                        title: 'ID', 
+                        width: '80px',
+                        sortable: true,
+                        cellClass: (value) => value % 2 === 0 ? 'even-id' : 'odd-id'
+                    },
+                    { 
+                        name: 'name', 
+                        title: 'Full Name', 
+                        sortable: true,
+                        searchable: true,
+                        formatter: (value, row) => `<strong>${value}</strong>`
+                    },
+                    { 
+                        name: 'email', 
+                        title: 'Email', 
+                        sortable: true,
+                        searchable: true,
+                        formatter: (value) => `<a href="mailto:${value}">${value}</a>`
+                    },
+                    { 
+                        name: 'department', 
+                        title: 'Department', 
+                        sortable: true,
+                        filterable: true
+                    },
+                    { 
+                        name: 'salary', 
+                        title: 'Salary', 
+                        sortable: true,
+                        formatter: (value) => `$${value.toLocaleString()}`
+                    },
+                    { 
+                        name: 'status', 
+                        title: 'Status', 
+                        sortable: true,
+                        filterable: true,
+                        formatter: (value) => {
+                            const statusClass = value === 'Active' ? 'success' : 'warning';
+                            return `<span class="badge badge-${statusClass}">${value}</span>`;
+                        }
+                    },
+                    { 
+                        name: 'joinDate', 
+                        title: 'Join Date', 
+                        sortable: true,
+                        formatter: (value) => new Date(value).toLocaleDateString()
+                    }
+                ],
+                pagination: {
+                    enabled: true,
+                    pageSize: 10,
+                    showPageNumbers: true,
+                    showFirstLast: true,
+                    showPrevNext: true
+                },
+                sorting: {
+                    enabled: true,
+                    defaultSortType: 'auto'
+                },
+                filtering: {
+                    enabled: true,
+                    debounceDelay: 300
+                },
+                search: {
+                    enabled: true,
+                    placeholder: 'Search employees...',
+                    searchDelay: 300
+                },
+                selection: {
+                    enabled: false,
+                    mode: 'multi',
+                    dataIdKey: 'id'
+                },
+                ...options
+            });
+            
+            // Event listeners to update info panel
+            table.on('afterLoad', () => updateInfoPanel());
+            table.on('afterFilter', () => updateInfoPanel());
+            table.on('afterSort', () => updateInfoPanel());
+            table.on('afterSearch', () => updateInfoPanel());
+            table.on('selectionChange', () => updateInfoPanel());
+            table.on('pageChange', () => updateInfoPanel());
+            
+            const loadTime = Math.round(performance.now() - startTime);
+            document.getElementById('loadTime').textContent = loadTime;
+            
+            updateStatus('✅ Table initialized successfully', 'success');
+            updateInfoPanel();
+            
+            // Update state tracking based on options
+            paginationEnabled = options.pagination ? options.pagination.enabled !== false : true;
+            virtualScrollEnabled = options.virtualScroll ? options.virtualScroll.enabled === true : false;
+            selectionEnabled = options.selection ? options.selection.enabled === true : false;
+            updateControlStates();
+        }
+        
+        // Sample data generator
+        function generateSampleData(count = 100) {
+            const departments = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance', 'Operations'];
+            const statuses = ['Active', 'Inactive'];
+            const names = ['John Doe', 'Jane Smith', 'Bob Johnson', 'Alice Brown', 'Charlie Wilson', 'Diana Davis', 'Eve Miller', 'Frank Garcia', 'Grace Lee', 'Henry Taylor'];
+            
+            return Array.from({ length: count }, (_, i) => ({
+                id: i + 1,
+                name: names[i % names.length] + ` (${i + 1})`,
+                email: `user${i + 1}@example.com`,
+                department: departments[i % departments.length],
+                salary: 40000 + Math.floor(Math.random() * 60000),
+                status: statuses[i % 2],
+                joinDate: new Date(2020 + Math.floor(Math.random() * 5), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString()
+            }));
+        }
+        
+        function updateControlStates() {
+            // Update pagination button
+            const paginationBtn = document.querySelector('button[onclick="togglePagination()"]');
+            if (paginationBtn) {
+                paginationBtn.textContent = paginationEnabled ? 'Disable Pagination' : 'Enable Pagination';
+                paginationBtn.className = paginationEnabled ? 'secondary active' : 'secondary';
+            }
+            
+            // Update virtual scroll buttons
+            const virtualScrollBtn = document.querySelector('button[onclick="toggleVirtualScroll()"]');
+            const largeDataBtn = document.querySelector('button[onclick="loadLargeDataset()"]');
+            const scrollToRowBtn = document.querySelector('button[onclick="scrollToRow()"]');
+            
+            if (virtualScrollBtn) {
+                virtualScrollBtn.textContent = virtualScrollEnabled ? 'Disable Virtual Scroll' : 'Enable Virtual Scroll';
+                virtualScrollBtn.className = virtualScrollEnabled ? 'active' : '';
+            }
+            if (largeDataBtn) {
+                largeDataBtn.className = virtualScrollEnabled ? 'secondary active' : 'secondary';
+            }
+            if (scrollToRowBtn) {
+                scrollToRowBtn.className = virtualScrollEnabled ? 'secondary' : 'secondary disabled';
+                scrollToRowBtn.disabled = !virtualScrollEnabled;
+            }
+            
+            // Update selection buttons
+            const enableSelectionBtn = document.querySelector('button[onclick="enableSelection()"]');
+            const selectAllBtn = document.querySelector('button[onclick="selectAll()"]');
+            const clearSelectionBtn = document.querySelector('button[onclick="clearSelection()"]');
+            
+            if (enableSelectionBtn) {
+                enableSelectionBtn.textContent = selectionEnabled ? 'Disable Selection' : 'Enable Selection';
+                enableSelectionBtn.className = selectionEnabled ? 'active' : '';
+            }
+            
+            if (selectAllBtn) {
+                selectAllBtn.className = selectionEnabled ? 'secondary' : 'secondary disabled';
+                selectAllBtn.disabled = !selectionEnabled;
+            }
+            
+            if (clearSelectionBtn) {
+                clearSelectionBtn.className = selectionEnabled ? 'secondary' : 'secondary disabled';
+                clearSelectionBtn.disabled = !selectionEnabled;
+            }
+            
+            // Update theme buttons
+            const defaultThemeBtn = document.querySelector('button[onclick="switchTheme(\'default\')"]');
+            const darkThemeBtn = document.querySelector('button[onclick="switchTheme(\'dark\')"]');
+            
+            if (defaultThemeBtn) {
+                defaultThemeBtn.className = currentTheme === 'default' ? 'active' : '';
+            }
+            if (darkThemeBtn) {
+                darkThemeBtn.className = currentTheme === 'dark' ? 'secondary active' : 'secondary';
+            }
+        }
+        
+        // Control functions
+        function loadSampleData() {
+            const data = generateSampleData(100);
+            paginationEnabled = true; // Reset to default state
+            virtualScrollEnabled = false;
+            selectionEnabled = false;
+            
+            initializeTable(data);
+        }
+        
+        async function loadAsyncData() {
+            updateStatus('⏳ Loading async data...', 'success');
+            
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            const data = generateSampleData(75);
+            initializeTable(data);
+        }
+        
+        function clearData() {
+            if (table) {
+                table.loadData([]);
+                updateStatus('📭 Data cleared', 'success');
+            }
+        }
+        
+        function enableSelection() {
+            if (table) {
+                selectionEnabled = !selectionEnabled;
+                table.setOptions({ 
+                    selection: { 
+                        enabled: selectionEnabled, 
+                        mode: 'multi' 
+                    } 
+                });
+                updateControlStates();
+                updateStatus(`${selectionEnabled ? '✅ Selection enabled' : '❌ Selection disabled'} (multi-select)`, 'success');
+            }
+        }
+        
+        function selectAll() {
+            if (table && selectionEnabled) {
+                const count = table.selectAllRows();
+                updateStatus(`✅ Selected ${count} rows`, 'success');
+            } else if (!selectionEnabled) {
+                updateStatus('❌ Selection is disabled', 'error');
+            }
+        }
+        
+        function clearSelection() {
+            if (table && selectionEnabled) {
+                table.clearSelection();
+                updateStatus('🔄 Selection cleared', 'success');
+            } else if (!selectionEnabled) {
+                updateStatus('❌ Selection is disabled', 'error');
+            }
+        }
+        
+        function changePageSize(size) {
+            if (table) {
+                table.changePageSize(parseInt(size));
+                updateStatus(`📄 Page size changed to ${size}`, 'success');
+            }
+        }
+        
+        function togglePagination() {
+            if (table) {
+                paginationEnabled = !paginationEnabled;
+                
+                // If enabling pagination, disable virtual scroll
+                if (paginationEnabled && virtualScrollEnabled) {
+                    virtualScrollEnabled = false;
+                }
+                
+                // Re-initialize table with new pagination settings
+                const currentData = table.getOriginalData();
+                initializeTable(currentData, {
+                    pagination: { 
+                        enabled: paginationEnabled,
+                        pageSize: 10,
+                        showPageNumbers: true,
+                        showFirstLast: true,
+                        showPrevNext: true
+                    },
+                    virtualScroll: { enabled: virtualScrollEnabled }
+                });
+                
+                updateStatus(`📄 Pagination ${paginationEnabled ? 'enabled' : 'disabled'}`, 'success');
+            }
+        }
+        
+        function toggleVirtualScroll() {
+            if (virtualScrollEnabled) {
+                // Disable virtual scroll and return to normal pagination mode
+                virtualScrollEnabled = false;
+                paginationEnabled = true;
+                
+                const data = generateSampleData(100); // Smaller dataset for normal mode
+                initializeTable(data, {
+                    pagination: {
+                        enabled: true,
+                        pageSize: 10,
+                        showPageNumbers: true,
+                        showFirstLast: true,
+                        showPrevNext: true
+                    },
+                    virtualScroll: {
+                        enabled: false
+                    }
+                });
+                updateStatus('📄 Virtual scrolling disabled, pagination enabled', 'success');
+            } else {
+                // Enable virtual scroll
+                enableVirtualScroll();
+            }
+        }
+
+        function enableVirtualScroll() {
+            const data = generateSampleData(1000);
+            virtualScrollEnabled = true;
+            paginationEnabled = false; // Disable pagination when virtual scroll is enabled
+            
+            initializeTable(data, {
+                virtualScroll: {
+                    enabled: true,
+                    buffer: 10,
+                    containerHeight: 400
+                },
+                pagination: {
+                    enabled: false
+                }
+            });
+            updateStatus('📜 Virtual scrolling enabled with 1K rows', 'success');
+        }
+        
+        function loadLargeDataset() {
+            const data = generateSampleData(10000);
+            virtualScrollEnabled = true;
+            paginationEnabled = false; // Disable pagination when virtual scroll is enabled
+            
+            initializeTable(data, {
+                virtualScroll: {
+                    enabled: true,
+                    buffer: 20,
+                    containerHeight: 400
+                },
+                pagination: {
+                    enabled: false
+                }
+            });
+            updateStatus('🚀 Large dataset loaded (10K rows) with virtual scrolling', 'success');
+        }
+        
+        function scrollToRow() {
+            if (table && table.virtualScrollManager && virtualScrollEnabled) {
+                table.virtualScrollManager.scrollToRow(499); // 0-indexed, so 499 = row 500
+                updateStatus('📍 Scrolled to row 500', 'success');
+            } else if (!virtualScrollEnabled) {
+                updateStatus('❌ Virtual scrolling is disabled', 'error');
+            } else {
+                updateStatus('❌ Virtual scroll manager not available', 'error');
+            }
+        }
+        
+        function searchTable(term) {
+            if (table) {
+                table.setSearchTerm(term);
+                updateStatus(`🔍 Search: "${term}"`, 'success');
+            }
+        }
+        
+        function applyStatusFilter() {
+            if (table) {
+                table.applyFilter('status', {
+                    type: 'value',
+                    values: ['Active']
+                });
+                updateStatus('🎯 Filter applied: Active status only', 'success');
+            }
+        }
+        
+        function clearFilters() {
+            if (table) {
+                table.clearAllFilters();
+                table.clearSearch();
+                updateStatus('🔄 All filters and search cleared', 'success');
+            }
+        }
+        
+        function switchTheme(theme) {
+            // Remove current theme
+            const currentThemeLink = document.querySelector('link[href*="tablixjs-theme-"]');
+            if (currentThemeLink) {
+                currentThemeLink.remove();
+            }
+            
+            // Remove theme attribute
+            document.body.removeAttribute('data-theme');
+            
+            // Add new theme
+            if (theme !== 'none' && theme !== 'default') {
+                const themeLink = document.createElement('link');
+                themeLink.rel = 'stylesheet';
+                themeLink.href = `../dist/tablixjs-theme-${theme}.css`;
+                themeLink.onload = () => {
+                    updateStatus(`🎨 Theme switched to: ${theme}`, 'success');
+                };
+                themeLink.onerror = () => {
+                    updateStatus(`❌ Failed to load theme: ${theme}`, 'error');
+                };
+                document.head.appendChild(themeLink);
+                
+                // Apply theme attribute for CSS custom properties
+                document.body.setAttribute('data-theme', theme);
+            } else if (theme === 'default') {
+                // Default theme uses the base CSS without theme attribute
+                updateStatus(`🎨 Theme switched to: default`, 'success');
+            }
+            
+            currentTheme = theme;
+            updateControlStates();
+        }
+        
+        function updateInfoPanel() {
+            if (!table) return;
+            
+            const data = table.getData();
+            const originalData = table.getOriginalData();
+            const selectedData = table.getSelectedData();
+            const paginationInfo = table.getPaginationInfo();
+            const searchInfo = table.getSearchInfo();
+            
+            document.getElementById('totalRows').textContent = originalData.length;
+            document.getElementById('selectedRows').textContent = selectedData.length;
+            document.getElementById('currentPage').textContent = paginationInfo ? paginationInfo.currentPage : 'N/A';
+            document.getElementById('searchResults').textContent = searchInfo ? `${data.length}/${originalData.length}` : data.length;
+        }
+        
+        function updateStatus(message, type = 'success') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            
+            // Auto-clear success messages after 3 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusEl.textContent = '✅ TablixJS ready for testing';
+                }, 3000);
+            }
+        }
+        
+        // Test built version on load
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                // Test that the built version exports are available
+                console.log('Testing built version exports:');
+                console.log('- TablixJS.default:', typeof TablixJS.default);
+                console.log('- TablixJS.Table:', typeof TablixJS.Table);
+                console.log('- TablixJS.version:', TablixJS.version);
+                
+                if (typeof TablixJS.default !== 'function') {
+                    throw new Error('TablixJS.default is not a constructor function');
+                }
+                
+                updateStatus('✅ Built version loaded and verified successfully!', 'success');
+                
+                // Initialize control states
+                updateControlStates();
+                
+                // Auto-load sample data after 2 seconds
+                setTimeout(() => {
+                    loadSampleData();
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Built version test failed:', error);
+                updateStatus(`❌ Built version test failed: ${error.message}`, 'error');
+            }
+        });
+    </script>
+    
+    <style>
+        /* Additional styles for table elements */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .badge-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .even-id {
+            background-color: #f8f9fa !important;
+        }
+        
+        .odd-id {
+            background-color: #ffffff !important;
+        }
+        
+        /* Dark theme adjustments */
+        .tablix-dark .badge-success {
+            background: #20c997;
+        }
+        
+        .tablix-dark .badge-warning {
+            background: #fd7e14;
+            color: white;
+        }
+    </style>
+</body>
+</html>

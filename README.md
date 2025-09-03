@@ -840,6 +840,44 @@ For production, simply include the files directly (no build process required):
 - **[Column Formatting](docs/column-formatting.md)** - Custom column formatting and renderers
 - **[Plugin Architecture](docs/plugin-architecture.md)** - Extending TablixJS functionality
 
+## 🧪 Testing & Examples
+
+### **Built Version Test**
+Test the production-ready built version with our comprehensive example:
+
+```bash
+# Build the library
+npm run build
+
+# Start local server
+npm run dev
+
+# Navigate to: http://localhost:5174/examples/built-version-test.html
+```
+
+**Features Tested:**
+- ✅ All module formats (ESM, CJS, UMD)
+- ✅ Data loading (static & async)
+- ✅ Pagination with dynamic page sizes
+- ✅ Multi-column sorting
+- ✅ Advanced filtering and search
+- ✅ Row selection (single & multi)
+- ✅ Virtual scrolling with 10K+ rows
+- ✅ Theme switching (default & dark)
+- ✅ Performance monitoring
+- ✅ Event system validation
+
+### **Development Examples**
+Explore individual features with focused examples:
+- **[Complete Features Demo](examples/built-version-test.html)** - All features in production build
+- **[Pagination Examples](examples/pagination.html)** - Advanced pagination patterns
+- **[Selection Demo](examples/selection-demo.html)** - Interactive selection modes
+- **[Virtual Scrolling](examples/virtual-scroll-demo.html)** - Large dataset performance
+- **[Filtering Demo](examples/filtering-demo.html)** - Advanced filtering UI
+- **[Theming Demo](examples/theme-demo.html)** - Theme customization
+
+> **💡 Pro Tip:** Use `examples/built-version-test.html` to verify everything works after making changes to the library!
+
 ### **API Reference**
 
 #### **Table Class**

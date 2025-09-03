@@ -1,0 +1,1636 @@
+/**
+ * TablixJS CSS Bundle
+ * Complete styles for TablixJS table library
+ * All @import statements have been resolved and inlined
+ */
+
+/* TablixJS - Main Stylesheet */
+
+/* Import core styles (required) */
+
+/* === table-core.css === */
+/* TablixJS - Core Theme Skeleton */
+
+/* Base wrapper */
+.tablix-wrapper {
+  font-family: var(--tablix-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif);
+  font-size: var(--tablix-font-size, 14px);
+  color: var(--tablix-text-color, #333);
+}
+
+/* Table structure */
+.tablix-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--tablix-table-bg, #fff);
+  border: var(--tablix-table-border, 1px solid #e0e0e0);
+}
+
+/* Table header */
+.tablix-thead {
+  background-color: var(--tablix-header-bg, #f5f5f5);
+}
+
+.tablix-th {
+  background-color: var(--tablix-header-bg, #f5f5f5);
+  border: var(--tablix-cell-border, 1px solid #e0e0e0);
+  padding: var(--tablix-cell-padding, 12px 8px);
+  text-align: left;
+  font-weight: var(--tablix-header-font-weight, 600);
+  color: var(--tablix-header-text-color, #333);
+}
+
+/* Table body */
+.tablix-tbody {
+  background-color: var(--tablix-table-bg, #fff);
+}
+
+.tablix-td {
+  border: var(--tablix-cell-border, 1px solid #e0e0e0);
+  padding: var(--tablix-cell-padding, 10px 8px);
+  color: var(--tablix-text-color, #666);
+}
+
+/* Row states */
+.tablix-row:nth-child(even) {
+  background-color: var(--tablix-row-even-bg, #fafafa);
+}
+
+.tablix-row:hover {
+  background-color: var(--tablix-row-hover-bg, #f0f0f0);
+}
+
+/* Empty state */
+.tablix-empty-cell {
+  text-align: center;
+  color: var(--tablix-empty-text-color, #999);
+  font-style: italic;
+  padding: var(--tablix-empty-padding, 20px);
+}
+
+/* Loading and error states */
+.tablix-loading {
+  text-align: center;
+  padding: var(--tablix-loading-padding, 40px);
+  color: var(--tablix-loading-text-color, #666);
+  font-style: italic;
+}
+
+.tablix-error {
+  text-align: center;
+  padding: var(--tablix-error-padding, 40px);
+  color: var(--tablix-error-text-color, #d32f2f);
+  background-color: var(--tablix-error-bg, #ffebee);
+  border: var(--tablix-error-border, 1px solid #ffcdd2);
+  border-radius: var(--tablix-border-radius, 4px);
+}
+
+.tablix-row:hover {
+  background-color: var(--tablix-row-hover-bg, #f8f9fa);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .tablix-table {
+    font-size: var(--tablix-mobile-font-size, 13px);
+  }
+  
+  .tablix-th,
+  .tablix-td {
+    padding: var(--tablix-mobile-cell-padding, 8px 6px);
+  }
+}
+
+
+
+/* === pagination-core.css === */
+/* TablixJS - Pagination Styles */
+
+/* Pagination container */
+.tablix-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--tablix-pagination-margin-top, 16px);
+  padding: var(--tablix-pagination-padding, 12px 0);
+  border-top: var(--tablix-pagination-border, 1px solid #e0e0e0);
+  flex-wrap: wrap;
+  gap: var(--tablix-pagination-gap, 16px);
+}
+
+/* Pagination info */
+.tablix-pagination-info {
+  color: var(--tablix-pagination-info-color, #666);
+  font-size: var(--tablix-pagination-info-font-size, 13px);
+}
+
+/* Page size controls */
+.tablix-pagination-page-size {
+  display: flex;
+  align-items: center;
+  gap: var(--tablix-pagination-gap-small, 8px);
+  color: var(--tablix-pagination-info-color, #666);
+  font-size: var(--tablix-pagination-info-font-size, 13px);
+}
+
+.tablix-page-size-select {
+  padding: var(--tablix-select-padding, 4px 8px);
+  border: var(--tablix-select-border, 1px solid #d0d0d0);
+  border-radius: var(--tablix-border-radius, 4px);
+  font-size: var(--tablix-pagination-info-font-size, 13px);
+  background-color: var(--tablix-select-bg, #fff);
+  color: var(--tablix-text-color, #333);
+}
+
+.tablix-page-size-select:focus {
+  outline: none;
+  border-color: var(--tablix-focus-color, #007acc);
+  box-shadow: 0 0 0 2px var(--tablix-focus-shadow, rgba(0, 122, 204, 0.2));
+}
+
+/* Navigation controls */
+.tablix-pagination-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--tablix-pagination-nav-gap, 4px);
+}
+
+/* Pagination buttons */
+.tablix-pagination-btn {
+  padding: var(--tablix-btn-padding, 6px 12px);
+  border: var(--tablix-btn-border, 1px solid #d0d0d0);
+  background-color: var(--tablix-btn-bg, #fff);
+  color: var(--tablix-btn-text-color, #333);
+  cursor: pointer;
+  border-radius: var(--tablix-border-radius, 4px);
+  font-size: var(--tablix-pagination-info-font-size, 13px);
+  transition: all 0.2s ease;
+  min-width: var(--tablix-btn-min-width, 32px);
+  text-align: center;
+}
+
+.tablix-pagination-btn:hover:not([disabled]) {
+  background-color: var(--tablix-btn-hover-bg, #f0f0f0);
+  border-color: var(--tablix-btn-hover-border-color, #007acc);
+}
+
+.tablix-pagination-btn:active:not([disabled]) {
+  background-color: var(--tablix-btn-active-bg, #e0e0e0);
+}
+
+.tablix-pagination-btn.active {
+  background-color: var(--tablix-btn-active-color, #007acc);
+  color: var(--tablix-btn-active-text, #fff);
+  border-color: var(--tablix-btn-active-color, #007acc);
+}
+
+.tablix-pagination-btn[disabled] {
+  background-color: var(--tablix-btn-disabled-bg, #f5f5f5);
+  color: var(--tablix-btn-disabled-text, #ccc);
+  cursor: not-allowed;
+  border-color: var(--tablix-btn-disabled-border, #e0e0e0);
+}
+
+/* Ellipsis */
+.tablix-pagination-ellipsis {
+  padding: var(--tablix-ellipsis-padding, 6px 4px);
+  color: var(--tablix-ellipsis-color, #999);
+  font-size: var(--tablix-pagination-info-font-size, 13px);
+}
+
+/* Loading indicator */
+.tablix-pagination-loading {
+  color: var(--tablix-loading-color, #007acc);
+  font-size: var(--tablix-pagination-info-font-size, 13px);
+  font-style: italic;
+}
+
+/* Control Panel */
+.tablix-controls {
+  background-color: var(--tablix-controls-bg, #f8f9fa);
+  border: var(--tablix-controls-border, 1px solid #e0e0e0);
+  border-radius: var(--tablix-controls-border-radius, 4px);
+  padding: var(--tablix-controls-padding, 12px 16px);
+  margin: var(--tablix-controls-margin, 0 0 12px 0);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--tablix-controls-gap, 16px);
+}
+
+.tablix-control-group {
+  display: flex;
+  align-items: center;
+  gap: var(--tablix-controls-gap-small, 8px);
+}
+
+.tablix-control-group label {
+  color: var(--tablix-text-color, #333);
+  font-size: var(--tablix-pagination-info-font-size, 13px);
+  font-weight: 500;
+}
+
+/* Search controls */
+.tablix-search-group {
+  position: relative;
+}
+
+.tablix-search-input {
+  padding: var(--tablix-search-input-padding, 6px 32px 6px 8px);
+  border: var(--tablix-search-input-border, 1px solid #d0d0d0);
+  border-radius: var(--tablix-border-radius, 4px);
+  background-color: var(--tablix-search-input-bg, #fff);
+  color: var(--tablix-text-color, #333);
+  font-size: var(--tablix-pagination-info-font-size, 13px);
+  min-width: 200px;
+  transition: all 0.2s ease;
+}
+
+.tablix-search-input:focus {
+  outline: none;
+  border-color: var(--tablix-search-input-focus-border, #007acc);
+  box-shadow: var(--tablix-search-input-focus-shadow, 0 0 0 2px rgba(0, 122, 204, 0.2));
+}
+
+.tablix-search-clear {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--tablix-search-clear-color, #999);
+  cursor: pointer;
+  padding: 4px;
+  font-size: 12px;
+  line-height: 1;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.tablix-search-clear:hover {
+  color: var(--tablix-search-clear-hover-color, #666);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Control buttons */
+.tablix-control-btn {
+  padding: var(--tablix-control-btn-padding, 6px 10px);
+  border: var(--tablix-control-btn-border, 1px solid #d0d0d0);
+  background-color: var(--tablix-control-btn-bg, #fff);
+  color: var(--tablix-control-btn-text-color, #333);
+  cursor: pointer;
+  border-radius: var(--tablix-border-radius, 4px);
+  font-size: var(--tablix-pagination-info-font-size, 13px);
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.tablix-control-btn:hover:not([disabled]) {
+  background-color: var(--tablix-control-btn-hover-bg, #f0f0f0);
+  border-color: var(--tablix-control-btn-hover-border, #007acc);
+}
+
+.tablix-control-btn:active:not([disabled]) {
+  background-color: var(--tablix-control-btn-active-bg, #007acc);
+  color: var(--tablix-control-btn-active-text, #fff);
+}
+
+.tablix-control-btn[disabled] {
+  background-color: var(--tablix-btn-disabled-bg, #f5f5f5);
+  color: var(--tablix-btn-disabled-text, #ccc);
+  cursor: not-allowed;
+  border-color: var(--tablix-btn-disabled-border, #e0e0e0);
+}
+
+/* Page size selector in controls */
+.tablix-page-size-group select {
+  padding: var(--tablix-select-padding, 4px 8px);
+  border: var(--tablix-select-border, 1px solid #d0d0d0);
+  border-radius: var(--tablix-border-radius, 4px);
+  background-color: var(--tablix-select-bg, #fff);
+  color: var(--tablix-text-color, #333);
+  font-size: var(--tablix-pagination-info-font-size, 13px);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .tablix-pagination {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--tablix-pagination-mobile-gap, 12px);
+  }
+  
+  .tablix-pagination-nav {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .tablix-pagination-info,
+  .tablix-pagination-page-size {
+    text-align: center;
+  }
+  
+  .tablix-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--tablix-pagination-mobile-gap, 12px);
+  }
+  
+  .tablix-control-group {
+    justify-content: center;
+  }
+  
+  .tablix-search-input {
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tablix-pagination-btn {
+    padding: var(--tablix-btn-mobile-padding, 8px);
+    min-width: var(--tablix-btn-mobile-min-width, 36px);
+  }
+  
+  .tablix-pagination-first,
+  .tablix-pagination-last {
+    display: none;
+  }
+  
+  .tablix-controls {
+    padding: 8px 12px;
+  }
+  
+  .tablix-control-btn {
+    padding: 8px;
+  }
+  
+  .tablix-search-input {
+    min-width: 120px;
+  }
+}
+
+
+
+/* === sorting-core.css === */
+/* TablixJS - Sorting Styles */
+
+/* Sortable column headers */
+.tablix-sortable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  transition: background-color 0.15s ease;
+}
+
+.tablix-sortable:hover {
+  background-color: var(--tablix-header-hover-bg, rgba(0, 0, 0, 0.05)) !important;
+}
+
+.tablix-sortable:focus {
+  outline: 2px solid var(--tablix-focus-color, #007acc);
+  outline-offset: -2px;
+}
+
+/* Header content container */
+.tablix-th-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 20px;
+}
+
+.tablix-th-text {
+  flex: 1;
+  margin-right: var(--tablix-sort-spacing, 8px);
+}
+
+/* Sort indicator */
+.tablix-sort-indicator {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.5;
+  transition: opacity 0.15s ease;
+  min-width: 16px;
+  justify-content: center;
+}
+
+.tablix-sortable:hover .tablix-sort-indicator,
+.tablix-sorted .tablix-sort-indicator {
+  opacity: 1;
+}
+
+.tablix-sort-arrow {
+  font-size: var(--tablix-sort-arrow-size, 12px);
+  line-height: 1;
+  position: relative;
+  transition: color 0.15s ease;
+  color: var(--tablix-sort-arrow-color, #666);
+}
+
+/* Sort arrow states */
+.tablix-sort-asc {
+  color: var(--tablix-sort-active-color, #007acc);
+}
+
+.tablix-sort-desc {
+  color: var(--tablix-sort-active-color, #007acc);
+}
+
+.tablix-sort-none {
+  color: var(--tablix-sort-inactive-color, #ccc);
+}
+
+/* Sorted column highlighting */
+.tablix-sorted {
+  background-color: var(--tablix-sorted-header-bg, rgba(0, 122, 204, 0.05)) !important;
+}
+
+.tablix-sorted.tablix-sortable:hover {
+  background-color: var(--tablix-sorted-header-hover-bg, rgba(0, 122, 204, 0.1)) !important;
+}
+
+/* Column cells for sorted columns */
+.tablix-table .tablix-td[data-sorted="true"] {
+  background-color: var(--tablix-sorted-cell-bg, rgba(0, 122, 204, 0.02));
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .tablix-th-content {
+    font-size: var(--tablix-mobile-header-font-size, 13px);
+  }
+  
+  .tablix-sort-indicator {
+    min-width: 14px;
+  }
+  
+  .tablix-sort-arrow {
+    font-size: var(--tablix-mobile-sort-arrow-size, 11px);
+  }
+}
+
+/* High contrast and accessibility */
+@media (prefers-contrast: high) {
+  .tablix-sort-arrow {
+    font-weight: bold;
+  }
+  
+  .tablix-sortable:focus {
+    outline-width: 3px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .tablix-sortable,
+  .tablix-sort-indicator,
+  .tablix-sort-arrow {
+    transition: none;
+  }
+}
+
+
+
+/* === filtering-core.css === */
+/* TablixJS Filtering Core Styles */
+
+/* Filter indicators in table headers */
+.tablix-filter-indicator {
+  display: inline-block;
+  margin-left: 0.25rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.tablix-filter-indicator:hover {
+  opacity: 1;
+}
+
+.tablix-filter-indicator.tablix-filter-active {
+  opacity: 1;
+  color: var(--tablix-btn-active-color, #007bff);
+}
+
+.tablix-filter-icon {
+  font-size: 0.75rem;
+  user-select: none;
+}
+
+.tablix-filter-badge {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+  background: var(--tablix-btn-active-color, #007bff);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.6rem;
+  line-height: 1;
+  padding: 0.1rem 0.3rem;
+  min-width: 1rem;
+  text-align: center;
+}
+
+/* Filter dropdown */
+.tablix-filter-dropdown {
+  position: absolute;
+  background: var(--tablix-dropdown-bg, white);
+  border: 1px solid var(--tablix-border-color, #dee2e6);
+  border-radius: 0.25rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  z-index: 1000;
+  min-width: 280px;
+  max-width: 400px;
+  max-height: 500px;
+  display: none;
+  font-family: var(--tablix-font-family, inherit);
+  font-size: var(--tablix-font-size, 0.875rem);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tablix-filter-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--tablix-border-color, #dee2e6);
+  background: var(--tablix-header-bg, #f8f9fa);
+}
+
+.tablix-filter-dropdown-header h4 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tablix-header-text-color, #495057);
+}
+
+.tablix-filter-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  color: var(--tablix-text-color, #6c757d);
+}
+
+.tablix-filter-close:hover {
+  color: var(--tablix-text-color, #495057);
+}
+
+/* Filter tabs */
+.tablix-filter-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--tablix-border-color, #dee2e6);
+}
+
+.tablix-filter-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--tablix-text-color, #6c757d);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tablix-filter-tab:hover {
+  color: var(--tablix-text-color, #495057);
+  background: var(--tablix-hover-bg, #f8f9fa);
+}
+
+.tablix-filter-tab.active {
+  color: var(--tablix-btn-active-color, #007bff);
+  border-bottom-color: var(--tablix-btn-active-color, #007bff);
+}
+
+/* Filter panels */
+.tablix-filter-content {
+  position: relative;
+  min-height: 200px;
+  max-height: 300px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.tablix-filter-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1rem;
+  display: none;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.tablix-filter-panel.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Value filter panel */
+.tablix-filter-search {
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+}
+
+.tablix-filter-search-input {
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--tablix-border-color, #ced4da);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  box-sizing: border-box;
+}
+
+.tablix-filter-search-input:focus {
+  outline: none;
+  border-color: var(--tablix-focus-color, #80bdff);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.tablix-filter-select-all {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--tablix-border-color, #dee2e6);
+  flex-shrink: 0;
+}
+
+.tablix-filter-select-all label {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--tablix-text-color, #495057);
+}
+
+.tablix-filter-select-all input {
+  margin-right: 0.5rem;
+}
+
+.tablix-filter-values {
+  max-height: 150px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.tablix-filter-value-item {
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.tablix-filter-value-item:hover {
+  background: var(--tablix-hover-bg, #f8f9fa);
+}
+
+.tablix-filter-value-item input {
+  margin-right: 0.5rem;
+}
+
+.tablix-filter-value-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Condition filter panel */
+.tablix-filter-conditions {
+  margin-bottom: 1rem;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.tablix-filter-condition {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tablix-filter-operator {
+  flex: 1;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--tablix-border-color, #ced4da);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.tablix-filter-value {
+  flex: 1;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--tablix-border-color, #ced4da);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.tablix-filter-value:disabled {
+  background: var(--tablix-disabled-bg, #e9ecef);
+  color: var(--tablix-disabled-text, #6c757d);
+}
+
+.tablix-filter-remove-condition {
+  background: none;
+  border: none;
+  color: var(--tablix-danger-color, #dc3545);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.tablix-filter-remove-condition:hover {
+  color: var(--tablix-danger-hover-color, #c82333);
+}
+
+.tablix-filter-add-condition {
+  background: none;
+  border: 1px dashed var(--tablix-border-color, #ced4da);
+  color: var(--tablix-btn-active-color, #007bff);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  width: 100%;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.tablix-filter-add-condition:hover {
+  border-color: var(--tablix-btn-active-color, #007bff);
+  background: var(--tablix-hover-bg, #f8f9fa);
+}
+
+/* Filter actions */
+.tablix-filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-top: 1px solid var(--tablix-border-color, #dee2e6);
+  background: var(--tablix-header-bg, #f8f9fa);
+  flex-shrink: 0;
+}
+
+.tablix-filter-actions button {
+  flex: 1;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--tablix-border-color, #ced4da);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.tablix-filter-apply {
+  background: var(--tablix-btn-primary-bg, #007bff);
+  color: var(--tablix-btn-primary-text, white);
+  border-color: var(--tablix-btn-primary-bg, #007bff);
+}
+
+.tablix-filter-apply:hover {
+  background: var(--tablix-btn-primary-hover-bg, #0056b3);
+  border-color: var(--tablix-btn-primary-hover-bg, #0056b3);
+}
+
+.tablix-filter-clear {
+  background: var(--tablix-btn-secondary-bg, #6c757d);
+  color: var(--tablix-btn-secondary-text, white);
+  border-color: var(--tablix-btn-secondary-bg, #6c757d);
+}
+
+.tablix-filter-clear:hover {
+  background: var(--tablix-btn-secondary-hover-bg, #5a6268);
+  border-color: var(--tablix-btn-secondary-hover-bg, #5a6268);
+}
+
+.tablix-filter-cancel {
+  background: var(--tablix-btn-light-bg, white);
+  color: var(--tablix-btn-light-text, #495057);
+}
+
+.tablix-filter-cancel:hover {
+  background: var(--tablix-btn-light-hover-bg, #e2e6ea);
+}
+
+/* Empty state */
+.tablix-filter-empty {
+  color: var(--tablix-empty-text-color, #6c757d);
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Focus styles */
+.tablix-filter-dropdown input:focus,
+.tablix-filter-dropdown select:focus,
+.tablix-filter-dropdown button:focus {
+  outline: none;
+  border-color: var(--tablix-focus-color, #80bdff);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Scrollbar styling for webkit browsers */
+.tablix-filter-values::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.tablix-filter-values::-webkit-scrollbar-track {
+  background: var(--tablix-scrollbar-track, #f1f1f1);
+}
+
+.tablix-filter-values::-webkit-scrollbar-thumb {
+  background: var(--tablix-scrollbar-thumb, #c1c1c1);
+  border-radius: 0.25rem;
+}
+
+.tablix-filter-values::-webkit-scrollbar-thumb:hover {
+  background: var(--tablix-scrollbar-thumb-hover, #a8a8a8);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .tablix-filter-dropdown,
+.dark .tablix-filter-dropdown {
+  --tablix-dropdown-bg: #343a40;
+  --tablix-border-color: #495057;
+  --tablix-header-bg: #495057;
+  --tablix-header-text-color: #f8f9fa;
+  --tablix-text-color: #f8f9fa;
+  --tablix-hover-bg: #495057;
+  --tablix-disabled-bg: #495057;
+  --tablix-disabled-text: #adb5bd;
+  --tablix-btn-light-bg: #495057;
+  --tablix-btn-light-text: #f8f9fa;
+  --tablix-btn-light-hover-bg: #5a6268;
+  --tablix-empty-text-color: #adb5bd;
+  --tablix-scrollbar-track: #495057;
+  --tablix-scrollbar-thumb: #6c757d;
+  --tablix-scrollbar-thumb-hover: #adb5bd;
+}
+
+
+
+/* === search-core.css === */
+/* TablixJS Search Core Styles */
+
+/* Controls layout */
+.tablix-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tablix-controls-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tablix-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.tablix-control-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Search styles */
+.tablix-search-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tablix-search-input {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--tablix-border-color, #ced4da);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  min-width: 200px;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  box-sizing: border-box;
+}
+
+.tablix-search-input:focus {
+  outline: none;
+  border-color: var(--tablix-focus-color, #80bdff);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.tablix-search-input::placeholder {
+  color: var(--tablix-placeholder-color, #6c757d);
+  opacity: 1;
+}
+
+.tablix-search-clear {
+  background: none;
+  border: none;
+  color: var(--tablix-text-color, #6c757d);
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  line-height: 1;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+  display: none;
+}
+
+.tablix-search-clear:hover {
+  color: var(--tablix-danger-color, #dc3545);
+  background: var(--tablix-hover-bg, #f8f9fa);
+}
+
+.tablix-search-clear:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Control buttons */
+.tablix-control-btn {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--tablix-border-color, #ced4da);
+  background: var(--tablix-btn-bg, white);
+  color: var(--tablix-btn-color, #495057);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+}
+
+.tablix-control-btn:hover {
+  background: var(--tablix-btn-hover-bg, #e2e6ea);
+  border-color: var(--tablix-btn-hover-border-color, #adb5bd);
+}
+
+.tablix-control-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.tablix-control-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Page size control */
+.tablix-page-size-group label {
+  font-size: 0.875rem;
+  color: var(--tablix-text-color, #495057);
+  margin-right: 0.25rem;
+}
+
+.tablix-page-size-select {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--tablix-border-color, #ced4da);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  background: var(--tablix-input-bg, white);
+  color: var(--tablix-input-color, #495057);
+  cursor: pointer;
+}
+
+.tablix-page-size-select:focus {
+  outline: none;
+  border-color: var(--tablix-focus-color, #80bdff);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.tablix-page-size-group span {
+  font-size: 0.875rem;
+  color: var(--tablix-text-color, #495057);
+  margin-left: 0.25rem;
+}
+
+/* Refresh button */
+.tablix-refresh-group .tablix-control-btn {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .tablix-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .tablix-controls-left,
+  .tablix-controls-right {
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-left: 0;
+  }
+
+  .tablix-control-group {
+    justify-content: center;
+  }
+
+  .tablix-search-input {
+    min-width: auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .tablix-control-group {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .tablix-pagination-controls {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .tablix-control-btn {
+    flex: 1;
+    min-width: auto;
+  }
+}
+
+/* Search active state */
+.tablix-search-input:not(:placeholder-shown) {
+  border-color: var(--tablix-btn-active-color, #007bff);
+}
+
+.tablix-search-input:not(:placeholder-shown) + .tablix-search-clear {
+  display: block;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .tablix-controls,
+.dark .tablix-controls {
+  --tablix-border-color: #495057;
+  --tablix-btn-bg: #495057;
+  --tablix-btn-color: #f8f9fa;
+  --tablix-btn-hover-bg: #5a6268;
+  --tablix-btn-hover-border-color: #6c757d;
+  --tablix-input-bg: #495057;
+  --tablix-input-color: #f8f9fa;
+  --tablix-text-color: #f8f9fa;
+  --tablix-placeholder-color: #adb5bd;
+  --tablix-hover-bg: #5a6268;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .tablix-search-input,
+  .tablix-control-btn,
+  .tablix-page-size-select {
+    border-width: 2px;
+  }
+
+  .tablix-search-input:focus,
+  .tablix-control-btn:focus,
+  .tablix-page-size-select:focus {
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .tablix-search-input,
+  .tablix-control-btn,
+  .tablix-page-size-select,
+  .tablix-search-clear {
+    transition: none;
+  }
+}
+
+
+
+/* === selection-core.css === */
+/* Selection Core Styles */
+
+/* Row selection styles */
+.tablix-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.tablix-row:hover {
+  background-color: var(--tablix-row-hover-bg, #f8f9fa);
+}
+
+/* Selected row styles */
+.tablix-row.tablix-selected {
+  background-color: var(--tablix-row-selected-bg, #e3f2fd) !important;
+  border-left: 4px solid var(--tablix-selection-border-color, #2196f3) !important;
+  box-shadow: inset 0 0 0 1px rgba(33, 150, 243, 0.3) !important;
+}
+
+.tablix-row.tablix-selected:hover {
+  background-color: var(--tablix-row-selected-hover-bg, #bbdefb) !important;
+}
+
+/* Dark theme support for selected rows */
+[data-theme="dark"] .tablix-row.tablix-selected,
+.dark .tablix-row.tablix-selected,
+.tablix-wrapper.dark .tablix-row.tablix-selected {
+  background-color: var(--tablix-row-selected-bg, rgba(102, 126, 234, 0.3)) !important;
+  border-left: 4px solid var(--tablix-selection-border-color, #667eea) !important;
+  box-shadow: inset 0 0 0 1px rgba(102, 126, 234, 0.4) !important;
+}
+
+[data-theme="dark"] .tablix-row.tablix-selected:hover,
+.dark .tablix-row.tablix-selected:hover,
+.tablix-wrapper.dark .tablix-row.tablix-selected:hover {
+  background-color: var(--tablix-row-selected-hover-bg, rgba(102, 126, 234, 0.4)) !important;
+}
+
+/* Last selected row (for multi-selection) */
+.tablix-row.tablix-last-selected {
+  background-color: var(--tablix-row-last-selected-bg, #4eaaf5);
+  color: var(--tablix-row-last-selected-color, #ffffff);
+}
+
+.tablix-row.tablix-last-selected:hover {
+  background-color: var(--tablix-row-last-selected-hover-bg, #1976d2);
+}
+
+/* Selection disabled state */
+.tablix-wrapper[data-selection-disabled] .tablix-row {
+  cursor: default;
+}
+
+.tablix-wrapper[data-selection-disabled] .tablix-row:hover {
+  background-color: transparent;
+}
+
+/* Prevent text selection when clicking for row selection */
+.tablix-wrapper[data-selection-enabled] .tablix-table {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Allow text selection inside cells when needed */
+.tablix-wrapper[data-selection-enabled] .tablix-td {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* Selection indicator (optional - for future use) */
+.tablix-selection-indicator {
+  width: 4px;
+  background-color: var(--tablix-selection-indicator-color, #2196f3);
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+}
+
+/* Multi-selection hint text (for future use) */
+.tablix-selection-hint {
+  font-size: 0.875rem;
+  color: var(--tablix-text-muted, #6c757d);
+  padding: 0.5rem;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Drag selection styles */
+.tablix-wrapper.tablix-drag-selecting {
+  cursor: crosshair;
+}
+
+.tablix-wrapper.tablix-drag-selecting .tablix-table {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.tablix-wrapper.tablix-drag-selecting .tablix-row {
+  cursor: crosshair;
+}
+
+/* Drag selection visual feedback */
+.tablix-wrapper.tablix-drag-selecting .tablix-row:hover {
+  background-color: var(--tablix-drag-hover-bg, #e8f4fd);
+}
+
+.tablix-wrapper.tablix-drag-selecting .tablix-row.tablix-selected {
+  background-color: var(--tablix-drag-selected-bg, #bbdefb);
+  position: relative;
+}
+
+.tablix-wrapper.tablix-drag-selecting .tablix-row.tablix-selected::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--tablix-drag-overlay-bg, rgba(33, 150, 243, 0.1));
+  pointer-events: none;
+}
+
+/* Smooth transitions during drag */
+.tablix-wrapper.tablix-drag-selecting .tablix-row {
+  transition: background-color 0.1s ease;
+}
+
+
+
+/* Import themes */
+
+/* === default.css === */
+/* TablixJS - Default Light Theme */
+
+:root {
+  /* Typography */
+  --tablix-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --tablix-font-size: 14px;
+  --tablix-mobile-font-size: 13px;
+  
+  /* Colors - Text */
+  --tablix-text-color: #333;
+  --tablix-header-text-color: #333;
+  --tablix-empty-text-color: #999;
+  --tablix-loading-text-color: #666;
+  --tablix-error-text-color: #d32f2f;
+  
+  /* Colors - Backgrounds */
+  --tablix-table-bg: #fff;
+  --tablix-header-bg: #f5f5f5;
+  --tablix-row-even-bg: #fafafa;
+  --tablix-row-hover-bg: #f0f0f0;
+  --tablix-error-bg: #ffebee;
+  
+  /* Colors - Borders */
+  --tablix-table-border: 1px solid #e0e0e0;
+  --tablix-cell-border: 1px solid #e0e0e0;
+  --tablix-error-border: 1px solid #ffcdd2;
+  
+  /* Colors - Focus and Interactive */
+  --tablix-focus-color: #007acc;
+  --tablix-focus-shadow: rgba(0, 122, 204, 0.2);
+  
+  /* Spacing */
+  --tablix-cell-padding: 12px 8px;
+  --tablix-mobile-cell-padding: 8px 6px;
+  --tablix-empty-padding: 20px;
+  --tablix-loading-padding: 40px;
+  --tablix-error-padding: 40px;
+  
+  /* Header */
+  --tablix-header-font-weight: 600;
+  
+  /* Border radius */
+  --tablix-border-radius: 4px;
+  
+  /* Pagination specific */
+  --tablix-pagination-margin-top: 16px;
+  --tablix-pagination-padding: 12px 0;
+  --tablix-pagination-border: 1px solid #e0e0e0;
+  --tablix-pagination-gap: 16px;
+  --tablix-pagination-gap-small: 8px;
+  --tablix-pagination-mobile-gap: 12px;
+  --tablix-pagination-nav-gap: 4px;
+  
+  /* Pagination text */
+  --tablix-pagination-info-color: #666;
+  --tablix-pagination-info-font-size: 13px;
+  
+  /* Buttons */
+  --tablix-btn-padding: 6px 12px;
+  --tablix-btn-mobile-padding: 8px;
+  --tablix-btn-min-width: 32px;
+  --tablix-btn-mobile-min-width: 36px;
+  --tablix-btn-border: 1px solid #d0d0d0;
+  --tablix-btn-bg: #fff;
+  --tablix-btn-text-color: #333;
+  --tablix-btn-hover-bg: #f0f0f0;
+  --tablix-btn-hover-border-color: #007acc;
+  --tablix-btn-active-bg: #e0e0e0;
+  --tablix-btn-active-color: #007acc;
+  --tablix-btn-active-text: #fff;
+  --tablix-btn-disabled-bg: #f5f5f5;
+  --tablix-btn-disabled-text: #ccc;
+  --tablix-btn-disabled-border: #e0e0e0;
+  
+  /* Select elements */
+  --tablix-select-padding: 4px 8px;
+  --tablix-select-border: 1px solid #d0d0d0;
+  --tablix-select-bg: #fff;
+  
+  /* Other elements */
+  --tablix-ellipsis-padding: 6px 4px;
+  --tablix-ellipsis-color: #999;
+  --tablix-loading-color: #007acc;
+  
+  /* Control panel styles */
+  --tablix-controls-bg: #f8f9fa;
+  --tablix-controls-border: 1px solid #e0e0e0;
+  --tablix-controls-padding: 12px 16px;
+  --tablix-controls-margin: 0 0 12px 0;
+  --tablix-controls-gap: 16px;
+  --tablix-controls-gap-small: 8px;
+  --tablix-controls-border-radius: 4px;
+  
+  /* Search input styles */
+  --tablix-search-input-padding: 6px 8px;
+  --tablix-search-input-border: 1px solid #d0d0d0;
+  --tablix-search-input-bg: #fff;
+  --tablix-search-input-focus-border: #007acc;
+  --tablix-search-input-focus-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+  --tablix-search-clear-color: #999;
+  --tablix-search-clear-hover-color: #666;
+  
+  /* Control buttons */
+  --tablix-control-btn-padding: 6px 10px;
+  --tablix-control-btn-border: 1px solid #d0d0d0;
+  --tablix-control-btn-bg: #fff;
+  --tablix-control-btn-text-color: #333;
+  --tablix-control-btn-hover-bg: #f0f0f0;
+  --tablix-control-btn-hover-border: #007acc;
+  --tablix-control-btn-active-bg: #007acc;
+  --tablix-control-btn-active-text: #fff;
+  
+  /* Virtual scroll specific */
+  --tablix-virtual-scroll-bg: #fff;
+  --tablix-virtual-scroll-border: 1px solid #ddd;
+  
+  /* Sorting specific */
+  --tablix-header-hover-bg: rgba(0, 0, 0, 0.05);
+  --tablix-sorted-header-bg: rgba(0, 122, 204, 0.05);
+  --tablix-sorted-header-hover-bg: rgba(0, 122, 204, 0.1);
+  --tablix-sorted-cell-bg: rgba(0, 122, 204, 0.02);
+  --tablix-sort-spacing: 8px;
+  --tablix-sort-arrow-size: 12px;
+  --tablix-mobile-sort-arrow-size: 11px;
+  --tablix-sort-arrow-color: #666;
+  --tablix-sort-active-color: #007acc;
+  --tablix-sort-inactive-color: #ccc;
+  --tablix-sort-order-bg: #007acc;
+  --tablix-sort-order-text: #fff;
+  --tablix-mobile-header-font-size: 13px;
+  
+  /* Selection specific */
+  --tablix-row-selected-bg: #e3f2fd;
+  --tablix-row-selected-hover-bg: #bbdefb;
+  --tablix-row-last-selected-bg: #abd5f8;
+  --tablix-row-last-selected-color: #ffffff;
+  --tablix-row-last-selected-hover-bg: #9ec0e0;
+  --tablix-selection-indicator-color: #9ec0e0;
+  --tablix-text-muted: #6c757d;
+  
+  /* Drag selection specific */
+  --tablix-drag-hover-bg: #e8f4fd;
+  --tablix-drag-selected-bg: #bbdefb;
+  --tablix-drag-overlay-bg: rgba(33, 150, 243, 0.1);
+}
+
+
+
+/* === dark.css === */
+/* TablixJS - Dark Theme */
+
+[data-theme="dark"] {
+  /* Colors - Text */
+  --tablix-text-color: #e0e0e0;
+  --tablix-header-text-color: #e0e0e0;
+  --tablix-empty-text-color: #999;
+  --tablix-loading-text-color: #ccc;
+  --tablix-error-text-color: #ff6b6b;
+  
+  /* Colors - Backgrounds */
+  --tablix-table-bg: #2d2d2d;
+  --tablix-header-bg: #3a3a3a;
+  --tablix-row-even-bg: #333;
+  --tablix-row-hover-bg: #404040;
+  --tablix-error-bg: #3d1a1a;
+  
+  /* Colors - Borders */
+  --tablix-table-border: 1px solid #555;
+  --tablix-cell-border: 1px solid #555;
+  --tablix-error-border: 1px solid #6d2c2c;
+  --tablix-pagination-border: 1px solid #555;
+  
+  /* Colors - Focus and Interactive */
+  --tablix-focus-color: #4db6e6;
+  --tablix-focus-shadow: rgba(77, 182, 230, 0.2);
+  
+  /* Pagination text */
+  --tablix-pagination-info-color: #ccc;
+  
+  /* Buttons */
+  --tablix-btn-border: 1px solid #555;
+  --tablix-btn-bg: #3a3a3a;
+  --tablix-btn-text-color: #e0e0e0;
+  --tablix-btn-hover-bg: #4a4a4a;
+  --tablix-btn-hover-border-color: #4db6e6;
+  --tablix-btn-active-bg: #2a2a2a;
+  --tablix-btn-active-color: #4db6e6;
+  --tablix-btn-active-text: #fff;
+  --tablix-btn-disabled-bg: #2a2a2a;
+  --tablix-btn-disabled-text: #666;
+  --tablix-btn-disabled-border: #444;
+  
+  /* Select elements */
+  --tablix-select-border: 1px solid #555;
+  --tablix-select-bg: #3a3a3a;
+  
+  /* Other elements */
+  --tablix-ellipsis-color: #777;
+  --tablix-loading-color: #4db6e6;
+  
+  /* Control panel styles */
+  --tablix-controls-bg: #3a3a3a;
+  --tablix-controls-border: 1px solid #555;
+  --tablix-controls-padding: 12px 16px;
+  --tablix-controls-margin: 0 0 12px 0;
+  --tablix-controls-gap: 16px;
+  --tablix-controls-gap-small: 8px;
+  --tablix-controls-border-radius: 4px;
+  
+  /* Search input styles */
+  --tablix-search-input-padding: 6px 8px;
+  --tablix-search-input-border: 1px solid #555;
+  --tablix-search-input-bg: #2d2d2d;
+  --tablix-search-input-focus-border: #4db6e6;
+  --tablix-search-input-focus-shadow: 0 0 0 2px rgba(77, 182, 230, 0.2);
+  --tablix-search-clear-color: #999;
+  --tablix-search-clear-hover-color: #ccc;
+  
+  /* Control buttons */
+  --tablix-control-btn-padding: 6px 10px;
+  --tablix-control-btn-border: 1px solid #555;
+  --tablix-control-btn-bg: #3a3a3a;
+  --tablix-control-btn-text-color: #e0e0e0;
+  --tablix-control-btn-hover-bg: #4a4a4a;
+  --tablix-control-btn-hover-border: #4db6e6;
+  --tablix-control-btn-active-bg: #4db6e6;
+  --tablix-control-btn-active-text: #fff;
+  
+  /* Virtual scroll specific */
+  --tablix-virtual-scroll-bg: #2d2d2d;
+  --tablix-virtual-scroll-border: 1px solid #555;
+  
+  /* Sorting specific */
+  --tablix-header-hover-bg: rgba(255, 255, 255, 0.1);
+  --tablix-sorted-header-bg: rgba(77, 182, 230, 0.1);
+  --tablix-sorted-header-hover-bg: rgba(77, 182, 230, 0.15);
+  --tablix-sorted-cell-bg: rgba(77, 182, 230, 0.05);
+  --tablix-sort-arrow-color: #ccc;
+  --tablix-sort-active-color: #4db6e6;
+  --tablix-sort-inactive-color: #666;
+  --tablix-sort-order-bg: #4db6e6;
+  --tablix-sort-order-text: #1a1a1a;
+}
+
+/* Alternative class-based dark theme */
+.tablix-wrapper.dark {
+  /* Colors - Text */
+  --tablix-text-color: #e0e0e0;
+  --tablix-header-text-color: #e0e0e0;
+  --tablix-empty-text-color: #999;
+  --tablix-loading-text-color: #ccc;
+  --tablix-error-text-color: #ff6b6b;
+  
+  /* Colors - Backgrounds */
+  --tablix-table-bg: #2d2d2d;
+  --tablix-header-bg: #3a3a3a;
+  --tablix-row-even-bg: #333;
+  --tablix-row-hover-bg: #404040;
+  --tablix-error-bg: #3d1a1a;
+  
+  /* Colors - Borders */
+  --tablix-table-border: 1px solid #555;
+  --tablix-cell-border: 1px solid #555;
+  --tablix-error-border: 1px solid #6d2c2c;
+  --tablix-pagination-border: 1px solid #555;
+  
+  /* Colors - Focus and Interactive */
+  --tablix-focus-color: #4db6e6;
+  --tablix-focus-shadow: rgba(77, 182, 230, 0.2);
+  
+  /* Pagination text */
+  --tablix-pagination-info-color: #ccc;
+  
+  /* Buttons */
+  --tablix-btn-border: 1px solid #555;
+  --tablix-btn-bg: #3a3a3a;
+  --tablix-btn-text-color: #e0e0e0;
+  --tablix-btn-hover-bg: #4a4a4a;
+  --tablix-btn-hover-border-color: #4db6e6;
+  --tablix-btn-active-bg: #2a2a2a;
+  --tablix-btn-active-color: #4db6e6;
+  --tablix-btn-active-text: #fff;
+  --tablix-btn-disabled-bg: #2a2a2a;
+  --tablix-btn-disabled-text: #666;
+  --tablix-btn-disabled-border: #444;
+  
+  /* Select elements */
+  --tablix-select-border: 1px solid #555;
+  --tablix-select-bg: #3a3a3a;
+  
+  /* Other elements */
+  --tablix-ellipsis-color: #777;
+  --tablix-loading-color: #4db6e6;
+  
+  /* Control panel styles */
+  --tablix-controls-bg: #3a3a3a;
+  --tablix-controls-border: 1px solid #555;
+  --tablix-controls-padding: 12px 16px;
+  --tablix-controls-margin: 0 0 12px 0;
+  --tablix-controls-gap: 16px;
+  --tablix-controls-gap-small: 8px;
+  --tablix-controls-border-radius: 4px;
+  
+  /* Search input styles */
+  --tablix-search-input-padding: 6px 8px;
+  --tablix-search-input-border: 1px solid #555;
+  --tablix-search-input-bg: #2d2d2d;
+  --tablix-search-input-focus-border: #4db6e6;
+  --tablix-search-input-focus-shadow: 0 0 0 2px rgba(77, 182, 230, 0.2);
+  --tablix-search-clear-color: #999;
+  --tablix-search-clear-hover-color: #ccc;
+  
+  /* Control buttons */
+  --tablix-control-btn-padding: 6px 10px;
+  --tablix-control-btn-border: 1px solid #555;
+  --tablix-control-btn-bg: #3a3a3a;
+  --tablix-control-btn-text-color: #e0e0e0;
+  --tablix-control-btn-hover-bg: #4a4a4a;
+  --tablix-control-btn-hover-border: #4db6e6;
+  --tablix-control-btn-active-bg: #4db6e6;
+  --tablix-control-btn-active-text: #fff;
+  
+  /* Virtual scroll specific */
+  --tablix-virtual-scroll-bg: #2d2d2d;
+  --tablix-virtual-scroll-border: 1px solid #555;
+  
+  /* Sorting specific */
+  --tablix-header-hover-bg: rgba(255, 255, 255, 0.1);
+  --tablix-sorted-header-bg: rgba(77, 182, 230, 0.1);
+  --tablix-sorted-header-hover-bg: rgba(77, 182, 230, 0.15);
+  --tablix-sorted-cell-bg: rgba(77, 182, 230, 0.05);
+  --tablix-sort-arrow-color: #ccc;
+  --tablix-sort-active-color: #4db6e6;
+  --tablix-sort-inactive-color: #666;
+  --tablix-sort-order-bg: #4db6e6;
+  --tablix-sort-order-text: #1a1a1a;
+  
+  /* Selection specific */
+  --tablix-row-selected-bg: #1565c0;
+  --tablix-row-selected-hover-bg: #1976d2;
+  --tablix-row-last-selected-bg: #abd5f8;
+  --tablix-row-last-selected-color: #ffffff;
+  --tablix-row-last-selected-hover-bg: #9ec0e0;
+  --tablix-selection-indicator-color: #4db6e6;
+  --tablix-text-muted: #999;
+  
+  /* Drag selection specific */
+  --tablix-drag-hover-bg: #0d47a1;
+  --tablix-drag-selected-bg: #1565c0;
+  --tablix-drag-overlay-bg: rgba(77, 182, 230, 0.15);
+}
+
+
+
+/* 
+To use the dark theme, either:
+1. Add data-theme="dark" to your html/body element
+2. Add the "dark" class to your table wrapper
+*/

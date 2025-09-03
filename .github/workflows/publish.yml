@@ -1,0 +1,172 @@
+name: Publish to NPM
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (without v prefix)'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    # Only run on main/master branch and version tags
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build package
+        run: npm run build
+
+      - name: Verify build outputs
+        run: |
+          echo "Checking dist folder contents:"
+          ls -la dist/
+          echo "Verifying required files exist:"
+          test -f dist/tablixjs.esm.js && echo "✓ ESM build exists" || exit 1
+          test -f dist/tablixjs.cjs.js && echo "✓ CJS build exists" || exit 1
+          test -f dist/tablixjs.umd.js && echo "✓ UMD build exists" || exit 1
+          test -f dist/tablixjs.umd.min.js && echo "✓ UMD minified build exists" || exit 1
+          test -f dist/index.d.ts && echo "✓ TypeScript declarations exist" || exit 1
+          test -f dist/tablixjs.css && echo "✓ CSS bundle exists" || exit 1
+
+      - name: Extract version from tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: extract_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+
+      - name: Update package version from tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          VERSION=${{ steps.extract_version.outputs.VERSION }}
+          npm version $VERSION --no-git-tag-version
+          echo "Updated package.json version to: $VERSION"
+
+      - name: Update package version from input
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          npm version $VERSION --no-git-tag-version
+          echo "Updated package.json version to: $VERSION"
+
+      - name: Show package info
+        run: |
+          echo "Package name: $(npm pkg get name)"
+          echo "Package version: $(npm pkg get version)"
+          echo "Package description: $(npm pkg get description)"
+
+      - name: Dry run publish
+        run: npm publish --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to NPM
+        if: success()
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          body: |
+            ## Changes in ${{ github.ref_name }}
+            
+            - Built with Rollup for multiple module formats (ESM, CJS, UMD)
+            - Includes TypeScript declarations
+            - Complete CSS bundle with themes
+            - Automatic NPM publishing
+            
+            ### Installation
+            ```bash
+            npm install tablixjs
+            ```
+            
+            ### CDN Usage
+            ```html
+            <!-- Via jsDelivr -->
+            <script src="https://cdn.jsdelivr.net/npm/tablixjs@${{ steps.extract_version.outputs.VERSION || github.event.inputs.version }}/dist/tablixjs.umd.min.js"></script>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tablixjs@${{ steps.extract_version.outputs.VERSION || github.event.inputs.version }}/dist/tablixjs.css">
+            ```
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: build-artifacts
+          path: |
+            dist/
+            package.json
+          retention-days: 30
+
+  # Optional: Validate package can be installed
+  validate:
+    needs: publish
+    runs-on: ubuntu-latest
+    if: always() && needs.publish.result == 'success'
+    
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Wait for NPM registry update
+        run: sleep 60
+
+      - name: Test installation
+        run: |
+          npm init -y
+          npm install tablixjs
+          echo "✓ Package installed successfully"
+
+      - name: Test imports
+        run: |
+          cat > test-import.mjs << 'EOF'
+          import TablixJS from 'tablixjs';
+          console.log('✓ ES Module import successful');
+          console.log('TablixJS constructor:', typeof TablixJS);
+          EOF
+          node test-import.mjs
