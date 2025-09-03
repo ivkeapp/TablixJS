@@ -196,11 +196,11 @@ class Renderer {
       if (isSortable) {
         html += `<span class="tablix-sort-indicator">`;
         if (sortDirection === 'asc') {
-          html += `<span class="tablix-sort-arrow tablix-sort-asc" aria-label="Sorted ascending">↑</span>`;
+          html += `<span class="tablix-sort-arrow tablix-sort-asc" aria-label="${this.table.t('sort.sortedAscending')}">↑</span>`;
         } else if (sortDirection === 'desc') {
-          html += `<span class="tablix-sort-arrow tablix-sort-desc" aria-label="Sorted descending">↓</span>`;
+          html += `<span class="tablix-sort-arrow tablix-sort-desc" aria-label="${this.table.t('sort.sortedDescending')}">↓</span>`;
         } else {
-          html += `<span class="tablix-sort-arrow tablix-sort-none" aria-label="Not sorted">↕</span>`;
+          html += `<span class="tablix-sort-arrow tablix-sort-none" aria-label="${this.table.t('sort.notSorted')}">↕</span>`;
         }
         html += `</span>`;
       }
@@ -217,7 +217,7 @@ class Renderer {
       // Empty body for virtual scrolling - rows will be added by VirtualScrollManager
       html += `<tr class="tablix-placeholder-row" style="display: none;"><td colspan="${columns.length}"></td></tr>`;
     } else if (data.length === 0) {
-      html += `<tr class="tablix-empty-row"><td colspan="${columns.length}" class="tablix-empty-cell">No data available</td></tr>`;
+      html += `<tr class="tablix-empty-row"><td colspan="${columns.length}" class="tablix-empty-cell">${this.table.t('general.noData')}</td></tr>`;
     } else {
       data.forEach((row, index) => {
         // Calculate global row index for pagination
@@ -347,23 +347,27 @@ class Renderer {
     // Page info
     html += `<div class="tablix-pagination-info">`;
     if (info.totalRows === 0) {
-      html += 'No records found';
+      html += this.table.t('pagination.noRecords');
     } else {
-      html += `Showing ${info.startRow}-${info.endRow} of ${info.totalRows} records`;
+      html += this.table.t('pagination.showingRecords', {
+        startRow: info.startRow,
+        endRow: info.endRow,
+        totalRows: info.totalRows
+      });
     }
     html += '</div>';
 
     // Page size selector
     if (paginationManager.options.showPageSizes && paginationManager.options.pageSizeOptions.length > 1) {
       html += '<div class="tablix-pagination-page-size">';
-      html += 'Show ';
+      html += this.table.t('general.show') + ' ';
       html += '<select class="tablix-page-size-select">';
       paginationManager.options.pageSizeOptions.forEach(size => {
         const selected = size === info.pageSize ? ' selected' : '';
         html += `<option value="${size}"${selected}>${size}</option>`;
       });
       html += '</select>';
-      html += ' records per page';
+      html += ' ' + this.table.t('general.records') + ' ' + this.table.t('general.perPage');
       html += '</div>';
     }
 
@@ -374,13 +378,13 @@ class Renderer {
       // First page
       if (paginationManager.options.showFirstLast) {
         const disabled = info.currentPage === 1 ? ' disabled' : '';
-        html += `<button class="tablix-pagination-btn tablix-pagination-first" data-page="1"${disabled}>First</button>`;
+        html += `<button class="tablix-pagination-btn tablix-pagination-first" data-page="1"${disabled}>${this.table.t('pagination.first')}</button>`;
       }
 
       // Previous page
       if (paginationManager.options.showPrevNext) {
         const disabled = !info.hasPrevPage ? ' disabled' : '';
-        html += `<button class="tablix-pagination-btn tablix-pagination-prev" data-page="${info.currentPage - 1}"${disabled}>Previous</button>`;
+        html += `<button class="tablix-pagination-btn tablix-pagination-prev" data-page="${info.currentPage - 1}"${disabled}>${this.table.t('pagination.previous')}</button>`;
       }
 
       // Page numbers
@@ -399,20 +403,20 @@ class Renderer {
       // Next page
       if (paginationManager.options.showPrevNext) {
         const disabled = !info.hasNextPage ? ' disabled' : '';
-        html += `<button class="tablix-pagination-btn tablix-pagination-next" data-page="${info.currentPage + 1}"${disabled}>Next</button>`;
+        html += `<button class="tablix-pagination-btn tablix-pagination-next" data-page="${info.currentPage + 1}"${disabled}>${this.table.t('pagination.next')}</button>`;
       }
 
       // Last page
       if (paginationManager.options.showFirstLast) {
         const disabled = info.currentPage === info.totalPages ? ' disabled' : '';
-        html += `<button class="tablix-pagination-btn tablix-pagination-last" data-page="${info.totalPages}"${disabled}>Last</button>`;
+        html += `<button class="tablix-pagination-btn tablix-pagination-last" data-page="${info.totalPages}"${disabled}>${this.table.t('pagination.last')}</button>`;
       }
       html += '</div>';
     }
 
     // Loading indicator
     if (info.isLoading) {
-      html += '<div class="tablix-pagination-loading">Loading...</div>';
+      html += `<div class="tablix-pagination-loading">${this.table.t('general.loading')}</div>`;
     }
     html += '</div>';
     paginationContainer.innerHTML = html;
@@ -467,14 +471,14 @@ class Renderer {
    * Render loading state
    */
   renderLoading() {
-    this.table.container.innerHTML = '<div class="tablix-loading">Loading...</div>';
+    this.table.container.innerHTML = `<div class="tablix-loading">${this.table.t('general.loading')}</div>`;
   }
 
   /**
    * Render error state
    */
   renderError(error) {
-    this.table.container.innerHTML = `<div class="tablix-error">Error: ${this.escapeHtml(error.message || error)}</div>`;
+    this.table.container.innerHTML = `<div class="tablix-error">${this.table.t('general.error')}: ${this.escapeHtml(error.message || error)}</div>`;
   }
 
   /**
@@ -484,7 +488,7 @@ class Renderer {
     const controlsOptions = this.table.options.controls;
     const searchOptions = this.table.options.search || {
       enabled: false,
-      placeholder: 'Search...'
+      placeholder: null
     };
     let html = `<div class="tablix-controls tablix-controls-${position}">`;
 
@@ -494,10 +498,10 @@ class Renderer {
     // Pagination controls
     if (controlsOptions.pagination && this.table.paginationManager) {
       html += '<div class="tablix-control-group tablix-pagination-controls">';
-      html += '<button type="button" class="tablix-btn tablix-control-btn" data-action="firstPage">First</button>';
-      html += '<button type="button" class="tablix-btn tablix-control-btn" data-action="prevPage">Previous</button>';
-      html += '<button type="button" class="tablix-btn tablix-control-btn" data-action="nextPage">Next</button>';
-      html += '<button type="button" class="tablix-btn tablix-control-btn" data-action="lastPage">Last</button>';
+      html += `<button type="button" class="tablix-btn tablix-control-btn" data-action="firstPage">${this.table.t('pagination.first')}</button>`;
+      html += `<button type="button" class="tablix-btn tablix-control-btn" data-action="prevPage">${this.table.t('pagination.previous')}</button>`;
+      html += `<button type="button" class="tablix-btn tablix-control-btn" data-action="nextPage">${this.table.t('pagination.next')}</button>`;
+      html += `<button type="button" class="tablix-btn tablix-control-btn" data-action="lastPage">${this.table.t('pagination.last')}</button>`;
       html += '</div>';
     }
 
@@ -506,21 +510,21 @@ class Renderer {
       const pageSizeOptions = this.table.paginationManager.options.pageSizeOptions;
       const currentPageSize = this.table.paginationManager.pageSize;
       html += '<div class="tablix-control-group tablix-page-size-group">';
-      html += '<label for="tablix-page-size-select">Show:</label>';
+      html += `<label for="tablix-page-size-select">${this.table.t('general.show')}:</label>`;
       html += '<select class="tablix-page-size-select" id="tablix-page-size-select">';
       pageSizeOptions.forEach(size => {
         const selected = size === currentPageSize ? ' selected' : '';
         html += `<option value="${size}"${selected}>${size}</option>`;
       });
       html += '</select>';
-      html += '<span>entries</span>';
+      html += `<span>${this.table.t('general.entries')}</span>`;
       html += '</div>';
     }
 
     // Refresh control
     if (controlsOptions.refresh) {
       html += '<div class="tablix-control-group tablix-refresh-group">';
-      html += '<button type="button" class="tablix-btn tablix-control-btn" data-action="refresh" title="Refresh data">⟳</button>';
+      html += `<button type="button" class="tablix-btn tablix-control-btn" data-action="refresh" title="${this.table.t('controls.refresh')}">⟳</button>`;
       html += '</div>';
     }
     html += '</div>'; // Close left controls
@@ -530,15 +534,15 @@ class Renderer {
 
     // Search control
     if (controlsOptions.search && searchOptions.enabled) {
-      // Ensure placeholder always has a default value to prevent "undefined" display
-      const placeholderText = searchOptions.placeholder || 'Search...';
+      // Use localized placeholder or provided one
+      const placeholderText = searchOptions.placeholder || this.table.t('search.placeholder');
       html += '<div class="tablix-control-group tablix-search-group">';
       html += `<input type="text" 
                       class="tablix-search-input" 
                       id="tablix-search-input" 
                       name="table-search"
                       placeholder="${placeholderText}" />`;
-      html += '<button type="button" class="tablix-btn tablix-search-clear" title="Clear search" style="display: none;">✕</button>';
+      html += `<button type="button" class="tablix-btn tablix-search-clear" title="${this.table.t('search.clear')}" style="display: none;">✕</button>`;
       html += '</div>';
     }
     html += '</div>'; // Close right controls
@@ -763,14 +767,14 @@ class Renderer {
         arrow.classList.remove('tablix-sort-none', 'tablix-sort-asc', 'tablix-sort-desc');
         arrow.classList.add(`tablix-sort-${currentSort.direction}`);
         arrow.textContent = currentSort.direction === 'asc' ? '↑' : '↓';
-        arrow.setAttribute('aria-label', `Sorted ${currentSort.direction === 'asc' ? 'ascending' : 'descending'}`);
+        arrow.setAttribute('aria-label', `${this.table.t('sort.sorted')}${currentSort.direction === 'asc' ? this.table.t('sort.sortedAscending') : this.table.t('sort.sortedDescending')}`);
         arrow.removeAttribute('data-sort-order');
       } else {
         // Column is not sorted
         arrow.classList.remove('tablix-sort-asc', 'tablix-sort-desc');
         arrow.classList.add('tablix-sort-none');
         arrow.textContent = '↕';
-        arrow.setAttribute('aria-label', 'Not sorted');
+        arrow.setAttribute('aria-label', this.table.t('sort.notSorted'));
         arrow.removeAttribute('data-sort-order');
       }
     });
@@ -2226,17 +2230,25 @@ class FilterUI {
     headers.forEach(header => {
       const columnName = header.dataset.column;
       if (!columnName) return;
-
-      // Skip if filter icon already exists
-      if (header.querySelector('.tablix-filter-indicator')) return;
       const thContent = header.querySelector('.tablix-th-content');
       if (!thContent) return;
 
-      // Create filter indicator
-      const filterIndicator = document.createElement('span');
+      // Check if filter icon already exists
+      let filterIndicator = header.querySelector('.tablix-filter-indicator');
+      if (filterIndicator) {
+        // Update existing filter indicator with new translations
+        const filterIcon = filterIndicator.querySelector('.tablix-filter-icon');
+        if (filterIcon) {
+          filterIcon.title = this.table.t('filter.filterColumn');
+        }
+        return;
+      }
+
+      // Create new filter indicator
+      filterIndicator = document.createElement('span');
       filterIndicator.className = 'tablix-filter-indicator';
       filterIndicator.innerHTML = `
-        <span class="tablix-filter-icon" title="Filter column">⚪</span>
+        <span class="tablix-filter-icon" title="${this.table.t('filter.filterColumn')}">⚪</span>
       `;
 
       // Add click handler
@@ -2310,15 +2322,15 @@ class FilterUI {
     const currentFilter = this.filterManager.getColumnFilter(columnName);
     return `
       <div class="tablix-filter-dropdown-header">
-        <h4>Filter: ${columnName}</h4>
+        <h4>${this.table.t('filter.filter')}: ${columnName}</h4>
         <button class="tablix-filter-close" type="button">×</button>
       </div>
       
       <div class="tablix-filter-tabs">
         <button class="tablix-filter-tab ${!currentFilter || currentFilter.type === 'value' ? 'active' : ''}" 
-                data-tab="value">Filter by Value</button>
+                data-tab="value">${this.table.t('filter.filterByValue')}</button>
         <button class="tablix-filter-tab ${currentFilter && currentFilter.type === 'condition' ? 'active' : ''}" 
-                data-tab="condition">Filter by Condition</button>
+                data-tab="condition">${this.table.t('filter.filterByCondition')}</button>
       </div>
       
       <div class="tablix-filter-content">
@@ -2332,9 +2344,9 @@ class FilterUI {
       </div>
       
       <div class="tablix-filter-actions">
-        <button class="tablix-filter-apply" type="button">Apply</button>
-        <button class="tablix-filter-clear" type="button">Clear</button>
-        <button class="tablix-filter-cancel" type="button">Cancel</button>
+        <button class="tablix-filter-apply" type="button">${this.table.t('filter.apply')}</button>
+        <button class="tablix-filter-clear" type="button">${this.table.t('filter.clear')}</button>
+        <button class="tablix-filter-cancel" type="button">${this.table.t('filter.cancel')}</button>
       </div>
     `;
   }
@@ -2349,14 +2361,14 @@ class FilterUI {
     const uniqueValues = this.filterManager.getColumnUniqueValues(columnName);
     const selectedValues = currentFilter && currentFilter.type === 'value' ? currentFilter.config.values : [];
     if (uniqueValues.length === 0) {
-      return '<p class="tablix-filter-empty">No values available</p>';
+      return `<p class="tablix-filter-empty">${this.table.t('filter.noValuesAvailable')}</p>`;
     }
     let html = `
       <div class="tablix-filter-search">
         <input type="text" 
                id="tablix-filter-search-${columnName}" 
                name="filter-search-${columnName}"
-               placeholder="Search values..." 
+               placeholder="${this.table.t('filter.searchValues')}" 
                class="tablix-filter-search-input">
       </div>
       <div class="tablix-filter-select-all">
@@ -2364,7 +2376,7 @@ class FilterUI {
           <input type="checkbox" 
                  id="tablix-filter-select-all-${columnName}" 
                  name="filter-select-all-${columnName}"
-                 class="tablix-filter-select-all-checkbox"> Select All
+                 class="tablix-filter-select-all-checkbox"> ${this.table.t('filter.selectAll')}
         </label>
       </div>
       <div class="tablix-filter-values">
@@ -2404,7 +2416,7 @@ class FilterUI {
     });
     html += `
       </div>
-      <button class="tablix-filter-add-condition" type="button">+ Add Condition</button>
+      <button class="tablix-filter-add-condition" type="button">+ ${this.table.t('filter.addCondition')}</button>
     `;
     return html;
   }
@@ -2434,13 +2446,13 @@ class FilterUI {
                id="tablix-filter-value-${index}" 
                name="filter-value-${index}"
                class="tablix-filter-value" 
-               placeholder="Value" 
+               placeholder="${this.table.t('filter.value')}" 
                value="${this.escapeHtml(condition.value || '')}"
                ${needsValue ? '' : 'disabled'}>
         <button class="tablix-filter-remove-condition" 
                 type="button" 
                 data-index="${index}"
-                title="Remove condition">×</button>
+                title="${this.table.t('filter.removeCondition')}">×</button>
       </div>
     `;
     return html;
@@ -2760,22 +2772,38 @@ class FilterUI {
   showDropdown(dropdown, trigger) {
     document.body.appendChild(dropdown);
 
-    // Position dropdown
+    // Make dropdown visible but off-screen to measure it
+    dropdown.style.position = 'absolute';
+    dropdown.style.top = '-9999px';
+    dropdown.style.left = '-9999px';
+    dropdown.style.display = 'block';
+    dropdown.style.visibility = 'hidden';
+
+    // Force reflow to ensure accurate measurements
+    dropdown.offsetHeight;
+
+    // Get accurate measurements
     const triggerRect = trigger.getBoundingClientRect();
     const dropdownRect = dropdown.getBoundingClientRect();
-    let left = triggerRect.left;
-    let top = triggerRect.bottom + 5;
+    let left = triggerRect.left + window.scrollX;
+    let top = triggerRect.bottom + window.scrollY + 5;
 
     // Adjust if dropdown goes off screen
-    if (left + dropdownRect.width > window.innerWidth) {
-      left = window.innerWidth - dropdownRect.width - 10;
+    if (left + dropdownRect.width > window.innerWidth + window.scrollX) {
+      left = window.innerWidth + window.scrollX - dropdownRect.width - 10;
     }
-    if (top + dropdownRect.height > window.innerHeight) {
-      top = triggerRect.top - dropdownRect.height - 5;
+    if (top + dropdownRect.height > window.innerHeight + window.scrollY) {
+      top = triggerRect.top + window.scrollY - dropdownRect.height - 5;
     }
-    dropdown.style.left = `${Math.max(10, left)}px`;
-    dropdown.style.top = `${Math.max(10, top)}px`;
-    dropdown.style.display = 'block';
+
+    // Ensure dropdown stays within viewport
+    left = Math.max(window.scrollX + 10, left);
+    top = Math.max(window.scrollY + 10, top);
+
+    // Apply final positioning and make visible
+    dropdown.style.left = `${left}px`;
+    dropdown.style.top = `${top}px`;
+    dropdown.style.visibility = 'visible';
   }
 
   /**
@@ -3185,6 +3213,9 @@ class SelectionManager {
       isDragging: false,
       dragThreshold: 3 // Minimum pixels to move before considering it a drag
     };
+
+    // Track event listeners for proper cleanup
+    this.eventListeners = [];
     this.init();
   }
   init() {
@@ -3232,7 +3263,8 @@ class SelectionManager {
    * @param {Object} event - Row click event data
    */
   handleRowClick(event) {
-    if (!this.options.enabled) {
+    // Safety check - ensure table and managers are still available
+    if (!this.table || !this.options.enabled) {
       return;
     }
 
@@ -3273,7 +3305,9 @@ class SelectionManager {
       isShiftClick: originalEvent && originalEvent.shiftKey,
       isDragSelection: false
     };
-    this.table.eventManager.trigger('beforeSelect', beforeSelectEvent);
+    if (this.table && this.table.eventManager) {
+      this.table.eventManager.trigger('beforeSelect', beforeSelectEvent);
+    }
     if (this.options.mode === 'single') {
       this.handleSingleSelection(rowId, rowData);
     } else if (this.options.mode === 'multi') {
@@ -3289,7 +3323,9 @@ class SelectionManager {
       selectedData: this.getSelectedData(),
       isDragSelection: false
     };
-    this.table.eventManager.trigger('afterSelect', afterSelectEvent);
+    if (this.table && this.table.eventManager) {
+      this.table.eventManager.trigger('afterSelect', afterSelectEvent);
+    }
   }
 
   /**
@@ -3396,7 +3432,7 @@ class SelectionManager {
 
     // Mouse down on table body
     tableElement.addEventListener('mousedown', e => {
-      if (!this.options.enabled || this.options.mode !== 'multi') return;
+      if (!this.table || !this.options.enabled || this.options.mode !== 'multi') return;
       const row = e.target.closest('.tablix-row');
       if (!row || row.classList.contains('tablix-empty-row')) return;
       const globalRowIndex = parseInt(row.dataset.rowIndex, 10);
@@ -3424,7 +3460,7 @@ class SelectionManager {
 
     // Mouse move - handle drag selection
     tableElement.addEventListener('mousemove', e => {
-      if (!this.dragSelection.isActive) return;
+      if (!this.table || !this.dragSelection.isActive) return;
       const deltaX = Math.abs(e.clientX - startX);
       const deltaY = Math.abs(e.clientY - startY);
 
@@ -3440,16 +3476,14 @@ class SelectionManager {
 
     // Mouse up - complete drag selection
     tableElement.addEventListener('mouseup', e => {
-      if (this.dragSelection.isActive) {
-        this.completeDragSelection();
-      }
+      if (!this.table || !this.dragSelection.isActive) return;
+      this.completeDragSelection();
     });
 
     // Mouse leave - cancel drag selection
     tableElement.addEventListener('mouseleave', e => {
-      if (this.dragSelection.isActive) {
-        this.cancelDragSelection();
-      }
+      if (!this.table || !this.dragSelection.isActive) return;
+      this.cancelDragSelection();
     });
 
     // Prevent text selection during drag
@@ -3464,6 +3498,11 @@ class SelectionManager {
    * Start drag selection
    */
   startDragSelection() {
+    if (!this.table || !this.table.container) {
+      console.warn('SelectionManager: Cannot start drag selection - table not available');
+      return;
+    }
+
     // Add drag selection class to table for styling
     const tableWrapper = this.table.container.querySelector('.tablix-wrapper');
     if (tableWrapper) {
@@ -3538,6 +3577,10 @@ class SelectionManager {
    * Complete drag selection
    */
   completeDragSelection() {
+    if (!this.table || !this.table.container) {
+      console.warn('SelectionManager: Cannot complete drag selection - table not available');
+      return;
+    }
     const tableWrapper = this.table.container.querySelector('.tablix-wrapper');
     if (tableWrapper) {
       tableWrapper.classList.remove('tablix-drag-selecting');
@@ -3559,6 +3602,10 @@ class SelectionManager {
    * Cancel drag selection and restore original state
    */
   cancelDragSelection() {
+    if (!this.table || !this.table.container) {
+      console.warn('SelectionManager: Cannot cancel drag selection - table not available');
+      return;
+    }
     const tableWrapper = this.table.container.querySelector('.tablix-wrapper');
     if (tableWrapper) {
       tableWrapper.classList.remove('tablix-drag-selecting');
@@ -3617,6 +3664,11 @@ class SelectionManager {
    * @returns {Array} Current page data
    */
   getCurrentPageData() {
+    if (!this.table || !this.table.dataManager) {
+      console.warn('SelectionManager: Table or dataManager is not available');
+      return [];
+    }
+
     // If using virtual scrolling, return full dataset
     if (this.table.virtualScrollManager) {
       return this.table.dataManager.getData();
@@ -3633,6 +3685,10 @@ class SelectionManager {
    * @returns {Array} Full dataset
    */
   getFullData() {
+    if (!this.table || !this.table.dataManager) {
+      console.warn('SelectionManager: Table or dataManager is not available');
+      return [];
+    }
     return this.table.dataManager.getData();
   }
 
@@ -3640,7 +3696,7 @@ class SelectionManager {
    * Update UI to reflect current selection
    */
   updateUI() {
-    if (!this.options.enabled) {
+    if (!this.options.enabled || !this.table || !this.table.container) {
       return;
     }
     const tableElement = this.table.container.querySelector('.tablix-table');
@@ -3909,7 +3965,20 @@ class SelectionManager {
    */
   destroy() {
     this.clearSelection();
-    // Remove event listeners would go here if we tracked them
+
+    // Clear references to prevent memory leaks and null reference errors
+    this.table = null;
+    this.selectedRows.clear();
+    this.rowIdMap.clear();
+    this.lastSelectedRow = null;
+
+    // Reset drag selection state
+    this.dragSelection.isActive = false;
+    this.dragSelection.isDragging = false;
+    this.dragSelection.startRowIndex = null;
+    this.dragSelection.currentRowIndex = null;
+    this.dragSelection.startRowId = null;
+    this.dragSelection.originalSelection = null;
   }
 }
 
@@ -4720,6 +4789,853 @@ class VirtualScrollManager {
   }
 }
 
+/**
+ * TablixJS Localization Module
+ * Provides internationalization support for the table library
+ */
+
+class Localization {
+  constructor() {
+    this.currentLanguage = 'en';
+    this.translations = new Map();
+    this.fallbackLanguage = 'en';
+
+    // Initialize with English defaults
+    this.addTranslations('en', this.getDefaultEnglishTranslations());
+  }
+
+  /**
+   * Get default English translations (fallback language pack)
+   * @returns {Object} English translations object
+   */
+  getDefaultEnglishTranslations() {
+    return {
+      // General
+      'general.loading': 'Loading...',
+      'general.error': 'Error',
+      'general.noData': 'No data available',
+      'general.show': 'Show',
+      'general.entries': 'entries',
+      'general.of': 'of',
+      'general.to': 'to',
+      'general.records': 'records',
+      'general.perPage': 'per page',
+      'general.showing': 'Showing',
+      'general.total': 'Total',
+      'general.rows': 'rows',
+      // Search
+      'search.placeholder': 'Search...',
+      'search.clear': 'Clear search',
+      'search.noResults': 'No results found',
+      'search.resultsFound': 'results found',
+      // Pagination
+      'pagination.first': 'First',
+      'pagination.previous': 'Previous',
+      'pagination.next': 'Next',
+      'pagination.last': 'Last',
+      'pagination.page': 'Page',
+      'pagination.pageOf': 'Page {currentPage} of {totalPages}',
+      'pagination.showingRecords': 'Showing {startRow}-{endRow} of {totalRows} records',
+      'pagination.noRecords': 'No records found',
+      'pagination.pageSize': 'Records per page',
+      // Sorting
+      'sort.sortAscending': 'Sort ascending',
+      'sort.sortDescending': 'Sort descending',
+      'sort.sortedAscending': 'Sorted ascending',
+      'sort.sortedDescending': 'Sorted descending',
+      'sort.notSorted': 'Not sorted',
+      'sort.clearSort': 'Clear sorting',
+      // Selection
+      'selection.selectRow': 'Select row',
+      'selection.deselectRow': 'Deselect row',
+      'selection.selectAll': 'Select all',
+      'selection.deselectAll': 'Deselect all',
+      'selection.selectedCount': '{count} selected',
+      'selection.selectAllVisible': 'Select all visible rows',
+      'selection.clearSelection': 'Clear selection',
+      // Filtering
+      'filter.filter': 'Filter',
+      'filter.clearFilter': 'Clear filter',
+      'filter.clearAllFilters': 'Clear all filters',
+      'filter.applyFilter': 'Apply filter',
+      'filter.filterBy': 'Filter by',
+      'filter.filterColumn': 'Filter column',
+      'filter.filterByValue': 'Filter by Value',
+      'filter.filterByCondition': 'Filter by Condition',
+      'filter.searchValues': 'Search values...',
+      'filter.selectAll': 'Select All',
+      'filter.noValuesAvailable': 'No values available',
+      'filter.addCondition': 'Add Condition',
+      'filter.removeCondition': 'Remove condition',
+      'filter.value': 'Value',
+      'filter.apply': 'Apply',
+      'filter.clear': 'Clear',
+      'filter.cancel': 'Cancel',
+      'filter.contains': 'Contains',
+      'filter.startsWith': 'Starts with',
+      'filter.endsWith': 'Ends with',
+      'filter.equals': 'Equals',
+      'filter.notEquals': 'Not equals',
+      'filter.greaterThan': 'Greater than',
+      'filter.lessThan': 'Less than',
+      'filter.greaterThanOrEqual': 'Greater than or equal',
+      'filter.lessThanOrEqual': 'Less than or equal',
+      'filter.between': 'Between',
+      'filter.isEmpty': 'Is empty',
+      'filter.isNotEmpty': 'Is not empty',
+      'filter.selectValues': 'Select values',
+      'filter.noOptionsAvailable': 'No options available',
+      // Controls
+      'controls.refresh': 'Refresh data',
+      'controls.export': 'Export data',
+      'controls.settings': 'Settings',
+      'controls.columns': 'Columns',
+      'controls.showColumns': 'Show/Hide columns',
+      // Virtual Scrolling
+      'virtualScroll.loadingMoreRows': 'Loading more rows...',
+      'virtualScroll.scrollToTop': 'Scroll to top',
+      'virtualScroll.scrollToBottom': 'Scroll to bottom',
+      // Error Messages
+      'error.loadingData': 'Failed to load data',
+      'error.networkError': 'Network error occurred',
+      'error.invalidData': 'Invalid data format',
+      'error.serverError': 'Server error occurred',
+      'error.timeout': 'Request timed out',
+      'error.unknown': 'An unknown error occurred',
+      'error.retry': 'Retry',
+      // Data Types
+      'dataType.string': 'Text',
+      'dataType.number': 'Number',
+      'dataType.date': 'Date',
+      'dataType.boolean': 'Boolean',
+      'dataType.currency': 'Currency',
+      'dataType.percentage': 'Percentage',
+      // Accessibility
+      'accessibility.table': 'Data table',
+      'accessibility.sortableColumn': 'Sortable column',
+      'accessibility.selectableRow': 'Selectable row',
+      'accessibility.rowSelected': 'Row selected',
+      'accessibility.rowNotSelected': 'Row not selected',
+      'accessibility.pageNavigation': 'Page navigation',
+      'accessibility.searchInput': 'Search table data',
+      'accessibility.filterColumn': 'Filter column',
+      // Actions
+      'action.apply': 'Apply',
+      'action.cancel': 'Cancel',
+      'action.close': 'Close',
+      'action.save': 'Save',
+      'action.reset': 'Reset',
+      'action.ok': 'OK',
+      'action.yes': 'Yes',
+      'action.no': 'No',
+      // Time and Date
+      'date.today': 'Today',
+      'date.yesterday': 'Yesterday',
+      'date.thisWeek': 'This week',
+      'date.lastWeek': 'Last week',
+      'date.thisMonth': 'This month',
+      'date.lastMonth': 'Last month',
+      // Numbers and Formatting
+      'format.currency.symbol': '$',
+      'format.decimal.separator': '.',
+      'format.thousand.separator': ',',
+      'format.percentage.symbol': '%'
+    };
+  }
+
+  /**
+   * Set the current language
+   * @param {string} language - Language code (e.g., 'en', 'fr', 'es')
+   */
+  setLanguage(language) {
+    if (typeof language !== 'string' || language.trim() === '') {
+      console.warn('TablixJS Localization: Invalid language code provided. Using fallback.');
+      return;
+    }
+    this.currentLanguage = language.toLowerCase().trim();
+  }
+
+  /**
+   * Add translations for a specific language
+   * @param {string} language - Language code
+   * @param {Object} translations - Translations object
+   */
+  addTranslations(language, translations) {
+    if (typeof language !== 'string' || !translations || typeof translations !== 'object') {
+      console.warn('TablixJS Localization: Invalid parameters for addTranslations.');
+      return;
+    }
+    const languageCode = language.toLowerCase().trim();
+    if (!this.translations.has(languageCode)) {
+      this.translations.set(languageCode, {});
+    }
+
+    // Merge with existing translations for this language
+    const existing = this.translations.get(languageCode);
+    this.translations.set(languageCode, {
+      ...existing,
+      ...translations
+    });
+  }
+
+  /**
+   * Get localized string by key
+   * @param {string} key - Translation key (e.g., 'pagination.next')
+   * @param {Object} params - Parameters to substitute in the translation
+   * @returns {string} Localized string or fallback
+   */
+  t(key, params = {}) {
+    if (typeof key !== 'string') {
+      console.warn('TablixJS Localization: Translation key must be a string.');
+      return key;
+    }
+
+    // Try current language first
+    let translation = this.getTranslationFromLanguage(this.currentLanguage, key);
+
+    // Fallback to English if not found
+    if (translation === null && this.currentLanguage !== this.fallbackLanguage) {
+      translation = this.getTranslationFromLanguage(this.fallbackLanguage, key);
+    }
+
+    // Final fallback: return the key itself
+    if (translation === null) {
+      console.warn(`TablixJS Localization: Translation not found for key: ${key}`);
+      return key;
+    }
+
+    // Substitute parameters in the translation
+    return this.substituteParameters(translation, params);
+  }
+
+  /**
+   * Get translation from a specific language
+   * @private
+   * @param {string} language - Language code
+   * @param {string} key - Translation key
+   * @returns {string|null} Translation or null if not found
+   */
+  getTranslationFromLanguage(language, key) {
+    const languageTranslations = this.translations.get(language);
+    if (!languageTranslations) {
+      return null;
+    }
+
+    // First try direct key lookup (for flat structure like 'pagination.first')
+    if (key in languageTranslations && typeof languageTranslations[key] === 'string') {
+      return languageTranslations[key];
+    }
+
+    // Fallback to nested key lookup (for nested structure)
+    const keys = key.split('.');
+    let current = languageTranslations;
+    for (const k of keys) {
+      if (current && typeof current === 'object' && k in current) {
+        current = current[k];
+      } else {
+        return null;
+      }
+    }
+    return typeof current === 'string' ? current : null;
+  }
+
+  /**
+   * Substitute parameters in translation string
+   * @private
+   * @param {string} translation - Translation string with placeholders
+   * @param {Object} params - Parameters to substitute
+   * @returns {string} Translation with substituted parameters
+   */
+  substituteParameters(translation, params) {
+    if (!params || typeof params !== 'object') {
+      return translation;
+    }
+    let result = translation;
+
+    // Replace {paramName} with actual values
+    Object.keys(params).forEach(key => {
+      const regex = new RegExp(`\\{${key}\\}`, 'g');
+      result = result.replace(regex, params[key]);
+    });
+    return result;
+  }
+
+  /**
+   * Get current language code
+   * @returns {string} Current language code
+   */
+  getCurrentLanguage() {
+    return this.currentLanguage;
+  }
+
+  /**
+   * Get available languages
+   * @returns {Array<string>} Array of available language codes
+   */
+  getAvailableLanguages() {
+    return Array.from(this.translations.keys());
+  }
+
+  /**
+   * Check if a language is available
+   * @param {string} language - Language code to check
+   * @returns {boolean} True if language is available
+   */
+  hasLanguage(language) {
+    return this.translations.has(language.toLowerCase().trim());
+  }
+
+  /**
+   * Get all translations for current language
+   * @returns {Object} All translations for current language
+   */
+  getAllTranslations() {
+    return this.translations.get(this.currentLanguage) || {};
+  }
+
+  /**
+   * Remove translations for a specific language
+   * @param {string} language - Language code to remove
+   */
+  removeLanguage(language) {
+    const languageCode = language.toLowerCase().trim();
+    if (languageCode === this.fallbackLanguage) {
+      console.warn('TablixJS Localization: Cannot remove fallback language.');
+      return;
+    }
+    this.translations.delete(languageCode);
+
+    // If we removed the current language, switch to fallback
+    if (this.currentLanguage === languageCode) {
+      this.currentLanguage = this.fallbackLanguage;
+    }
+  }
+
+  /**
+   * Clear all translations except fallback
+   */
+  clearTranslations() {
+    const fallbackTranslations = this.translations.get(this.fallbackLanguage);
+    this.translations.clear();
+    this.translations.set(this.fallbackLanguage, fallbackTranslations);
+    this.currentLanguage = this.fallbackLanguage;
+  }
+
+  /**
+   * Format number based on current locale
+   * @param {number} number - Number to format
+   * @param {Object} options - Formatting options
+   * @returns {string} Formatted number
+   */
+  formatNumber(number, options = {}) {
+    const {
+      style = 'decimal',
+      currency = 'USD',
+      minimumFractionDigits,
+      maximumFractionDigits
+    } = options;
+    try {
+      const formatter = new Intl.NumberFormat(this.getLocaleCode(), {
+        style,
+        currency: style === 'currency' ? currency : undefined,
+        minimumFractionDigits,
+        maximumFractionDigits
+      });
+      return formatter.format(number);
+    } catch (error) {
+      // Fallback formatting if Intl is not available
+      return this.fallbackNumberFormat(number, options);
+    }
+  }
+
+  /**
+   * Format date based on current locale
+   * @param {Date|string|number} date - Date to format
+   * @param {Object} options - Formatting options
+   * @returns {string} Formatted date
+   */
+  formatDate(date, options = {}) {
+    const dateObj = date instanceof Date ? date : new Date(date);
+    if (isNaN(dateObj.getTime())) {
+      return date.toString();
+    }
+    try {
+      const formatter = new Intl.DateTimeFormat(this.getLocaleCode(), options);
+      return formatter.format(dateObj);
+    } catch (error) {
+      // Fallback to simple date formatting
+      return dateObj.toLocaleDateString();
+    }
+  }
+
+  /**
+   * Get locale code for Intl formatting
+   * @private
+   * @returns {string} Locale code
+   */
+  getLocaleCode() {
+    // Map language codes to locale codes
+    const languageToLocaleMap = {
+      'en': 'en-US',
+      'fr': 'fr-FR',
+      'es': 'es-ES',
+      'de': 'de-DE',
+      'it': 'it-IT',
+      'pt': 'pt-BR',
+      'ru': 'ru-RU',
+      'ja': 'ja-JP',
+      'ko': 'ko-KR',
+      'zh': 'zh-CN'
+    };
+    return languageToLocaleMap[this.currentLanguage] || this.currentLanguage || 'en-US';
+  }
+
+  /**
+   * Fallback number formatting when Intl is not available
+   * @private
+   * @param {number} number - Number to format
+   * @param {Object} options - Formatting options
+   * @returns {string} Formatted number
+   */
+  fallbackNumberFormat(number, options = {}) {
+    const {
+      style
+    } = options;
+    if (style === 'currency') {
+      const symbol = this.t('format.currency.symbol');
+      return `${symbol}${number.toFixed(2)}`;
+    } else if (style === 'percent') {
+      const symbol = this.t('format.percentage.symbol');
+      return `${(number * 100).toFixed(1)}${symbol}`;
+    }
+    return number.toString();
+  }
+
+  /**
+   * Pluralization helper
+   * @param {number} count - Count for pluralization
+   * @param {string} singularKey - Key for singular form
+   * @param {string} pluralKey - Key for plural form
+   * @param {Object} params - Additional parameters
+   * @returns {string} Pluralized string
+   */
+  pluralize(count, singularKey, pluralKey, params = {}) {
+    const key = count === 1 ? singularKey : pluralKey;
+    return this.t(key, {
+      count,
+      ...params
+    });
+  }
+}
+
+/**
+ * French (fr) translations for TablixJS
+ */
+const frenchTranslations = {
+  // General
+  'general.loading': 'Chargement...',
+  'general.error': 'Erreur',
+  'general.noData': 'Aucune donnée disponible',
+  'general.show': 'Afficher',
+  'general.entries': 'entrées',
+  'general.of': 'de',
+  'general.to': 'à',
+  'general.records': 'enregistrements',
+  'general.perPage': 'par page',
+  'general.showing': 'Affichage',
+  'general.total': 'Total',
+  'general.rows': 'lignes',
+  // Search
+  'search.placeholder': 'Rechercher...',
+  'search.clear': 'Effacer la recherche',
+  'search.noResults': 'Aucun résultat trouvé',
+  'search.resultsFound': 'résultats trouvés',
+  // Pagination
+  'pagination.first': 'Premier',
+  'pagination.previous': 'Précédent',
+  'pagination.next': 'Suivant',
+  'pagination.last': 'Dernier',
+  'pagination.page': 'Page',
+  'pagination.pageOf': 'Page {currentPage} sur {totalPages}',
+  'pagination.showingRecords': 'Affichage de {startRow} à {endRow} sur {totalRows} enregistrements',
+  'pagination.noRecords': 'Aucun enregistrement trouvé',
+  'pagination.pageSize': 'Enregistrements par page',
+  // Sorting
+  'sort.sortAscending': 'Trier croissant',
+  'sort.sortDescending': 'Trier décroissant',
+  'sort.sortedAscending': 'Trié croissant',
+  'sort.sortedDescending': 'Trié décroissant',
+  'sort.notSorted': 'Non trié',
+  'sort.clearSort': 'Effacer le tri',
+  // Selection
+  'selection.selectRow': 'Sélectionner la ligne',
+  'selection.deselectRow': 'Désélectionner la ligne',
+  'selection.selectAll': 'Tout sélectionner',
+  'selection.deselectAll': 'Tout désélectionner',
+  'selection.selectedCount': '{count} sélectionné(s)',
+  'selection.selectAllVisible': 'Sélectionner toutes les lignes visibles',
+  'selection.clearSelection': 'Effacer la sélection',
+  // Filtering
+  'filter.filter': 'Filtrer',
+  'filter.clearFilter': 'Effacer le filtre',
+  'filter.clearAllFilters': 'Effacer tous les filtres',
+  'filter.applyFilter': 'Appliquer le filtre',
+  'filter.filterBy': 'Filtrer par',
+  'filter.filterColumn': 'Filtrer la colonne',
+  'filter.filterByValue': 'Filtrer par valeur',
+  'filter.filterByCondition': 'Filtrer par condition',
+  'filter.searchValues': 'Rechercher des valeurs...',
+  'filter.selectAll': 'Tout sélectionner',
+  'filter.noValuesAvailable': 'Aucune valeur disponible',
+  'filter.addCondition': 'Ajouter une condition',
+  'filter.removeCondition': 'Supprimer la condition',
+  'filter.value': 'Valeur',
+  'filter.apply': 'Appliquer',
+  'filter.clear': 'Effacer',
+  'filter.cancel': 'Annuler',
+  'filter.contains': 'Contient',
+  'filter.startsWith': 'Commence par',
+  'filter.endsWith': 'Se termine par',
+  'filter.equals': 'Égal à',
+  'filter.notEquals': 'Différent de',
+  'filter.greaterThan': 'Supérieur à',
+  'filter.lessThan': 'Inférieur à',
+  'filter.greaterThanOrEqual': 'Supérieur ou égal à',
+  'filter.lessThanOrEqual': 'Inférieur ou égal à',
+  'filter.between': 'Entre',
+  'filter.isEmpty': 'Est vide',
+  'filter.isNotEmpty': 'N\'est pas vide',
+  'filter.selectValues': 'Sélectionner les valeurs',
+  'filter.noOptionsAvailable': 'Aucune option disponible',
+  // Controls
+  'controls.refresh': 'Actualiser les données',
+  'controls.export': 'Exporter les données',
+  'controls.settings': 'Paramètres',
+  'controls.columns': 'Colonnes',
+  'controls.showColumns': 'Afficher/Masquer les colonnes',
+  // Virtual Scrolling
+  'virtualScroll.loadingMoreRows': 'Chargement de plus de lignes...',
+  'virtualScroll.scrollToTop': 'Faire défiler vers le haut',
+  'virtualScroll.scrollToBottom': 'Faire défiler vers le bas',
+  // Error Messages
+  'error.loadingData': 'Échec du chargement des données',
+  'error.networkError': 'Erreur réseau',
+  'error.invalidData': 'Format de données invalide',
+  'error.serverError': 'Erreur serveur',
+  'error.timeout': 'Délai d\'attente dépassé',
+  'error.unknown': 'Une erreur inconnue s\'est produite',
+  'error.retry': 'Réessayer',
+  // Data Types
+  'dataType.string': 'Texte',
+  'dataType.number': 'Nombre',
+  'dataType.date': 'Date',
+  'dataType.boolean': 'Booléen',
+  'dataType.currency': 'Devise',
+  'dataType.percentage': 'Pourcentage',
+  // Accessibility
+  'accessibility.table': 'Tableau de données',
+  'accessibility.sortableColumn': 'Colonne triable',
+  'accessibility.selectableRow': 'Ligne sélectionnable',
+  'accessibility.rowSelected': 'Ligne sélectionnée',
+  'accessibility.rowNotSelected': 'Ligne non sélectionnée',
+  'accessibility.pageNavigation': 'Navigation des pages',
+  'accessibility.searchInput': 'Rechercher dans les données du tableau',
+  'accessibility.filterColumn': 'Filtrer la colonne',
+  // Actions
+  'action.apply': 'Appliquer',
+  'action.cancel': 'Annuler',
+  'action.close': 'Fermer',
+  'action.save': 'Enregistrer',
+  'action.reset': 'Réinitialiser',
+  'action.ok': 'OK',
+  'action.yes': 'Oui',
+  'action.no': 'Non',
+  // Time and Date
+  'date.today': 'Aujourd\'hui',
+  'date.yesterday': 'Hier',
+  'date.thisWeek': 'Cette semaine',
+  'date.lastWeek': 'La semaine dernière',
+  'date.thisMonth': 'Ce mois-ci',
+  'date.lastMonth': 'Le mois dernier',
+  // Numbers and Formatting
+  'format.currency.symbol': '€',
+  'format.decimal.separator': ',',
+  'format.thousand.separator': ' ',
+  'format.percentage.symbol': '%'
+};
+
+/**
+ * Spanish (es) translations for TablixJS
+ */
+const spanishTranslations = {
+  // General
+  'general.loading': 'Cargando...',
+  'general.error': 'Error',
+  'general.noData': 'No hay datos disponibles',
+  'general.show': 'Mostrar',
+  'general.entries': 'entradas',
+  'general.of': 'de',
+  'general.to': 'a',
+  'general.records': 'registros',
+  'general.perPage': 'por página',
+  'general.showing': 'Mostrando',
+  'general.total': 'Total',
+  'general.rows': 'filas',
+  // Search
+  'search.placeholder': 'Buscar...',
+  'search.clear': 'Limpiar búsqueda',
+  'search.noResults': 'No se encontraron resultados',
+  'search.resultsFound': 'resultados encontrados',
+  // Pagination
+  'pagination.first': 'Primero',
+  'pagination.previous': 'Anterior',
+  'pagination.next': 'Siguiente',
+  'pagination.last': 'Último',
+  'pagination.page': 'Página',
+  'pagination.pageOf': 'Página {currentPage} de {totalPages}',
+  'pagination.showingRecords': 'Mostrando {startRow} a {endRow} de {totalRows} registros',
+  'pagination.noRecords': 'No se encontraron registros',
+  'pagination.pageSize': 'Registros por página',
+  // Sorting
+  'sort.sortAscending': 'Ordenar ascendente',
+  'sort.sortDescending': 'Ordenar descendente',
+  'sort.sortedAscending': 'Ordenado ascendente',
+  'sort.sortedDescending': 'Ordenado descendente',
+  'sort.notSorted': 'Sin ordenar',
+  'sort.clearSort': 'Limpiar ordenación',
+  // Selection
+  'selection.selectRow': 'Seleccionar fila',
+  'selection.deselectRow': 'Deseleccionar fila',
+  'selection.selectAll': 'Seleccionar todo',
+  'selection.deselectAll': 'Deseleccionar todo',
+  'selection.selectedCount': '{count} seleccionado(s)',
+  'selection.selectAllVisible': 'Seleccionar todas las filas visibles',
+  'selection.clearSelection': 'Limpiar selección',
+  // Filtering
+  'filter.filter': 'Filtrar',
+  'filter.clearFilter': 'Limpiar filtro',
+  'filter.clearAllFilters': 'Limpiar todos los filtros',
+  'filter.applyFilter': 'Aplicar filtro',
+  'filter.filterBy': 'Filtrar por',
+  'filter.filterColumn': 'Filtrar columna',
+  'filter.filterByValue': 'Filtrar por valor',
+  'filter.filterByCondition': 'Filtrar por condición',
+  'filter.searchValues': 'Buscar valores...',
+  'filter.selectAll': 'Seleccionar todo',
+  'filter.noValuesAvailable': 'No hay valores disponibles',
+  'filter.addCondition': 'Agregar condición',
+  'filter.removeCondition': 'Eliminar condición',
+  'filter.value': 'Valor',
+  'filter.apply': 'Aplicar',
+  'filter.clear': 'Limpiar',
+  'filter.cancel': 'Cancelar',
+  'filter.contains': 'Contiene',
+  'filter.startsWith': 'Comienza con',
+  'filter.endsWith': 'Termina con',
+  'filter.equals': 'Igual a',
+  'filter.notEquals': 'No igual a',
+  'filter.greaterThan': 'Mayor que',
+  'filter.lessThan': 'Menor que',
+  'filter.greaterThanOrEqual': 'Mayor o igual a',
+  'filter.lessThanOrEqual': 'Menor o igual a',
+  'filter.between': 'Entre',
+  'filter.isEmpty': 'Está vacío',
+  'filter.isNotEmpty': 'No está vacío',
+  'filter.selectValues': 'Seleccionar valores',
+  'filter.noOptionsAvailable': 'No hay opciones disponibles',
+  // Controls
+  'controls.refresh': 'Actualizar datos',
+  'controls.export': 'Exportar datos',
+  'controls.settings': 'Configuración',
+  'controls.columns': 'Columnas',
+  'controls.showColumns': 'Mostrar/Ocultar columnas',
+  // Virtual Scrolling
+  'virtualScroll.loadingMoreRows': 'Cargando más filas...',
+  'virtualScroll.scrollToTop': 'Desplazar hacia arriba',
+  'virtualScroll.scrollToBottom': 'Desplazar hacia abajo',
+  // Error Messages
+  'error.loadingData': 'Error al cargar los datos',
+  'error.networkError': 'Error de red',
+  'error.invalidData': 'Formato de datos inválido',
+  'error.serverError': 'Error del servidor',
+  'error.timeout': 'Tiempo de espera agotado',
+  'error.unknown': 'Ocurrió un error desconocido',
+  'error.retry': 'Reintentar',
+  // Data Types
+  'dataType.string': 'Texto',
+  'dataType.number': 'Número',
+  'dataType.date': 'Fecha',
+  'dataType.boolean': 'Booleano',
+  'dataType.currency': 'Moneda',
+  'dataType.percentage': 'Porcentaje',
+  // Accessibility
+  'accessibility.table': 'Tabla de datos',
+  'accessibility.sortableColumn': 'Columna ordenable',
+  'accessibility.selectableRow': 'Fila seleccionable',
+  'accessibility.rowSelected': 'Fila seleccionada',
+  'accessibility.rowNotSelected': 'Fila no seleccionada',
+  'accessibility.pageNavigation': 'Navegación de páginas',
+  'accessibility.searchInput': 'Buscar en los datos de la tabla',
+  'accessibility.filterColumn': 'Filtrar columna',
+  // Actions
+  'action.apply': 'Aplicar',
+  'action.cancel': 'Cancelar',
+  'action.close': 'Cerrar',
+  'action.save': 'Guardar',
+  'action.reset': 'Restablecer',
+  'action.ok': 'OK',
+  'action.yes': 'Sí',
+  'action.no': 'No',
+  // Time and Date
+  'date.today': 'Hoy',
+  'date.yesterday': 'Ayer',
+  'date.thisWeek': 'Esta semana',
+  'date.lastWeek': 'La semana pasada',
+  'date.thisMonth': 'Este mes',
+  'date.lastMonth': 'El mes pasado',
+  // Numbers and Formatting
+  'format.currency.symbol': '€',
+  'format.decimal.separator': ',',
+  'format.thousand.separator': '.',
+  'format.percentage.symbol': '%'
+};
+
+/**
+ * Serbian (sr) translations for TablixJS
+ */
+const serbianTranslations = {
+  // General
+  'general.loading': 'Učitavanje...',
+  'general.error': 'Greška',
+  'general.noData': 'Nema dostupnih podataka',
+  'general.show': 'Prikaži',
+  'general.entries': 'unosa',
+  'general.of': 'od',
+  'general.to': 'do',
+  'general.records': 'zapisa',
+  'general.perPage': 'po stranici',
+  'general.showing': 'Prikazano',
+  'general.total': 'Ukupno',
+  'general.rows': 'redova',
+  // Search
+  'search.placeholder': 'Pretraga...',
+  'search.clear': 'Obriši pretragu',
+  'search.noResults': 'Nema rezultata',
+  'search.resultsFound': 'rezultata pronađeno',
+  // Pagination
+  'pagination.first': 'Prva',
+  'pagination.previous': 'Prethodna',
+  'pagination.next': 'Sledeća',
+  'pagination.last': 'Poslednja',
+  'pagination.page': 'Stranica',
+  'pagination.pageOf': 'Stranica {currentPage} od {totalPages}',
+  'pagination.showingRecords': 'Prikazano {startRow}-{endRow} od {totalRows} zapisa',
+  'pagination.noRecords': 'Nema zapisa',
+  'pagination.pageSize': 'Zapisa po stranici',
+  // Sorting
+  'sort.sortAscending': 'Sortiraj rastuće',
+  'sort.sortDescending': 'Sortiraj opadajuće',
+  'sort.sortedAscending': 'Sortirano rastuće',
+  'sort.sortedDescending': 'Sortirano opadajuće',
+  'sort.notSorted': 'Nije sortirano',
+  'sort.clearSort': 'Obriši sortiranje',
+  // Selection
+  'selection.selectRow': 'Izaberi red',
+  'selection.deselectRow': 'Poništi izbor reda',
+  'selection.selectAll': 'Izaberi sve',
+  'selection.deselectAll': 'Poništi sve',
+  'selection.selectedCount': '{count} izabrano',
+  'selection.selectAllVisible': 'Izaberi sve vidljive redove',
+  'selection.clearSelection': 'Obriši izbor',
+  // Filtering
+  'filter.filter': 'Filter',
+  'filter.clearFilter': 'Obriši filter',
+  'filter.clearAllFilters': 'Obriši sve filtere',
+  'filter.applyFilter': 'Primeni filter',
+  'filter.filterBy': 'Filtriraj po',
+  'filter.filterColumn': 'Filtriraj kolonu',
+  'filter.filterByValue': 'Filtriraj po vrednosti',
+  'filter.filterByCondition': 'Filtriraj po uslovu',
+  'filter.searchValues': 'Pretraži vrednosti...',
+  'filter.selectAll': 'Izaberi sve',
+  'filter.noValuesAvailable': 'Nema dostupnih vrednosti',
+  'filter.addCondition': 'Dodaj uslov',
+  'filter.removeCondition': 'Ukloni uslov',
+  'filter.value': 'Vrednost',
+  'filter.apply': 'Primeni',
+  'filter.clear': 'Obriši',
+  'filter.cancel': 'Otkaži',
+  'filter.contains': 'Sadrži',
+  'filter.startsWith': 'Počinje sa',
+  'filter.endsWith': 'Završava se sa',
+  'filter.equals': 'Jednako',
+  'filter.notEquals': 'Nije jednako',
+  'filter.greaterThan': 'Veće od',
+  'filter.lessThan': 'Manje od',
+  'filter.greaterThanOrEqual': 'Veće ili jednako',
+  'filter.lessThanOrEqual': 'Manje ili jednako',
+  'filter.between': 'Između',
+  'filter.isEmpty': 'Prazno',
+  'filter.isNotEmpty': 'Nije prazno',
+  'filter.selectValues': 'Izaberi vrednosti',
+  'filter.noOptionsAvailable': 'Nema dostupnih opcija',
+  // Controls
+  'controls.refresh': 'Osveži podatke',
+  'controls.export': 'Izvezi podatke',
+  'controls.settings': 'Podešavanja',
+  'controls.columns': 'Kolone',
+  'controls.showColumns': 'Prikaži/Sakrij kolone',
+  // Virtual Scrolling
+  'virtualScroll.loadingMoreRows': 'Učitavanje dodatnih redova...',
+  'virtualScroll.scrollToTop': 'Idi na vrh',
+  'virtualScroll.scrollToBottom': 'Idi na dno',
+  // Error Messages
+  'error.loadingData': 'Neuspešno učitavanje podataka',
+  'error.networkError': 'Došlo je do mrežne greške',
+  'error.invalidData': 'Neispravan format podataka',
+  'error.serverError': 'Došlo je do greške na serveru',
+  'error.timeout': 'Isteklo vreme zahteva',
+  'error.unknown': 'Došlo je do nepoznate greške',
+  'error.retry': 'Pokušaj ponovo',
+  // Data Types
+  'dataType.string': 'Tekst',
+  'dataType.number': 'Broj',
+  'dataType.date': 'Datum',
+  'dataType.boolean': 'Logička vrednost',
+  'dataType.currency': 'Valuta',
+  'dataType.percentage': 'Procenat',
+  // Accessibility
+  'accessibility.table': 'Tabela podataka',
+  'accessibility.sortableColumn': 'Kolona za sortiranje',
+  'accessibility.selectableRow': 'Red za izbor',
+  'accessibility.rowSelected': 'Red izabran',
+  'accessibility.rowNotSelected': 'Red nije izabran',
+  'accessibility.pageNavigation': 'Navigacija stranica',
+  'accessibility.searchInput': 'Pretraga podataka tabele',
+  'accessibility.filterColumn': 'Filtriraj kolonu',
+  // Actions
+  'action.apply': 'Primeni',
+  'action.cancel': 'Otkaži',
+  'action.close': 'Zatvori',
+  'action.save': 'Sačuvaj',
+  'action.reset': 'Resetuj',
+  'action.ok': 'U redu',
+  'action.yes': 'Da',
+  'action.no': 'Ne',
+  // Time and Date
+  'date.today': 'Danas',
+  'date.yesterday': 'Juče',
+  'date.thisWeek': 'Ove nedelje',
+  'date.lastWeek': 'Prošle nedelje',
+  'date.thisMonth': 'Ovog meseca',
+  'date.lastMonth': 'Prošlog meseca',
+  // Numbers and Formatting
+  'format.currency.symbol': 'RSD',
+  'format.decimal.separator': ',',
+  'format.thousand.separator': '.',
+  'format.percentage.symbol': '%'
+};
+
 class Table {
   constructor(container, options = {}) {
     this.container = typeof container === 'string' ? document.querySelector(container) : container;
@@ -4771,7 +5687,8 @@ class Table {
       },
       search: {
         enabled: true,
-        placeholder: 'Search...',
+        placeholder: null,
+        // Will use localized string if not provided
         searchDelay: 300,
         // Debounce delay in milliseconds
         minLength: 1,
@@ -4795,8 +5712,31 @@ class Table {
         // Auto-detected if null
         containerHeight: 400 // Default container height in pixels
       },
+      // Localization options
+      language: 'en',
+      translations: {},
       ...options
     };
+
+    // Initialize localization first (before other managers that might use it)
+    this.localization = new Localization();
+
+    // Auto-load common language packs for developer convenience
+    this.localization.addTranslations('fr', frenchTranslations);
+    this.localization.addTranslations('es', spanishTranslations);
+    this.localization.addTranslations('sr', serbianTranslations);
+
+    // Set language and translations if provided
+    if (this.options.language) {
+      this.localization.setLanguage(this.options.language);
+    }
+
+    // Add custom translations if provided (these will override auto-loaded ones)
+    if (this.options.translations) {
+      Object.keys(this.options.translations).forEach(lang => {
+        this.localization.addTranslations(lang, this.options.translations[lang]);
+      });
+    }
 
     // Initialize managers
     this.eventManager = new EventManager();
@@ -5474,6 +6414,141 @@ class Table {
       count: allData.length
     });
     return allData.length;
+  }
+
+  // ===== LOCALIZATION API =====
+
+  /**
+   * Get localized string by key
+   * @param {string} key - Translation key (e.g., 'pagination.next')
+   * @param {Object} params - Parameters to substitute in the translation
+   * @returns {string} Localized string
+   */
+  t(key, params = {}) {
+    return this.localization.t(key, params);
+  }
+
+  /**
+   * Set the current language
+   * @param {string} language - Language code (e.g., 'en', 'fr', 'es')
+   */
+  setLanguage(language) {
+    // Close any open filter dropdowns before changing language
+    if (this.filterUI && this.filterUI.activeDropdown) {
+      this.filterUI.closeAllDropdowns();
+    }
+    this.localization.setLanguage(language);
+    this.options.language = language;
+
+    // Ensure language translations are available
+    this.ensureLanguageTranslations(language);
+
+    // Re-render table to apply new translations
+    this.refreshTable();
+  }
+
+  /**
+   * Ensure language translations are loaded
+   * @private
+   * @param {string} language - Language code
+   */
+  ensureLanguageTranslations(language) {
+    // If translations are already available, no need to reload
+    if (this.localization.hasLanguage(language)) {
+      return;
+    }
+
+    // Auto-load translations for common languages
+    const languageLoaders = {
+      'fr': () => frenchTranslations,
+      'es': () => spanishTranslations,
+      'sr': () => serbianTranslations
+    };
+    if (languageLoaders[language]) {
+      try {
+        const translations = languageLoaders[language]();
+        this.localization.addTranslations(language, translations);
+        console.log(`TablixJS: Auto-loaded ${language} translations`);
+      } catch (error) {
+        console.warn(`TablixJS: Failed to auto-load ${language} translations:`, error);
+      }
+    }
+  }
+
+  /**
+   * Add translations for a specific language
+   * @param {string} language - Language code
+   * @param {Object} translations - Translations object
+   */
+  addTranslations(language, translations) {
+    this.localization.addTranslations(language, translations);
+    // If we just added translations for the current language, re-render
+    if (language === this.localization.getCurrentLanguage()) {
+      this.refreshTable();
+    }
+  }
+
+  /**
+   * Add a complete language pack (convenience method for developers)
+   * This method helps developers add a new language with all required translations
+   * @param {string} language - Language code (e.g., 'de', 'it', 'pt')
+   * @param {Object} translations - Complete translations object
+   * @param {boolean} setAsCurrent - Whether to immediately set this as the current language
+   */
+  addLanguagePack(language, translations, setAsCurrent = false) {
+    // Add the translations
+    this.addTranslations(language, translations);
+
+    // Optionally set as current language
+    if (setAsCurrent) {
+      this.setLanguage(language);
+    }
+    console.log(`TablixJS: Language pack '${language}' added successfully`);
+  }
+
+  /**
+   * Get current language
+   * @returns {string} Current language code
+   */
+  getCurrentLanguage() {
+    return this.localization.getCurrentLanguage();
+  }
+
+  /**
+   * Get available languages
+   * @returns {Array<string>} Array of available language codes
+   */
+  getAvailableLanguages() {
+    return this.localization.getAvailableLanguages();
+  }
+
+  /**
+   * Check if a language is available
+   * @param {string} language - Language code to check
+   * @returns {boolean} True if language is available
+   */
+  hasLanguage(language) {
+    return this.localization.hasLanguage(language);
+  }
+
+  /**
+   * Format number using current locale
+   * @param {number} number - Number to format
+   * @param {Object} options - Formatting options
+   * @returns {string} Formatted number
+   */
+  formatNumber(number, options = {}) {
+    return this.localization.formatNumber(number, options);
+  }
+
+  /**
+   * Format date using current locale
+   * @param {Date|string|number} date - Date to format
+   * @param {Object} options - Formatting options
+   * @returns {string} Formatted date
+   */
+  formatDate(date, options = {}) {
+    return this.localization.formatDate(date, options);
   }
 
   /**
