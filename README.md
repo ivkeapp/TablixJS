@@ -82,15 +82,89 @@ TablixJS is a modern, lightweight, and dependency-free JavaScript library for bu
 
 ### **Installation**
 
+#### **Option 1: Install via npm (Recommended)**
+
+```bash
+npm install tablixjs
+```
+
+#### **Option 2: Direct Download**
+
 ```bash
 # Clone the repository
 git clone https://github.com/ivkeapp/TablixJS.git
 
 # Or download and include the files directly
-# No build process required - just ES6 modules!
 ```
 
-### **Basic Setup**
+### **Basic Usage**
+
+#### **Using npm Package in Node.js/Browser**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="./node_modules/tablixjs/dist/tablixjs.css">
+</head>
+<body>
+  <div id="my-table"></div>
+  
+  <!-- UMD Build for Browser -->
+  <script src="./node_modules/tablixjs/dist/tablixjs.umd.min.js"></script>
+  <script>
+    const table = new TablixJS.Table('#my-table', {
+      data: [
+        { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin' },
+        { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User' },
+        { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'Editor' }
+      ],
+      columns: [
+        { name: 'id', title: 'ID', width: '60px' },
+        { name: 'name', title: 'Full Name' },
+        { name: 'email', title: 'Email Address' },
+        { 
+          name: 'role', 
+          title: 'User Role',
+          renderer: (value) => `<span class="role-badge role-${value.toLowerCase()}">${value}</span>`
+        }
+      ]
+    });
+  </script>
+</body>
+</html>
+```
+
+#### **Using ES Modules**
+
+```javascript
+// For modern bundlers (Webpack, Vite, etc.)
+import TablixJS from 'tablixjs';
+
+const table = new TablixJS('#my-table', {
+  data: [
+    { id: 1, name: 'John Doe', email: 'john@example.com' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com' }
+  ],
+  columns: [
+    { name: 'id', title: 'ID' },
+    { name: 'name', title: 'Full Name' },
+    { name: 'email', title: 'Email' }
+  ]
+});
+```
+
+#### **Using CommonJS (Node.js)**
+
+```javascript
+const { Table } = require('tablixjs');
+
+// Note: TablixJS requires a DOM environment
+// Use with jsdom or similar for server-side rendering
+```
+
+#### **Direct Source Usage (Development)**
 
 ```html
 <!DOCTYPE html>
@@ -125,6 +199,17 @@ git clone https://github.com/ivkeapp/TablixJS.git
 </body>
 </html>
 ```
+
+### **Available Builds**
+
+TablixJS provides multiple build formats:
+
+- **`dist/tablixjs.umd.min.js`** - Minified UMD build for browsers (global `TablixJS`)
+- **`dist/tablixjs.esm.js`** - ES Module build for modern bundlers
+- **`dist/tablixjs.cjs.js`** - CommonJS build for Node.js
+- **`dist/tablixjs.css`** - Complete CSS with all styles
+- **`dist/tablixjs-theme-dark.css`** - Dark theme
+- **`dist/tablixjs-theme-default.css`** - Default theme
 
 ### **Advanced Configuration**
 
