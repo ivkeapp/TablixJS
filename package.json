@@ -30,8 +30,8 @@
     "build:js": "rollup -c rollup.config.js",
     "build:css": "node build-css.js",
     "build:types": "npm run copy:types",
-    "copy:types": "powershell -Command \"Copy-Item src/index.d.ts dist/index.d.ts\"",
-    "clean": "powershell -Command \"Remove-Item -Path dist -Recurse -Force -ErrorAction SilentlyContinue\"",
+    "copy:types": "node -e \"require('fs').copyFileSync('src/index.d.ts', 'dist/index.d.ts')\"",
+    "clean": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true})\"",
     "prepublishOnly": "npm run build",
     "test": "echo \"Tests not implemented yet\" && exit 0"
   },
