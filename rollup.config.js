@@ -157,5 +157,109 @@ export default [
  * TablixJS v${packageJson.version} | ${packageJson.license} License
  */`
     }
+  },
+
+  // jQuery wrapper build (unminified)
+  {
+    input: 'src/jquery/index.js',
+    external: ['jquery'],
+    plugins: commonPlugins,
+    output: {
+      file: 'dist/tablix.jquery.js',
+      format: 'umd',
+      name: 'TablixJS',
+      exports: 'named',
+      sourcemap: true,
+      globals: {
+        'jquery': '$'
+      },
+      banner: `/**
+ * TablixJS with jQuery Wrapper v${packageJson.version}
+ * ${packageJson.description}
+ * (c) ${new Date().getFullYear()} ${packageJson.author}
+ * Released under the ${packageJson.license} License.
+ */`
+    }
+  },
+
+  // jQuery wrapper build (minified)
+  {
+    input: 'src/jquery/index.js',
+    external: ['jquery'],
+    plugins: [
+      ...commonPlugins,
+      terser({
+        compress: {
+          pure_getters: true,
+          unsafe: true,
+          unsafe_comps: true
+        }
+      })
+    ],
+    output: {
+      file: 'dist/tablix.jquery.min.js',
+      format: 'umd',
+      name: 'TablixJS',
+      exports: 'named',
+      sourcemap: true,
+      globals: {
+        'jquery': '$'
+      },
+      banner: `/**
+ * TablixJS with jQuery Wrapper v${packageJson.version} | ${packageJson.license} License
+ */`
+    }
+  },
+
+  // jQuery standalone plugin (unminified) - just the plugin
+  {
+    input: 'src/jquery/plugin-standalone.js',
+    external: ['jquery'],
+    plugins: commonPlugins,
+    output: {
+      file: 'dist/tablix-jquery-plugin.js',
+      format: 'umd',
+      name: 'TablixJQueryPlugin',
+      exports: 'named',
+      sourcemap: true,
+      globals: {
+        'jquery': '$'
+      },
+      banner: `/**
+ * TablixJS jQuery Plugin (Standalone) v${packageJson.version}
+ * Requires TablixJS and jQuery to be loaded separately
+ * (c) ${new Date().getFullYear()} ${packageJson.author}
+ * Released under the ${packageJson.license} License.
+ */`
+    }
+  },
+
+  // jQuery standalone plugin (minified)
+  {
+    input: 'src/jquery/plugin-standalone.js',
+    external: ['jquery'],
+    plugins: [
+      ...commonPlugins,
+      terser({
+        compress: {
+          pure_getters: true,
+          unsafe: true,
+          unsafe_comps: true
+        }
+      })
+    ],
+    output: {
+      file: 'dist/tablix-jquery-plugin.min.js',
+      format: 'umd',
+      name: 'TablixJQueryPlugin',
+      exports: 'named',
+      sourcemap: true,
+      globals: {
+        'jquery': '$'
+      },
+      banner: `/**
+ * TablixJS jQuery Plugin (Standalone) v${packageJson.version} | ${packageJson.license} License
+ */`
+    }
   }
 ];
