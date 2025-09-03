@@ -1107,6 +1107,272 @@ table.emit(event, data)           // Emit custom event
 - **Virtual Scrolling**: Renders only visible rows + buffer
 - **Selection State**: Minimal memory footprint using row IDs
 
+---
+
+## Troubleshooting
+
+### **Installation & Setup Issues**
+
+#### **"TablixJS is not defined" (Browser)**
+**Problem**: Global `TablixJS` object is not available when using UMD build.
+```bash
+ReferenceError: TablixJS is not defined
+```
+**Solution**: 
+- Ensure correct script tag order and file paths
+- Add charset declaration to prevent encoding issues
+```html
+<meta charset="UTF-8">
+<script src="./node_modules/tablixjs/dist/tablixjs.umd.min.js"></script>
+<script>
+  const table = new TablixJS.Table('#container', options);
+</script>
+```
+
+#### **"exports is not defined" (Node.js)**
+**Problem**: CommonJS/ESM module conflicts in Node.js.
+```bash
+ReferenceError: exports is not defined
+```
+**Solution**:
+- Use ES modules with `import` for `"type": "module"` packages
+- Use CommonJS with `require()` for standard packages
+```javascript
+// ESM (when "type": "module" in package.json)
+import TablixJS from 'tablixjs';
+
+// CommonJS (standard Node.js)
+const { Table } = require('tablixjs');
+```
+
+#### **"document is not defined" (Node.js)**
+**Problem**: TablixJS requires DOM environment, not available in Node.js.
+```bash
+ReferenceError: document is not defined
+```
+**Solution**: TablixJS is browser-focused. For Node.js testing:
+```bash
+npm install jsdom
+```
+```javascript
+import { JSDOM } from 'jsdom';
+const dom = new JSDOM('<!DOCTYPE html><div id="table"></div>');
+global.document = dom.window.document;
+global.window = dom.window;
+```
+
+#### **npm Package-Lock Issues**
+**Problem**: CI/CD failing with `npm ci` requiring package-lock.json.
+```bash
+npm error The `npm ci` command can only install with an existing package-lock.json
+```
+**Solution**:
+- Remove `package-lock.json` from `.gitignore`
+- Commit `package-lock.json` to repository
+- Regenerate if needed: `rm package-lock.json && npm install`
+
+### **Build & Development Issues**
+
+#### **Cross-Platform Build Failures**
+**Problem**: PowerShell commands failing in Linux CI environments.
+```bash
+sh: 1: powershell: not found
+```
+**Solution**: Use cross-platform Node.js commands:
+```json
+{
+  "scripts": {
+    "copy:types": "node -e "require('fs').copyFileSync('src/index.d.ts', 'dist/index.d.ts')"",
+    "clean": "node -e "require('fs').rmSync('dist', {recursive: true, force: true})""
+  }
+}
+```
+
+#### **GitHub Actions Deprecated Warnings**
+**Problem**: Using outdated action versions.
+```bash
+Error: This request has been automatically failed because it uses a deprecated version of `actions/upload-artifact: v3`
+```
+**Solution**: Update to latest versions:
+```yaml
+- uses: actions/upload-artifact@v4  # not v3
+- uses: actions/checkout@v4         # not v3
+```
+
+### **Runtime Issues**
+
+#### **Character Encoding Problems**
+**Problem**: Unicode characters displaying as garbled text (âŸ³ instead of ⟳).
+**Solution**: Add proper charset declaration:
+```html
+<meta charset="UTF-8">
+```
+
+#### **Container Element Issues**
+**Problem**: "querySelector is not a function" errors.
+```bash
+TypeError: this.table.container.querySelector is not a function
+```
+**Solution**: Ensure container parameter is correct:
+```javascript
+// Correct API
+new TablixJS.Table('#container', options);  // selector string
+new TablixJS.Table(document.getElementById('container'), options);  // DOM element
+
+// Incorrect
+new TablixJS.Table({ container: '#container', ...options });  // wrong structure
+```
+
+#### **Column Configuration Errors**
+**Problem**: "Column must have a 'name' property" error.
+```bash
+Error: TablixJS: Column must have a "name" property
+```
+**Solution**: Use `name` property, not `key`:
+```javascript
+// Correct
+columns: [
+  { name: 'id', title: 'ID' },      // ✓ 'name'
+  { name: 'email', title: 'Email' } // ✓ 'name'
+]
+
+// Incorrect
+columns: [
+  { key: 'id', title: 'ID' },       // ✗ 'key' 
+  { key: 'email', title: 'Email' }  // ✗ 'key'
+]
+```
+
+### **Feature-Specific Issues**
+
+#### **Pagination Not Rebuilding Properly**
+**Problem**: Disabled pagination still shows controls, table doesn't show all data.
+**Solution**: Re-initialize table when changing pagination state:
+```javascript
+function togglePagination() {
+  paginationEnabled = !paginationEnabled;
+  const currentData = table.getOriginalData();
+  initializeTable(currentData, {
+    pagination: { enabled: paginationEnabled }
+  });
+}
+```
+
+#### **Virtual Scroll vs Pagination Conflicts**
+**Problem**: Both virtual scrolling and pagination active simultaneously.
+**Solution**: Make features mutually exclusive:
+```javascript
+if (paginationEnabled && virtualScrollEnabled) {
+  virtualScrollEnabled = false;  // Disable conflicting feature
+}
+```
+
+#### **Theme Switching Not Working**
+**Problem**: Dark theme not applying properly.
+**Solution**: Apply `data-theme` attribute for CSS custom properties:
+```javascript
+function switchTheme(theme) {
+  document.body.removeAttribute('data-theme');
+  if (theme !== 'default') {
+    document.body.setAttribute('data-theme', theme);
+  }
+  // Load theme CSS file...
+}
+```
+
+#### **Selection Controls Active When Disabled**
+**Problem**: Selection buttons clickable when selection is disabled.
+**Solution**: Update control states and disable buttons:
+```javascript
+function updateControlStates() {
+  const selectAllBtn = document.querySelector('[onclick="selectAll()"]');
+  if (selectAllBtn) {
+    selectAllBtn.disabled = !selectionEnabled;
+    selectAllBtn.className = selectionEnabled ? 'secondary' : 'secondary disabled';
+  }
+}
+```
+
+### **Performance Issues**
+
+#### **Large Dataset Rendering Slow**
+**Problem**: Browser freezing with 1000+ rows.
+**Solution**: Enable virtual scrolling:
+```javascript
+const table = new TablixJS.Table('#container', {
+  data: largeDataset,
+  virtualScroll: {
+    enabled: true,
+    buffer: 10,
+    containerHeight: 400
+  },
+  pagination: { enabled: false }  // Disable for virtual scroll
+});
+```
+
+#### **Search/Filter Lag**
+**Problem**: Typing causes performance issues.
+**Solution**: Increase debounce delay:
+```javascript
+search: {
+  enabled: true,
+  searchDelay: 500  // Increase from default 300ms
+}
+```
+
+### **Development Environment Issues**
+
+#### **Local Development Server**
+**Problem**: Examples not loading properly.
+**Solution**: Use proper development server:
+```bash
+# Method 1: Project dev server
+npm run dev
+
+# Method 2: Static file server
+npx serve . -l 8080
+
+# Method 3: Python (if available)
+python -m http.server 8000
+```
+
+#### **Module Loading Issues**
+**Problem**: ES modules not loading in browser.
+**Solution**: Ensure proper server setup and file extensions:
+```html
+<!-- Use type="module" for ES modules -->
+<script type="module">
+  import Table from './src/core/Table.js';  // Include .js extension
+</script>
+```
+
+### **Getting Help**
+
+When reporting issues, please include:
+- Browser version and operating system
+- Node.js version (for build issues)
+- Complete error messages from browser console
+- Minimal code example that reproduces the issue
+- TablixJS version being used
+
+**Useful debugging commands:**
+```bash
+# Check build output
+npm run build
+ls -la dist/
+
+# Verify package contents
+npm pack --dry-run
+
+# Check for console errors
+# Open browser DevTools → Console tab
+
+# Performance debugging
+# DevTools → Performance tab → Record
+```
+
+---
+
 ## 🤝 Contributing
 
 We welcome contributions to TablixJS! Here's how you can help:
