@@ -4,10 +4,10 @@ TablixJS is a modern, lightweight, and dependency-free JavaScript library for bu
 
 ## Why TablixJS?
 
-- **Zero Dependencies** - Pure JavaScript with no external libraries required
+- **Zero Dependencies** - Pure JavaScript with no external libraries required, optional jQuery/React integrations available
 - **Modular Architecture** - Clean separation of concerns with dedicated managers
 - **Performance Focused** - Optimized for large datasets with virtual scrolling support
-- **Framework Agnostic** - Works with vanilla JS, React, jQuery, and other frameworks
+- **Framework Agnostic** - Works with vanilla JS, React, jQuery, and other frameworks (all optional)
 - **TypeScript Ready** - ES6 modules with full IDE support
 - **Highly Customizable** - Extensive theming system and plugin architecture
 - **Accessible** - ARIA labels, keyboard navigation, and screen reader support
@@ -207,9 +207,143 @@ TablixJS provides multiple build formats:
 - **`dist/tablixjs.umd.min.js`** - Minified UMD build for browsers (global `TablixJS`)
 - **`dist/tablixjs.esm.js`** - ES Module build for modern bundlers
 - **`dist/tablixjs.cjs.js`** - CommonJS build for Node.js
+- **`dist/tablix.jquery.js`** - TablixJS + jQuery wrapper bundled (requires jQuery)
+- **`dist/tablix-jquery-plugin.js`** - jQuery plugin only (requires TablixJS + jQuery loaded separately)
 - **`dist/tablixjs.css`** - Complete CSS with all styles
 - **`dist/tablixjs-theme-dark.css`** - Dark theme
 - **`dist/tablixjs-theme-default.css`** - Default theme
+
+### **jQuery Integration Options**
+
+TablixJS provides **multiple jQuery integration patterns** while maintaining its **dependency-free core**:
+
+#### **Option 1: Bundled jQuery Wrapper (Easiest)**
+
+Single file containing both TablixJS and jQuery wrapper:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="node_modules/tablixjs/dist/tablixjs.css">
+</head>
+<body>
+  <div id="myTable"></div>
+  
+  <!-- Include jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
+  <!-- Include TablixJS with jQuery wrapper bundled -->
+  <script src="node_modules/tablixjs/dist/tablix.jquery.min.js"></script>
+  
+  <script>
+    $(document).ready(function() {
+      $('#myTable').tablixjs({
+        data: [
+          { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin' },
+          { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User' }
+        ],
+        columns: [
+          { name: 'id', title: 'ID' },
+          { name: 'name', title: 'Full Name' },
+          { name: 'email', title: 'Email Address' },
+          { name: 'role', title: 'User Role' }
+        ],
+        pagination: { enabled: true, pageSize: 10 },
+        sorting: { enabled: true },
+        filtering: { enabled: true },
+        selection: { enabled: true, mode: 'multi' }
+      });
+    });
+```
+
+#### **Option 2: Standalone Plugin (Maximum Flexibility)**
+
+Load TablixJS core and jQuery plugin separately:
+
+```html
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Include TablixJS core -->
+<script src="node_modules/tablixjs/dist/tablixjs.umd.min.js"></script>
+
+<!-- Include jQuery plugin -->
+<script src="node_modules/tablixjs/dist/tablix-jquery-plugin.min.js"></script>
+
+<script>
+  // Use jQuery API
+  $('#myTable').tablixjs(options);
+  
+  // Or mix with vanilla API
+  const table = new TablixJS.Table('#otherTable', options);
+</script>
+```
+
+#### **Option 3: NPM Import**
+
+```javascript
+// Import bundled jQuery version
+import 'tablixjs/jquery';
+
+// Use jQuery as normal
+$('#myTable').tablixjs(options);
+
+// Access the instance
+const tableInstance = $('#myTable').data('tablixjs');
+  </script>
+</body>
+</html>
+```
+
+#### **jQuery Method Calls**
+
+```javascript
+// Load new data
+$('#myTable').tablixJS('loadData', newDataArray);
+
+// Get current data
+var currentData = $('#myTable').tablixJS('getData');
+
+// Get selected rows
+var selectedData = $('#myTable').tablixJS('getSelectedData');
+var selectedIds = $('#myTable').tablixJS('getSelectedIds');
+
+// Selection methods
+$('#myTable').tablixJS('selectRows', [1, 2, 3]);
+$('#myTable').tablixJS('selectAllRows');
+$('#myTable').tablixJS('clearSelection');
+
+// Filtering and search
+$('#myTable').tablixJS('applyFilter', 'status', { type: 'value', values: ['Active'] });
+$('#myTable').tablixJS('setSearchTerm', 'john');
+$('#myTable').tablixJS('clearAllFilters');
+
+// Pagination
+$('#myTable').tablixJS('nextPage');
+$('#myTable').tablixJS('goToPage', 3);
+$('#myTable').tablixJS('changePageSize', 25);
+
+// Destroy table
+$('#myTable').tablixJS('destroy');
+```
+
+#### **jQuery Events**
+
+```javascript
+$('#myTable')
+  .on('tablixjs:afterLoad', function(event, data) {
+    console.log('Data loaded:', data);
+  })
+  .on('tablixjs:selectionChanged', function(event, selectionData) {
+    console.log('Selection changed:', selectionData.selectedIds);
+  })
+  .on('tablixjs:afterFilter', function(event, filterData) {
+    console.log('Filter applied');
+  });
+```
+
+> **See also:** [jQuery Wrapper Documentation](docs/jquery-wrapper.md) | [jQuery Example Demo](examples/jquery-wrapper.html)
 
 ### **Advanced Configuration**
 
@@ -272,7 +406,7 @@ TablixJS follows a modular architecture with dedicated managers for each major f
 
 | Wrapper | Purpose | Status |
 |---------|---------|--------|
-| **table-jquery.js** | jQuery plugin wrapper | 🔄 In Progress |
+| **tablixjs-jquery.js** | jQuery plugin wrapper | ✅ Complete |
 | **TableReact.jsx** | React component wrapper | 🔄 In Progress |
 | **Vue Integration** | Vue.js component | 📋 Planned |
 | **Angular Integration** | Angular component | 📋 Planned |
@@ -308,7 +442,8 @@ TablixJS/
 │   │       ├── default.css    # Default light theme
 │   │       └── dark.css       # Dark theme
 │   ├── jquery/                # jQuery wrapper
-│   │   └── table-jquery.js    # jQuery plugin
+│   │   ├── index.js           # jQuery wrapper entry point
+│   │   └── tablixjs-jquery.js # jQuery plugin implementation
 │   └── react/                 # React wrapper
 │       └── TableReact.jsx     # React component
 ├── examples/                  # Usage examples and demos
@@ -720,7 +855,7 @@ Selection automatically works with all table features:
 - **[Theme Demo](examples/theme-demo.html)** - Theming and styling examples
 - **[Sorting Demo](examples/sorting-demo.html)** - Column sorting functionality
 - **[Pagination Samples](examples/pagination-samples.js)** - Implementation patterns
-- **[jQuery Integration](examples/jquery.html)** - jQuery wrapper usage
+- **[jQuery Integration](examples/jquery-wrapper.html)** - jQuery wrapper usage
 - **[React Integration](examples/react.html)** - React component usage
 
 ## Styling & Theming
@@ -957,7 +1092,7 @@ For production, simply include the files directly (no build process required):
 - **[Virtual Scroll Test Suite](examples/virtual-scroll-test-suite.html)** - Performance testing
 
 ### **Framework Integration**
-- **[jQuery Integration](examples/jquery.html)** - jQuery wrapper usage
+- **[jQuery Integration](examples/jquery-wrapper.html)** - jQuery wrapper usage
 - **[React Integration](examples/react.html)** - React component usage
 
 ### **Testing & Development**

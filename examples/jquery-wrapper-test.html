@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS jQuery Wrapper Test</title>
+    <link rel="stylesheet" href="../dist/tablixjs.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .test-section h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            background: #007cba;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005a87;
+        }
+    </style>
+</head>
+<body>
+    <h1>TablixJS jQuery Wrapper Test</h1>
+    
+    <!-- Test 1: Bundled Version -->
+    <div class="test-section">
+        <h2>Test 1: jQuery Bundled Version (tablix.jquery.js)</h2>
+        <div id="status1" class="status">Loading bundled version...</div>
+        <table id="table1">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>City</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button onclick="testBundled()">Initialize Bundled</button>
+        <button onclick="testBundledAPI()">Test API</button>
+    </div>
+
+    <!-- Test 2: Standalone Plugin -->
+    <div class="test-section">
+        <h2>Test 2: jQuery Standalone Plugin</h2>
+        <div id="status2" class="status">Loading standalone plugin...</div>
+        <table id="table2">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>City</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button onclick="testStandalone()">Initialize Standalone</button>
+        <button onclick="testMixedAPI()">Test Mixed API</button>
+    </div>
+
+    <!-- Test 3: Dependency Checks -->
+    <div class="test-section">
+        <h2>Test 3: Dependency Detection</h2>
+        <div id="status3" class="status">Checking dependencies...</div>
+        <button onclick="checkDependencies()">Check Dependencies</button>
+        <button onclick="testWithoutJQuery()">Test Without jQuery</button>
+    </div>
+
+    <!-- Load jQuery first -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Test 1: Load bundled version -->
+    <script src="../dist/tablix.jquery.min.js"></script>
+    
+    <!-- Test 2: Load standalone plugin (TablixJS already included in bundled version) -->
+    <script src="../dist/tablix-jquery-plugin.min.js"></script>
+    
+    <script>
+        const sampleData = [
+            { name: 'Alice Johnson', age: 28, city: 'New York' },
+            { name: 'Bob Smith', age: 34, city: 'Los Angeles' },
+            { name: 'Carol Davis', age: 25, city: 'Chicago' },
+            { name: 'David Wilson', age: 31, city: 'Houston' },
+            { name: 'Eva Brown', age: 29, city: 'Phoenix' }
+        ];
+
+        function updateStatus(id, message, type = 'success') {
+            const statusEl = document.getElementById(id);
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+
+        function testBundled() {
+            try {
+                $('#table1').tablixjs({
+                    data: sampleData,
+                    sortable: true,
+                    filterable: true
+                });
+                updateStatus('status1', '✅ Bundled version initialized successfully!');
+            } catch (error) {
+                updateStatus('status1', `❌ Error: ${error.message}`, 'error');
+                console.error('Bundled test error:', error);
+            }
+        }
+
+        function testBundledAPI() {
+            try {
+                const instance = $('#table1').data('tablixjs');
+                if (instance && instance.getData) {
+                    const data = instance.getData();
+                    updateStatus('status1', `✅ API working: ${data.length} rows found`);
+                } else {
+                    updateStatus('status1', '❌ No instance found or API missing', 'error');
+                }
+            } catch (error) {
+                updateStatus('status1', `❌ API Error: ${error.message}`, 'error');
+                console.error('Bundled API error:', error);
+            }
+        }
+
+        function testStandalone() {
+            try {
+                $('#table2').tablixjs({
+                    data: sampleData,
+                    sortable: true,
+                    filterable: true
+                });
+                updateStatus('status2', '✅ Standalone plugin initialized successfully!');
+            } catch (error) {
+                updateStatus('status2', `❌ Error: ${error.message}`, 'error');
+                console.error('Standalone test error:', error);
+            }
+        }
+
+        function testMixedAPI() {
+            try {
+                // Test jQuery access
+                const $table = $('#table2');
+                const jqueryInstance = $table.data('tablixjs');
+                
+                // Test vanilla access (if TablixJS is globally available)
+                const vanillaAvailable = typeof TablixJS !== 'undefined';
+                
+                let message = '✅ Mixed API test: ';
+                if (jqueryInstance) {
+                    message += 'jQuery API ✓ ';
+                }
+                if (vanillaAvailable) {
+                    message += 'Vanilla API ✓';
+                }
+                
+                updateStatus('status2', message);
+            } catch (error) {
+                updateStatus('status2', `❌ Mixed API Error: ${error.message}`, 'error');
+                console.error('Mixed API error:', error);
+            }
+        }
+
+        function checkDependencies() {
+            const checks = {
+                'jQuery': typeof $ !== 'undefined',
+                'TablixJS (Global)': typeof TablixJS !== 'undefined',
+                'jQuery Plugin': typeof $.fn.tablixjs !== 'undefined',
+                'Window jQuery': typeof window.jQuery !== 'undefined'
+            };
+
+            let message = 'Dependency Status:\\n';
+            let allGood = true;
+            
+            Object.entries(checks).forEach(([name, available]) => {
+                message += `${name}: ${available ? '✅ Available' : '❌ Missing'}\\n`;
+                if (!available && name !== 'TablixJS (Global)') {
+                    allGood = false;
+                }
+            });
+
+            updateStatus('status3', message.trim(), allGood ? 'success' : 'error');
+        }
+
+        function testWithoutJQuery() {
+            // Temporarily hide jQuery
+            const originalJQuery = window.jQuery;
+            const original$ = window.$;
+            
+            try {
+                delete window.jQuery;
+                delete window.$;
+                
+                // Try to use the plugin
+                updateStatus('status3', '⚠️ jQuery temporarily removed for testing', 'error');
+                
+                setTimeout(() => {
+                    // Restore jQuery
+                    window.jQuery = originalJQuery;
+                    window.$ = original$;
+                    updateStatus('status3', '✅ jQuery restored - plugin should work again', 'success');
+                }, 2000);
+                
+            } catch (error) {
+                // Restore jQuery in case of error
+                window.jQuery = originalJQuery;
+                window.$ = original$;
+                updateStatus('status3', `❌ Test Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize tests when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('status1', 'Ready to test bundled version', 'success');
+            updateStatus('status2', 'Ready to test standalone plugin', 'success');
+            checkDependencies();
+            
+            console.log('TablixJS jQuery Wrapper Test Page Loaded');
+            console.log('Available globals:', {
+                jQuery: typeof jQuery,
+                $: typeof $,
+                TablixJS: typeof TablixJS,
+                jQueryPlugin: typeof $.fn.tablixjs
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS Integration Options Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .demo-section h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        .code-block {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .button-group {
+            margin: 15px 0;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            background: #007cba;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>TablixJS Integration Options Demo</h1>
+    
+    <div class="status info">
+        <strong>Demo Status:</strong> This page demonstrates different ways to load and use TablixJS with and without jQuery.
+    </div>
+
+    <!-- Option 1: Vanilla TablixJS -->
+    <div class="demo-section">
+        <h2>Option 1: Vanilla TablixJS (Core Library Only)</h2>
+        <p>This uses only the core TablixJS library without any wrappers.</p>
+        
+        <div class="code-block">
+&lt;script src="path/to/tablixjs.umd.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    const table = new TablixJS.Table(document.getElementById('table1'), {
+        data: data,
+        sortable: true
+    });
+&lt;/script&gt;
+        </div>
+        
+        <div id="status1" class="status"></div>
+        <table id="table1">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>City</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        
+        <div class="button-group">
+            <button onclick="initVanillaTable()">Initialize Vanilla Table</button>
+            <button onclick="sortVanillaTable()">Sort by Age</button>
+        </div>
+    </div>
+
+    <!-- Option 2: jQuery Bundled -->
+    <div class="demo-section">
+        <h2>Option 2: jQuery Bundled Version</h2>
+        <p>This uses the bundled version that includes both TablixJS and jQuery wrapper.</p>
+        
+        <div class="code-block">
+&lt;script src="https://code.jquery.com/jquery-3.6.0.min.js"&gt;&lt;/script&gt;
+&lt;script src="path/to/tablix.jquery.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    $('#table2').tablixjs({
+        data: data,
+        sortable: true
+    });
+&lt;/script&gt;
+        </div>
+        
+        <div id="status2" class="status"></div>
+        <table id="table2">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>City</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        
+        <div class="button-group">
+            <button onclick="initjQueryBundled()">Initialize jQuery Bundled</button>
+            <button onclick="getjQueryBundledData()">Get Table Data</button>
+        </div>
+    </div>
+
+    <!-- Option 3: jQuery Standalone Plugin -->
+    <div class="demo-section">
+        <h2>Option 3: jQuery Standalone Plugin</h2>
+        <p>This loads TablixJS core and jQuery plugin separately for maximum flexibility.</p>
+        
+        <div class="code-block">
+&lt;script src="https://code.jquery.com/jquery-3.6.0.min.js"&gt;&lt;/script&gt;
+&lt;script src="path/to/tablixjs.umd.min.js"&gt;&lt;/script&gt;
+&lt;script src="path/to/tablix-jquery-plugin.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    $('#table3').tablixjs({
+        data: data,
+        sortable: true
+    });
+&lt;/script&gt;
+        </div>
+        
+        <div id="status3" class="status"></div>
+        <table id="table3">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>City</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        
+        <div class="button-group">
+            <button onclick="initjQueryStandalone()">Initialize jQuery Plugin</button>
+            <button onclick="mixedUsage()">Mixed Usage Example</button>
+        </div>
+    </div>
+
+    <!-- Progressive Enhancement Example -->
+    <div class="demo-section">
+        <h2>Option 4: Progressive Enhancement</h2>
+        <p>This demonstrates loading jQuery support dynamically when available.</p>
+        
+        <div class="code-block">
+&lt;script&gt;
+    // Start with vanilla TablixJS
+    const table = new TablixJS.Table(element, options);
+    
+    // Add jQuery support if available
+    if (typeof $ !== 'undefined') {
+        // Enhanced with jQuery features
+    }
+&lt;/script&gt;
+        </div>
+        
+        <div id="status4" class="status"></div>
+        <table id="table4">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>City</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        
+        <div class="button-group">
+            <button onclick="progressiveEnhancement()">Progressive Enhancement</button>
+            <button onclick="checkDependencies()">Check Dependencies</button>
+        </div>
+    </div>
+
+    <!-- Load jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Simulate different loading scenarios -->
+    <script>
+        // Sample data for all demos
+        const sampleData = [
+            { name: 'Alice Johnson', age: 28, city: 'New York' },
+            { name: 'Bob Smith', age: 34, city: 'Los Angeles' },
+            { name: 'Carol Davis', age: 25, city: 'Chicago' },
+            { name: 'David Wilson', age: 31, city: 'Houston' },
+            { name: 'Eva Brown', age: 29, city: 'Phoenix' }
+        ];
+
+        // Mock TablixJS for demonstration purposes
+        // In real usage, this would be loaded from the actual files
+        window.TablixJS = {
+            Table: class {
+                constructor(element, options) {
+                    this.element = element;
+                    this.options = options;
+                    this.data = options.data || [];
+                    this.render();
+                }
+                
+                render() {
+                    const tbody = this.element.querySelector('tbody');
+                    tbody.innerHTML = '';
+                    this.data.forEach(row => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${row.name}</td>
+                            <td>${row.age}</td>
+                            <td>${row.city}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+                
+                sort(column) {
+                    if (column === 'age') {
+                        this.data.sort((a, b) => a.age - b.age);
+                        this.render();
+                    }
+                }
+                
+                getData() {
+                    return this.data;
+                }
+            }
+        };
+
+        // Mock jQuery plugin registration
+        if (typeof $ !== 'undefined') {
+            $.fn.tablixjs = function(options) {
+                return this.each(function() {
+                    const instance = new TablixJS.Table(this, options);
+                    $(this).data('tablixjs', instance);
+                });
+            };
+        }
+
+        // Demo functions
+        let tables = {};
+
+        function updateStatus(id, message, type = 'success') {
+            const statusEl = document.getElementById(id);
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+
+        function initVanillaTable() {
+            try {
+                tables.vanilla = new TablixJS.Table(document.getElementById('table1'), {
+                    data: [...sampleData],
+                    sortable: true
+                });
+                updateStatus('status1', '✅ Vanilla TablixJS initialized successfully!');
+            } catch (error) {
+                updateStatus('status1', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function sortVanillaTable() {
+            if (tables.vanilla) {
+                tables.vanilla.sort('age');
+                updateStatus('status1', '✅ Table sorted by age');
+            } else {
+                updateStatus('status1', '❌ Please initialize table first', 'error');
+            }
+        }
+
+        function initjQueryBundled() {
+            try {
+                $('#table2').tablixjs({
+                    data: [...sampleData],
+                    sortable: true
+                });
+                updateStatus('status2', '✅ jQuery bundled version initialized successfully!');
+            } catch (error) {
+                updateStatus('status2', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function getjQueryBundledData() {
+            const instance = $('#table2').data('tablixjs');
+            if (instance) {
+                const data = instance.getData();
+                updateStatus('status2', `✅ Table has ${data.length} rows`);
+            } else {
+                updateStatus('status2', '❌ Please initialize table first', 'error');
+            }
+        }
+
+        function initjQueryStandalone() {
+            try {
+                $('#table3').tablixjs({
+                    data: [...sampleData],
+                    sortable: true
+                });
+                updateStatus('status3', '✅ jQuery standalone plugin initialized successfully!');
+            } catch (error) {
+                updateStatus('status3', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function mixedUsage() {
+            // Demonstrate using both vanilla and jQuery APIs
+            try {
+                const $table = $('#table3');
+                const jqueryInstance = $table.data('tablixjs');
+                
+                if (jqueryInstance) {
+                    // Mix vanilla API with jQuery
+                    jqueryInstance.sort('age');
+                    updateStatus('status3', '✅ Mixed usage: jQuery selector + vanilla API');
+                } else {
+                    updateStatus('status3', '❌ Please initialize table first', 'error');
+                }
+            } catch (error) {
+                updateStatus('status3', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function progressiveEnhancement() {
+            try {
+                // Start with vanilla
+                const vanillaTable = new TablixJS.Table(document.getElementById('table4'), {
+                    data: [...sampleData],
+                    sortable: true
+                });
+
+                // Enhance with jQuery if available
+                if (typeof $ !== 'undefined' && $.fn.tablixjs) {
+                    // Could add jQuery-specific enhancements here
+                    updateStatus('status4', '✅ Progressive enhancement: Started vanilla, enhanced with jQuery support available');
+                } else {
+                    updateStatus('status4', '✅ Progressive enhancement: Vanilla only (jQuery not available)');
+                }
+            } catch (error) {
+                updateStatus('status4', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function checkDependencies() {
+            const checks = {
+                'jQuery': typeof $ !== 'undefined',
+                'TablixJS': typeof TablixJS !== 'undefined',
+                'jQuery Plugin': typeof $.fn.tablixjs !== 'undefined'
+            };
+
+            let message = 'Dependency Status:\n';
+            Object.entries(checks).forEach(([name, available]) => {
+                message += `${name}: ${available ? '✅ Available' : '❌ Not Found'}\n`;
+            });
+
+            updateStatus('status4', message.trim(), 'info');
+        }
+
+        // Initialize status messages
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('status1', 'Click "Initialize Vanilla Table" to start', 'info');
+            updateStatus('status2', 'Click "Initialize jQuery Bundled" to start', 'info');
+            updateStatus('status3', 'Click "Initialize jQuery Plugin" to start', 'info');
+            updateStatus('status4', 'Click "Progressive Enhancement" to start', 'info');
+        });
+    </script>
+
+    <div class="demo-section">
+        <h2>Summary</h2>
+        <p>This demo shows four different approaches to using TablixJS:</p>
+        <ul>
+            <li><strong>Vanilla:</strong> Core library only, minimal footprint</li>
+            <li><strong>jQuery Bundled:</strong> Everything in one file, easy setup</li>
+            <li><strong>jQuery Plugin:</strong> Modular approach, maximum flexibility</li>
+            <li><strong>Progressive Enhancement:</strong> Start simple, enhance as needed</li>
+        </ul>
+        <p>All approaches work together and maintain TablixJS's core principle of <strong>zero forced dependencies</strong>.</p>
+    </div>
+</body>
+</html>

@@ -32,7 +32,7 @@ This folder contains comprehensive examples and tests for TablixJS functionality
 - **Features**: React component wrapper
 - **Usage**: Modern React app integration
 
-### `jquery.html` - jQuery Integration (in dev)
+### `jquery-wrapper.html` - jQuery Integration ✅
 - **Purpose**: TablixJS with jQuery
 - **Features**: jQuery plugin-style usage
 - **Usage**: Legacy application integration

@@ -1,5 +1,5 @@
 /**
- * TablixJS v0.1.0
+ * TablixJS v0.1.1
  * TablixJS is a lightweight, dependency-free JavaScript library for building powerful, responsive data tables.
  * (c) 2025 Ivan Zarkovic
  * Released under the MIT License.

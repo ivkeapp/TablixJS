@@ -1,6 +1,6 @@
 {
   "name": "tablixjs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "TablixJS is a lightweight, dependency-free JavaScript library for building powerful, responsive data tables.",
   "type": "module",
   "main": "dist/tablixjs.cjs.js",
@@ -15,12 +15,19 @@
       "require": "./dist/tablixjs.cjs.js",
       "browser": "./dist/tablixjs.umd.min.js"
     },
+    "./jquery": {
+      "import": "./dist/tablix.jquery.js",
+      "require": "./dist/tablix.jquery.js",
+      "browser": "./dist/tablix.jquery.min.js"
+    },
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
     "src",
+    "docs",
+    "examples",
     "README.md",
     "LICENSE"
   ],
@@ -66,13 +73,17 @@
   },
   "peerDependencies": {
     "react": ">=16.8.0",
-    "react-dom": ">=16.8.0"
+    "react-dom": ">=16.8.0",
+    "jquery": ">=3.0.0"
   },
   "peerDependenciesMeta": {
     "react": {
       "optional": true
     },
     "react-dom": {
+      "optional": true
+    },
+    "jquery": {
       "optional": true
     }
   },

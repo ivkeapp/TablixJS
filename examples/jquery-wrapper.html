@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TablixJS jQuery Wrapper - Example</title>
+  
+  <!-- TablixJS CSS -->
+  <link rel="stylesheet" href="../src/styles/tablix.css">
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .example-section {
+      margin: 30px 0;
+      padding: 20px;
+      border: 1px solid #e1e1e1;
+      border-radius: 4px;
+      background-color: #fafafa;
+    }
+    
+    .example-section h3 {
+      color: #555;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    
+    .button-group {
+      margin: 15px 0;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+    }
+    
+    .button-group button {
+      margin: 5px;
+      padding: 8px 16px;
+      background-color: #007cba;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .button-group button:hover {
+      background-color: #005a87;
+    }
+    
+    .button-group button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .info-panel {
+      margin: 15px 0;
+      padding: 10px;
+      background-color: #e7f3ff;
+      border-left: 4px solid #2196f3;
+      border-radius: 4px;
+    }
+    
+    .table-container {
+      margin: 20px 0;
+    }
+    
+    #selectedInfo {
+      margin-top: 10px;
+      padding: 8px;
+      background-color: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    .code-preview {
+      background-color: #f8f8f8;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>TablixJS jQuery Wrapper Demo</h1>
+    
+    <!-- Basic Example -->
+    <div class="example-section">
+      <h3>Basic Table with jQuery Wrapper</h3>
+      <div class="info-panel">
+        <strong>Example:</strong> Basic table initialization using the jQuery wrapper with sample employee data.
+      </div>
+      
+      <div class="table-container">
+        <div id="basicTable"></div>
+      </div>
+      
+      <div class="button-group">
+        <button onclick="loadNewData()">Load New Data</button>
+        <button onclick="refreshTable()">Refresh Table</button>
+        <button onclick="showCurrentData()">Show Current Data</button>
+      </div>
+      
+      <div class="code-preview">
+$('#basicTable').tablixJS({
+  data: sampleData,
+  columns: [
+    { name: 'id', title: 'ID' },
+    { name: 'name', title: 'Employee Name' },
+    { name: 'department', title: 'Department' },
+    { name: 'email', title: 'Email' },
+    { name: 'salary', title: 'Salary', renderer: (value) => `$${value.toLocaleString()}` }
+  ]
+});
+      </div>
+    </div>
+
+    <!-- Advanced Features Example -->
+    <div class="example-section">
+      <h3>Advanced Table with Pagination, Sorting, Filtering & Selection</h3>
+      <div class="info-panel">
+        <strong>Features:</strong> This table includes pagination, sorting, filtering, search, and multi-row selection.
+      </div>
+      
+      <div class="table-container">
+        <div id="advancedTable"></div>
+      </div>
+      
+      <div class="button-group">
+        <button onclick="filterDevelopers()">Filter Developers</button>
+        <button onclick="sortBySalary()">Sort by Salary (Desc)</button>
+        <button onclick="clearAllFilters()">Clear Filters</button>
+        <button onclick="clearSorting()">Clear Sorting</button>
+        <button onclick="selectAll()">Select All</button>
+        <button onclick="clearSelection()">Clear Selection</button>
+        <button onclick="searchJohn()">Search "John"</button>
+        <button onclick="clearSearch()">Clear Search</button>
+      </div>
+      
+      <div id="selectedInfo">No rows selected</div>
+      
+      <div class="code-preview">
+$('#advancedTable').tablixJS({
+  data: largerSampleData,
+  columns: tableColumns,
+  pagination: {
+    enabled: true,
+    pageSize: 5,
+    showPageNumbers: true,
+    showPageSizes: true,
+    pageSizeOptions: [5, 10, 15, 20]
+  },
+  sorting: { enabled: true },
+  filtering: { enabled: true },
+  search: { enabled: true, placeholder: 'Search employees...' },
+  selection: { 
+    enabled: true, 
+    mode: 'multi',
+    dataIdKey: 'id' 
+  }
+});
+      </div>
+    </div>
+
+    <!-- Method Calls Example -->
+    <div class="example-section">
+      <h3>Pagination Controls</h3>
+      <div class="info-panel">
+        <strong>Example:</strong> Programmatic pagination control using jQuery wrapper methods.
+      </div>
+      
+      <div class="button-group">
+        <button onclick="goFirstPage()">First Page</button>
+        <button onclick="goPrevPage()">Previous</button>
+        <button onclick="goNextPage()">Next</button>
+        <button onclick="goLastPage()">Last Page</button>
+        <button onclick="goToPage3()">Go to Page 3</button>
+        <button onclick="changePageSize()">Change Page Size to 10</button>
+        <button onclick="showPaginationInfo()">Show Page Info</button>
+      </div>
+    </div>
+
+    <!-- Event Handling Example -->
+    <div class="example-section">
+      <h3>jQuery Event Handling</h3>
+      <div class="info-panel">
+        <strong>Events:</strong> The wrapper forwards TablixJS events as jQuery events with 'tablixjs:' prefix.
+      </div>
+      
+      <div id="eventLog" style="max-height: 200px; overflow-y: auto; background-color: #f8f8f8; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;">
+        <div>Event log will appear here...</div>
+      </div>
+      
+      <div class="button-group">
+        <button onclick="clearEventLog()">Clear Event Log</button>
+      </div>
+    </div>
+
+    <!-- Multiple Tables Example -->
+    <div class="example-section">
+      <h3>Multiple Tables</h3>
+      <div class="info-panel">
+        <strong>Multiple Instances:</strong> The wrapper supports multiple table instances on the same page.
+      </div>
+      
+      <div style="display: flex; gap: 20px;">
+        <div style="flex: 1;">
+          <h4>Table 1 - Employees</h4>
+          <div id="table1"></div>
+        </div>
+        <div style="flex: 1;">
+          <h4>Table 2 - Projects</h4>
+          <div id="table2"></div>
+        </div>
+      </div>
+      
+      <div class="button-group">
+        <button onclick="loadBothTables()">Reload Both Tables</button>
+        <button onclick="destroyBothTables()">Destroy Both Tables</button>
+        <button onclick="initBothTables()">Reinitialize Both Tables</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
+  <!-- Include TablixJS core and jQuery wrapper -->
+  <script type="module">
+    // First, import and expose TablixJS globally
+    import Table from '../src/core/Table.js';
+    window.TablixJS = { Table };
+    
+    // Then import the jQuery wrapper
+    await import('../src/jquery/tablixjs-jquery.js');
+    
+    // Sample data
+    const sampleData = [
+      { id: 1, name: 'John Doe', department: 'Engineering', email: 'john@company.com', salary: 85000 },
+      { id: 2, name: 'Jane Smith', department: 'Design', email: 'jane@company.com', salary: 72000 },
+      { id: 3, name: 'Mike Johnson', department: 'Engineering', email: 'mike@company.com', salary: 91000 },
+      { id: 4, name: 'Sarah Wilson', department: 'Marketing', email: 'sarah@company.com', salary: 65000 },
+      { id: 5, name: 'Tom Brown', department: 'Sales', email: 'tom@company.com', salary: 58000 }
+    ];
+
+    const largerSampleData = [
+      { id: 1, name: 'John Doe', department: 'Engineering', email: 'john@company.com', salary: 85000, joinDate: '2020-01-15' },
+      { id: 2, name: 'Jane Smith', department: 'Design', email: 'jane@company.com', salary: 72000, joinDate: '2019-03-22' },
+      { id: 3, name: 'Mike Johnson', department: 'Engineering', email: 'mike@company.com', salary: 91000, joinDate: '2018-07-10' },
+      { id: 4, name: 'Sarah Wilson', department: 'Marketing', email: 'sarah@company.com', salary: 65000, joinDate: '2021-02-28' },
+      { id: 5, name: 'Tom Brown', department: 'Sales', email: 'tom@company.com', salary: 58000, joinDate: '2020-09-14' },
+      { id: 6, name: 'Lisa Davis', department: 'Engineering', email: 'lisa@company.com', salary: 88000, joinDate: '2019-11-08' },
+      { id: 7, name: 'David Lee', department: 'Design', email: 'david@company.com', salary: 70000, joinDate: '2020-05-18' },
+      { id: 8, name: 'Emily Chen', department: 'Marketing', email: 'emily@company.com', salary: 67000, joinDate: '2021-01-12' },
+      { id: 9, name: 'James Wilson', department: 'Sales', email: 'james@company.com', salary: 62000, joinDate: '2019-08-25' },
+      { id: 10, name: 'Anna Johnson', department: 'Engineering', email: 'anna@company.com', salary: 89000, joinDate: '2018-12-03' },
+      { id: 11, name: 'Chris Martinez', department: 'Design', email: 'chris@company.com', salary: 74000, joinDate: '2020-10-07' },
+      { id: 12, name: 'Rachel Green', department: 'Marketing', email: 'rachel@company.com', salary: 69000, joinDate: '2021-04-20' },
+      { id: 13, name: 'Kevin Wang', department: 'Engineering', email: 'kevin@company.com', salary: 92000, joinDate: '2018-05-15' },
+      { id: 14, name: 'Michelle Torres', department: 'Sales', email: 'michelle@company.com', salary: 61000, joinDate: '2020-12-11' },
+      { id: 15, name: 'Robert Kim', department: 'Engineering', email: 'robert@company.com', salary: 87000, joinDate: '2019-06-28' }
+    ];
+
+    const tableColumns = [
+      { name: 'id', title: 'ID', width: '60px' },
+      { name: 'name', title: 'Employee Name' },
+      { name: 'department', title: 'Department' },
+      { name: 'email', title: 'Email Address' },
+      { 
+        name: 'salary', 
+        title: 'Annual Salary', 
+        renderer: (value) => `$${value.toLocaleString()}`,
+        sortable: true
+      },
+      { 
+        name: 'joinDate', 
+        title: 'Join Date',
+        renderer: (value) => new Date(value).toLocaleDateString()
+      }
+    ];
+
+    const projectData = [
+      { id: 1, name: 'Website Redesign', status: 'Active', budget: 50000 },
+      { id: 2, name: 'Mobile App', status: 'Planning', budget: 120000 },
+      { id: 3, name: 'Database Migration', status: 'Completed', budget: 80000 },
+      { id: 4, name: 'API Development', status: 'Active', budget: 95000 }
+    ];
+
+    const projectColumns = [
+      { name: 'id', title: 'Project ID' },
+      { name: 'name', title: 'Project Name' },
+      { name: 'status', title: 'Status' },
+      { name: 'budget', title: 'Budget', renderer: (value) => `$${value.toLocaleString()}` }
+    ];
+
+    // Initialize tables when document is ready
+    $(document).ready(function() {
+      // Basic table
+      $('#basicTable').tablixJS({
+        data: sampleData,
+        columns: [
+          { name: 'id', title: 'ID', width: '60px' },
+          { name: 'name', title: 'Employee Name' },
+          { name: 'department', title: 'Department' },
+          { name: 'email', title: 'Email' },
+          { name: 'salary', title: 'Salary', renderer: (value) => `$${value.toLocaleString()}` }
+        ]
+      });
+
+      // Advanced table with all features
+      $('#advancedTable').tablixJS({
+        data: largerSampleData,
+        columns: tableColumns,
+        pagination: {
+          enabled: true,
+          pageSize: 5,
+          showPageNumbers: true,
+          showPageSizes: true,
+          pageSizeOptions: [5, 10, 15, 20]
+        },
+        sorting: { enabled: true },
+        filtering: { enabled: true },
+        search: { enabled: true, placeholder: 'Search employees...' },
+        selection: { 
+          enabled: true, 
+          mode: 'multi',
+          dataIdKey: 'id' 
+        }
+      });
+
+      // Multiple tables
+      $('#table1').tablixJS({
+        data: sampleData.slice(0, 3),
+        columns: [
+          { name: 'id', title: 'ID' },
+          { name: 'name', title: 'Name' },
+          { name: 'department', title: 'Dept' }
+        ],
+        pagination: { enabled: true, pageSize: 2 }
+      });
+
+      $('#table2').tablixJS({
+        data: projectData,
+        columns: projectColumns,
+        pagination: { enabled: true, pageSize: 2 }
+      });
+
+      // Set up event logging for the advanced table
+      $('#advancedTable')
+        .on('tablixjs:afterLoad', function(event, data) {
+          logEvent('afterLoad', `Loaded ${data.data.length} records`);
+        })
+        .on('tablixjs:selectionChanged', function(event, selectionData) {
+          logEvent('selectionChanged', `Selected: ${selectionData.selectedIds.length} rows`);
+          updateSelectionInfo(selectionData.selectedData);
+        })
+        .on('tablixjs:afterFilter', function(event, filterData) {
+          logEvent('afterFilter', `Filter applied`);
+        })
+        .on('tablixjs:afterSort', function(event, sortData) {
+          logEvent('afterSort', `Sorted by: ${JSON.stringify(sortData)}`);
+        })
+        .on('tablixjs:afterPageChange', function(event, pageInfo) {
+          logEvent('afterPageChange', `Page: ${pageInfo.currentPage}/${pageInfo.totalPages}`);
+        })
+        .on('tablixjs:afterSearch', function(event, searchData) {
+          logEvent('afterSearch', `Search: "${searchData.searchTerm}"`);
+        });
+    });
+
+    // Event logging functions
+    window.logEvent = function(eventName, details) {
+      const timestamp = new Date().toLocaleTimeString();
+      const logEntry = `<div>[${timestamp}] <strong>${eventName}:</strong> ${details}</div>`;
+      const eventLog = document.getElementById('eventLog');
+      eventLog.innerHTML = logEntry + eventLog.innerHTML;
+    };
+
+    window.clearEventLog = function() {
+      document.getElementById('eventLog').innerHTML = '<div>Event log cleared...</div>';
+    };
+
+    window.updateSelectionInfo = function(selectedData) {
+      const selectedInfo = document.getElementById('selectedInfo');
+      if (selectedData.length === 0) {
+        selectedInfo.innerHTML = 'No rows selected';
+      } else {
+        const names = selectedData.map(row => row.name).join(', ');
+        selectedInfo.innerHTML = `Selected ${selectedData.length} row(s): ${names}`;
+      }
+    };
+
+    // Button handlers - make them global
+    window.loadNewData = function() {
+      const newData = [
+        { id: 101, name: 'Alice Cooper', department: 'HR', email: 'alice@company.com', salary: 55000 },
+        { id: 102, name: 'Bob Dylan', department: 'Finance', email: 'bob@company.com', salary: 75000 },
+        { id: 103, name: 'Carol King', department: 'Operations', email: 'carol@company.com', salary: 68000 }
+      ];
+      $('#basicTable').tablixJS('loadData', newData);
+    };
+
+    window.refreshTable = function() {
+      $('#basicTable').tablixJS('refresh');
+    };
+
+    window.showCurrentData = function() {
+      const data = $('#basicTable').tablixJS('getData');
+      alert(`Current table has ${data.length} rows`);
+    };
+
+    window.filterDevelopers = function() {
+      $('#advancedTable').tablixJS('applyFilter', 'department', {
+        type: 'value',
+        values: ['Engineering']
+      });
+    };
+
+    window.sortBySalary = function() {
+      $('#advancedTable').tablixJS('sort', 'salary', 'desc');
+    };
+
+    window.clearAllFilters = function() {
+      $('#advancedTable').tablixJS('clearAllFilters');
+    };
+
+    window.clearSorting = function() {
+      $('#advancedTable').tablixJS('clearSorting');
+    };
+
+    window.selectAll = function() {
+      $('#advancedTable').tablixJS('selectAllRows');
+    };
+
+    window.clearSelection = function() {
+      $('#advancedTable').tablixJS('clearSelection');
+    };
+
+    window.searchJohn = function() {
+      $('#advancedTable').tablixJS('setSearchTerm', 'John');
+    };
+
+    window.clearSearch = function() {
+      $('#advancedTable').tablixJS('clearSearch');
+    };
+
+    // Pagination controls
+    window.goFirstPage = function() {
+      $('#advancedTable').tablixJS('firstPage');
+    };
+
+    window.goPrevPage = function() {
+      $('#advancedTable').tablixJS('prevPage');
+    };
+
+    window.goNextPage = function() {
+      $('#advancedTable').tablixJS('nextPage');
+    };
+
+    window.goLastPage = function() {
+      $('#advancedTable').tablixJS('lastPage');
+    };
+
+    window.goToPage3 = function() {
+      $('#advancedTable').tablixJS('goToPage', 3);
+    };
+
+    window.changePageSize = function() {
+      $('#advancedTable').tablixJS('changePageSize', 10);
+    };
+
+    window.showPaginationInfo = function() {
+      const pageInfo = $('#advancedTable').tablixJS('getPaginationInfo');
+      alert(`Page ${pageInfo.currentPage} of ${pageInfo.totalPages} (${pageInfo.totalItems} total items)`);
+    };
+
+    // Multiple tables controls
+    window.loadBothTables = function() {
+      $('#table1').tablixJS('loadData', [
+        { id: 201, name: 'New Employee 1', department: 'IT' },
+        { id: 202, name: 'New Employee 2', department: 'HR' }
+      ]);
+      $('#table2').tablixJS('loadData', [
+        { id: 101, name: 'New Project', status: 'Active', budget: 150000 }
+      ]);
+    };
+
+    window.destroyBothTables = function() {
+      $('#table1').tablixJS('destroy');
+      $('#table2').tablixJS('destroy');
+    };
+
+    window.initBothTables = function() {
+      // Reinitialize table1
+      $('#table1').tablixJS({
+        data: sampleData.slice(0, 3),
+        columns: [
+          { name: 'id', title: 'ID' },
+          { name: 'name', title: 'Name' },
+          { name: 'department', title: 'Dept' }
+        ],
+        pagination: { enabled: true, pageSize: 2 }
+      });
+
+      // Reinitialize table2
+      $('#table2').tablixJS({
+        data: projectData,
+        columns: projectColumns,
+        pagination: { enabled: true, pageSize: 2 }
+      });
+    };
+  </script>
+</body>
+</html>
