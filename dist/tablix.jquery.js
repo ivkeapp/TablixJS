@@ -1,5 +1,5 @@
 /**
- * TablixJS with jQuery Wrapper v0.1.2
+ * TablixJS with jQuery Wrapper v0.1.3
  * TablixJS is a lightweight, dependency-free JavaScript library for building powerful, responsive data tables.
  * (c) 2025 Ivan Zarkovic
  * Released under the MIT License.
@@ -6659,49 +6659,131 @@
      * TablixJS jQuery Plugin
      * @param {Object|String} options - Configuration options or method name
      * @param {...*} args - Additional arguments for method calls
-     * @returns {jQuery} - jQuery chainable object
+     * @returns {jQuery|*} - jQuery chainable object or method result
      */
     $.fn[PLUGIN_NAME] = function (options, ...args) {
-      return this.each(function () {
-        const $element = $(this);
+      // Handle method calls on existing instances
+      if (typeof options === 'string') {
+        const method = options;
+        const $element = $(this.first()); // Use first element for method calls
         const instance = $element.data(DATA_KEY);
+        if (!instance) {
+          console.error(`TablixJS: Cannot call method '${method}' - table not initialized`);
+          return this;
+        }
 
-        // Handle method calls on existing instances
-        if (typeof options === 'string') {
-          if (!instance) {
-            console.error(`TablixJS: Cannot call method '${options}' - table not initialized`);
-            return;
-          }
-          const method = options;
+        // Methods that return data (not chainable)
+        const dataReturningMethods = ['getData', 'getSelectedData', 'getSelectedIds', 'getPaginationInfo', 'getSearchTerm', 'getSearchInfo', 'getActiveFilters', 'getColumnFilter', 'getSortState', 'getSelectionCount', 'isRowSelected'];
+        if (dataReturningMethods.includes(method)) {
           switch (method) {
-            case 'destroy':
-              instance.destroy();
-              $element.removeData(DATA_KEY);
-              break;
-            case 'reload':
-            case 'loadData':
-              const newData = args[0];
-              if (newData) {
-                instance.loadData(newData);
-              }
-              break;
             case 'getData':
               return instance.getData();
             case 'getSelectedData':
               return instance.getSelectedData();
-            case 'clearSelection':
-              instance.clearSelection();
-              break;
-            case 'refresh':
-              instance.refreshTable();
-              break;
+            case 'getSelectedIds':
+              return instance.getSelectedIds();
+            case 'getPaginationInfo':
+              return instance.getPaginationInfo();
+            case 'getSearchTerm':
+              return instance.getSearchTerm();
+            case 'getSearchInfo':
+              return instance.getSearchInfo();
+            case 'getActiveFilters':
+              return instance.getActiveFilters();
+            case 'getColumnFilter':
+              return instance.getColumnFilter(args[0]);
+            case 'getSortState':
+              return instance.getSortState();
+            case 'getSelectionCount':
+              return instance.getSelectionCount();
+            case 'isRowSelected':
+              return instance.isRowSelected(args[0]);
             default:
-              console.warn(`TablixJS: Unknown method '${method}'`);
+              return undefined;
           }
-          return;
         }
 
-        // Initialize new instance
+        // Methods that don't return data (chainable)
+        switch (method) {
+          case 'destroy':
+            instance.destroy();
+            $element.removeData(DATA_KEY);
+            break;
+          case 'reload':
+          case 'loadData':
+            const newData = args[0];
+            if (newData) {
+              instance.loadData(newData);
+            }
+            break;
+          case 'clearSelection':
+            instance.clearSelection();
+            break;
+          case 'refresh':
+            instance.refreshTable();
+            break;
+          case 'selectRows':
+            instance.selectRows(args[0]);
+            break;
+          case 'deselectRows':
+            instance.deselectRows(args[0]);
+            break;
+          case 'selectAllRows':
+            instance.selectAllRows();
+            break;
+          case 'clearSearch':
+            instance.clearSearch();
+            break;
+          case 'setSearchTerm':
+            instance.setSearchTerm(args[0]);
+            break;
+          case 'applyFilter':
+            instance.applyFilter(args[0], args[1]);
+            break;
+          case 'clearFilter':
+            instance.clearFilter(args[0]);
+            break;
+          case 'clearAllFilters':
+            instance.clearAllFilters();
+            break;
+          case 'sort':
+            instance.sort(args[0], args[1]);
+            break;
+          case 'toggleSort':
+            instance.toggleSort(args[0]);
+            break;
+          case 'clearSorting':
+            instance.clearSorting();
+            break;
+          case 'nextPage':
+            instance.nextPage();
+            break;
+          case 'prevPage':
+            instance.prevPage();
+            break;
+          case 'firstPage':
+            instance.firstPage();
+            break;
+          case 'lastPage':
+            instance.lastPage();
+            break;
+          case 'goToPage':
+            instance.goToPage(args[0]);
+            break;
+          case 'changePageSize':
+            instance.changePageSize(args[0]);
+            break;
+          default:
+            console.warn(`TablixJS: Unknown method '${method}'`);
+        }
+
+        // Return jQuery object for chaining for non-data methods
+        return this;
+      }
+
+      // Initialize new instances (chainable)
+      return this.each(function () {
+        const $element = $(this);
         initializeTable($element, options);
       });
     };

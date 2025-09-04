@@ -72,20 +72,36 @@
    * TablixJS jQuery Plugin
    * @param {Object|String} options - Configuration options or method name
    * @param {...*} args - Additional arguments for method calls
-   * @returns {jQuery} - jQuery chainable object
+   * @returns {jQuery|*} - jQuery chainable object or method result
    */
   $.fn[PLUGIN_NAME] = function(options, ...args) {
+    // Handle method calls on existing instances
+    if (typeof options === 'string') {
+      const $element = $(this.first()); // Use first element for method calls
+      const instance = $element.data(DATA_KEY);
+      
+      if (!instance) {
+        console.error(`TablixJS: Cannot call method "${options}" on uninitialized element.`);
+        return this;
+      }
+      
+      // Methods that return data (not chainable)
+      const dataReturningMethods = ['getData', 'getOriginalData', 'getSelectedData', 'getSelectedIds', 'selectAllRows', 'getPaginationInfo', 'getSearchTerm', 'getSearchInfo', 'getActiveFilters', 'getColumnFilter', 'getSortState', 'getSelectionCount', 'isRowSelected'];
+      
+      if (dataReturningMethods.includes(options)) {
+        return handleMethodCall($element, instance, options, args);
+      } else {
+        // Non-data returning methods - call and return jQuery object for chaining
+        handleMethodCall($element, instance, options, args);
+        return this;
+      }
+    }
+    
+    // Initialize new instances (chainable)
     return this.each(function() {
       const $element = $(this);
       const instance = $element.data(DATA_KEY);
-      
-      // If options is a string, treat it as a method call
-      if (typeof options === 'string') {
-        handleMethodCall($element, instance, options, args);
-      } else {
-        // Initialize new instance
-        handleInitialization($element, instance, options);
-      }
+      handleInitialization($element, instance, options);
     });
   };
   

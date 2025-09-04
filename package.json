@@ -1,6 +1,6 @@
 {
   "name": "tablixjs",
-  "version": "0.1.3",
+  "version": "1.0.4",
   "description": "TablixJS is a lightweight, dependency-free JavaScript library for building powerful, responsive data tables.",
   "type": "module",
   "main": "dist/tablixjs.cjs.js",

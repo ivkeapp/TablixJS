@@ -219,9 +219,26 @@
                 const instance = $.fn.tablixJS.getInstance('#test-table');
                 results.append('<div class="status success">✓ getInstance() works</div>');
                 
-                // Test getting data
+                // Test getting data - THIS SHOULD NOW RETURN ACTUAL DATA
                 const data = $('#test-table').tablixJS('getData');
-                results.append('<div class="status success">✓ getData() works - ' + (data ? data.length : 0) + ' rows</div>');
+                console.log('getData() result:', data);
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    results.append(`<div class="status success">✓ getData() works correctly - returns ${data.length} rows</div>`);
+                    results.append(`<div class="status info">First row: ${JSON.stringify(data[0])}</div>`);
+                } else {
+                    results.append('<div class="status error">✗ getData() returned invalid data</div>');
+                }
+                
+                // Test getting selected data
+                const selectedData = $('#test-table').tablixJS('getSelectedData');
+                results.append(`<div class="status success">✓ getSelectedData() works - ${selectedData.length} selected</div>`);
+                
+                // Test pagination info
+                const paginationInfo = $('#test-table').tablixJS('getPaginationInfo');
+                if (paginationInfo) {
+                    results.append(`<div class="status success">✓ getPaginationInfo() works - Page ${paginationInfo.currentPage} of ${paginationInfo.totalPages}</div>`);
+                }
                 
                 // Test selection methods
                 $('#test-table').tablixJS('clearSelection');

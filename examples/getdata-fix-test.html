@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS getData() Fix Test</title>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- TablixJS bundled with jQuery wrapper -->
+    <script src="../dist/tablix.jquery.js"></script>
+    <link rel="stylesheet" href="../dist/tablixjs.css">
+    <link rel="stylesheet" href="../dist/tablixjs-theme-default.css">
+</head>
+<body>
+    <h1>getData() Fix Verification</h1>
+    
+    <div id="myTable"></div>
+    
+    <button onclick="testGetData()">Test getData()</button>
+    <div id="results"></div>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize table with test data
+            $('#myTable').tablixJS({
+                data: [
+                    { id: 1, name: 'John Doe', email: 'john@example.com' },
+                    { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+                    { id: 3, name: 'Bob Johnson', email: 'bob@example.com' }
+                ],
+                columns: [
+                    { name: 'id', title: 'ID' },
+                    { name: 'name', title: 'Name' },
+                    { name: 'email', title: 'Email' }
+                ]
+            });
+        });
+
+        function testGetData() {
+            console.log('=== Testing getData() method ===');
+            
+            // This is exactly what you were testing
+            const loadedData = $('#myTable').tablixJS('getData');
+            console.log('Loaded data:', loadedData);
+            console.log('Type:', typeof loadedData);
+            console.log('Is Array:', Array.isArray(loadedData));
+            
+            const results = document.getElementById('results');
+            
+            if (Array.isArray(loadedData)) {
+                results.innerHTML = `
+                    <h3>✅ SUCCESS: getData() returns actual data array!</h3>
+                    <p><strong>Type:</strong> ${typeof loadedData}</p>
+                    <p><strong>Length:</strong> ${loadedData.length}</p>
+                    <p><strong>First item:</strong> ${JSON.stringify(loadedData[0])}</p>
+                    <p><strong>Not jQuery object anymore!</strong></p>
+                `;
+            } else {
+                results.innerHTML = `
+                    <h3>❌ ISSUE: getData() returns:</h3>
+                    <p><strong>Type:</strong> ${typeof loadedData}</p>
+                    <p><strong>Value:</strong> ${loadedData}</p>
+                    <p><strong>Constructor:</strong> ${loadedData.constructor.name}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
