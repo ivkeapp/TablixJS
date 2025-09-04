@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS jQuery Bundle Fix Test</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../dist/tablix.jquery.js"></script>
+    <!-- TablixJS CSS Imports -->
+    <link rel="stylesheet" href="../dist/tablixjs.css">
+    <link rel="stylesheet" href="../dist/tablixjs-theme-default.css">
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background-color: #f8f9fa;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+        .content {
+            padding: 30px;
+        }
+        .test-section { 
+            margin-bottom: 40px; 
+            padding: 25px; 
+            border: 1px solid #e9ecef; 
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #495057;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        .status { 
+            padding: 12px 16px; 
+            margin: 15px 0; 
+            border-radius: 6px; 
+            font-weight: 500;
+            border-left: 4px solid;
+        }
+        .success { 
+            background-color: #d4edda; 
+            color: #155724; 
+            border-color: #28a745;
+        }
+        .error { 
+            background-color: #f8d7da; 
+            color: #721c24; 
+            border-color: #dc3545;
+        }
+        .info { 
+            background-color: #d1ecf1; 
+            color: #0c5460; 
+            border-color: #17a2b8;
+        }
+        .button-group {
+            margin: 25px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        /* Enhanced table container */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>TablixJS jQuery Bundle Fix Test</h1>
+        </div>
+        <div class="content">
+            
+            <div class="test-section">
+                <h2>Bundle Loading Test</h2>
+                <div id="loading-status" class="status info">Testing bundle loading...</div>
+                <div id="jquery-status" class="status info">Checking jQuery plugin registration...</div>
+            </div>
+
+            <div class="test-section">
+                <h2>jQuery Plugin Test</h2>
+                <div class="table-container">
+                    <div id="test-table"></div>
+                </div>
+                <div id="plugin-status" class="status info">Testing jQuery plugin...</div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="testMethods()">Test Plugin Methods</button>
+                    <button class="btn btn-secondary" onclick="testEvents()">Test Events</button>
+                    <button class="btn btn-danger" onclick="testDestroy()">Test Destroy</button>
+                </div>
+                <div id="method-results"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Test 1: Check if bundle loaded correctly
+            console.log('Testing bundle loading...');
+            
+            if (typeof window.TablixJS !== 'undefined') {
+                $('#loading-status').removeClass('info').addClass('success').text('✓ TablixJS bundle loaded successfully');
+                console.log('TablixJS object:', window.TablixJS);
+            } else {
+                $('#loading-status').removeClass('info').addClass('error').text('✗ TablixJS bundle failed to load');
+            }
+            
+            // Test 2: Check if jQuery plugin is registered
+            if (typeof $.fn.tablixJS !== 'undefined') {
+                $('#jquery-status').removeClass('info').addClass('success').text('✓ jQuery plugin registered successfully');
+                console.log('jQuery plugin available:', $.fn.tablixJS);
+            } else {
+                $('#jquery-status').removeClass('info').addClass('error').text('✗ jQuery plugin registration failed');
+                return;
+            }
+
+            // Test 3: Initialize table with jQuery plugin
+            try {
+                const testData = [
+                    { id: 1, name: 'John Doe', email: 'john@example.com', status: 'Active' },
+                    { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 'Pending' },
+                    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', status: 'Inactive' },
+                    { id: 4, name: 'Alice Brown', email: 'alice@example.com', status: 'Active' },
+                    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', status: 'Pending' }
+                ];
+
+                $('#test-table').tablixJS({
+                    data: testData,
+                    columns: [
+                        { name: 'id', title: 'ID', width: '80px' },
+                        { name: 'name', title: 'Name', width: '200px' },
+                        { name: 'email', title: 'Email', width: '250px' },
+                        { name: 'status', title: 'Status', width: '120px' }
+                    ],
+                    pagination: {
+                        enabled: true,
+                        pageSize: 3
+                    },
+                    search: {
+                        enabled: true
+                    },
+                    selection: {
+                        enabled: true,
+                        mode: 'multi'
+                    }
+                });
+
+                $('#plugin-status').removeClass('info').addClass('success').text('✓ jQuery plugin initialization successful!');
+                console.log('Table initialized successfully');
+
+            } catch (error) {
+                $('#plugin-status').removeClass('info').addClass('error').text('✗ jQuery plugin initialization failed: ' + error.message);
+                console.error('Plugin initialization error:', error);
+            }
+        });
+
+        function testMethods() {
+            const results = $('#method-results');
+            results.empty();
+            
+            try {
+                // Test getting instance
+                const instance = $.fn.tablixJS.getInstance('#test-table');
+                results.append('<div class="status success">✓ getInstance() works</div>');
+                
+                // Test getting data
+                const data = $('#test-table').tablixJS('getData');
+                results.append('<div class="status success">✓ getData() works - ' + (data ? data.length : 0) + ' rows</div>');
+                
+                // Test selection methods
+                $('#test-table').tablixJS('clearSelection');
+                results.append('<div class="status success">✓ clearSelection() works</div>');
+                
+            } catch (error) {
+                results.append('<div class="status error">✗ Method test failed: ' + error.message + '</div>');
+                console.error('Method test error:', error);
+            }
+        }
+
+        function testEvents() {
+            const results = $('#method-results');
+            
+            // Test jQuery event forwarding
+            $('#test-table').on('tablixjs:selectionChanged', function(e, data) {
+                results.append('<div class="status success">✓ Event forwarding works - selectionChanged received</div>');
+            });
+            
+            // Trigger a selection to test events
+            try {
+                const instance = $.fn.tablixJS.getInstance('#test-table');
+                if (instance && instance.selectRows) {
+                    instance.selectRows(['1']);
+                    results.append('<div class="status info">Event test triggered - check for event message above</div>');
+                }
+            } catch (error) {
+                results.append('<div class="status error">✗ Event test failed: ' + error.message + '</div>');
+            }
+        }
+
+        function testDestroy() {
+            const results = $('#method-results');
+            
+            try {
+                $('#test-table').tablixJS('destroy');
+                results.append('<div class="status success">✓ destroy() method works</div>');
+                
+                // Check if instance is removed
+                const instance = $.fn.tablixJS.getInstance('#test-table');
+                if (!instance) {
+                    results.append('<div class="status success">✓ Instance properly cleaned up</div>');
+                } else {
+                    results.append('<div class="status error">✗ Instance not properly cleaned up</div>');
+                }
+                
+            } catch (error) {
+                results.append('<div class="status error">✗ Destroy test failed: ' + error.message + '</div>');
+                console.error('Destroy test error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

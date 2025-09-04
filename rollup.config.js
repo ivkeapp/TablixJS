@@ -168,7 +168,6 @@ export default [
       file: 'dist/tablix.jquery.js',
       format: 'umd',
       name: 'TablixJS',
-      exports: 'named',
       sourcemap: true,
       globals: {
         'jquery': '$'
@@ -200,7 +199,6 @@ export default [
       file: 'dist/tablix.jquery.min.js',
       format: 'umd',
       name: 'TablixJS',
-      exports: 'named',
       sourcemap: true,
       globals: {
         'jquery': '$'
@@ -220,7 +218,6 @@ export default [
       file: 'dist/tablix-jquery-plugin.js',
       format: 'umd',
       name: 'TablixJQueryPlugin',
-      exports: 'named',
       sourcemap: true,
       globals: {
         'jquery': '$'
@@ -252,7 +249,6 @@ export default [
       file: 'dist/tablix-jquery-plugin.min.js',
       format: 'umd',
       name: 'TablixJQueryPlugin',
-      exports: 'named',
       sourcemap: true,
       globals: {
         'jquery': '$'

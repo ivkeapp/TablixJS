@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>TablixJS jQuery Test - Simple</title>
+    <link rel="stylesheet" href="./dist/tablixjs.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>TablixJS jQuery Test</h1>
+    
+    <div id="status"></div>
+    <div id="debug-info"></div>
+    <div id="test-table"></div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="./dist/tablix.jquery.min.js"></script>
+    
+    <script>
+        function log(message, isError = false) {
+            const status = document.getElementById('status');
+            const div = document.createElement('div');
+            div.className = 'status ' + (isError ? 'error' : 'success');
+            div.textContent = message;
+            status.appendChild(div);
+            console.log(message);
+        }
+        
+        function debug(message) {
+            const debug = document.getElementById('debug-info');
+            const div = document.createElement('div');
+            div.className = 'debug';
+            div.textContent = message;
+            debug.appendChild(div);
+            console.log('[DEBUG]', message);
+        }
+        
+        // Debug globals
+        debug('jQuery: ' + (typeof $ !== 'undefined' ? $.fn.jquery : 'NOT FOUND'));
+        debug('window.TablixJS: ' + typeof window.TablixJS);
+        debug('window.TablixJS constructor: ' + (window.TablixJS ? typeof window.TablixJS : 'N/A'));
+        debug('$.fn.tablixJS: ' + typeof $.fn.tablixJS);
+        
+        if (window.TablixJS) {
+            debug('window.TablixJS.Table: ' + typeof window.TablixJS.Table);
+            debug('window.TablixJS.name: ' + (window.TablixJS.name || 'unnamed'));
+            debug('window.TablixJS === window.TablixJS.Table: ' + (window.TablixJS === window.TablixJS.Table));
+        }
+        
+        $(document).ready(function() {
+            try {
+                const sampleData = [
+                    { id: 1, name: 'Alice', age: 28 },
+                    { id: 2, name: 'Bob', age: 35 }
+                ];
+                
+                $('#test-table').tablixJS({
+                    data: sampleData,
+                    columns: [
+                        { name: 'id', title: 'ID' },
+                        { name: 'name', title: 'Name' },
+                        { name: 'age', title: 'Age' }
+                    ]
+                });
+                
+                log('✅ Success: jQuery plugin worked!');
+                
+                // Test API access
+                const instance = $('#test-table').data('tablixjs-instance');
+                if (instance) {
+                    debug('Instance found: ' + typeof instance);
+                    debug('Instance getData: ' + typeof instance.getData);
+                } else {
+                    debug('No instance found in data store');
+                }
+                
+            } catch (error) {
+                log('❌ Error: ' + error.message, true);
+                console.error('Full error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
