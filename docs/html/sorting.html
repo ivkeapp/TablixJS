@@ -1,0 +1,339 @@
+<h1 id="tablixjs-sorting-feature-documentation">TablixJS Sorting Feature Documentation</h1>
+<h2 id="overview">Overview</h2>
+<p>TablixJS now includes a comprehensive sorting system that supports both client-side and server-side sorting with advanced features like multi-column sorting, custom sort functions, and full accessibility support.</p>
+<h2 id="features">Features</h2>
+<h3 id="core-features">Core Features</h3>
+<ul>
+<li><strong>Interactive Headers</strong>: Click column headers to cycle through sort states (ascending → descending → unsorted)</li>
+<li><strong>Multi-column Sorting</strong>: Hold Ctrl/Cmd while clicking headers to sort by multiple columns</li>
+<li><strong>Custom Sort Functions</strong>: Define custom sorting logic per column for complex data types</li>
+<li><strong>Auto-detection</strong>: Automatically detects data types (string, number, date, boolean)</li>
+<li><strong>Visual Indicators</strong>: Sort arrows with order numbers for multi-column sorting</li>
+<li><strong>Server-side Ready</strong>: Infrastructure for backend sorting integration</li>
+<li><strong>Accessibility</strong>: Full keyboard support and ARIA labels</li>
+<li><strong>Event System</strong>: beforeSort and afterSort events with detailed information</li>
+</ul>
+<h3 id="sorting-states">Sorting States</h3>
+<p>Each column can be in one of three states:</p>
+<ol>
+<li><strong>Ascending</strong> (↑): Data sorted A-Z, 0-9, oldest-newest</li>
+<li><strong>Descending</strong> (↓): Data sorted Z-A, 9-0, newest-oldest  </li>
+<li><strong>Unsorted</strong>: No sorting applied to this column</li>
+</ol>
+<h2 id="basic-usage">Basic Usage</h2>
+<h3 id="simple-table-with-sorting">Simple Table with Sorting</h3>
+<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> Table from <span class="hljs-string">'./src/core/Table.js'</span>;
+
+const table = <span class="hljs-keyword">new</span> Table(<span class="hljs-string">'#myTable'</span>, {
+<span class="hljs-symbol">  data:</span> employees,
+<span class="hljs-symbol">  columns:</span> [
+    { <span class="hljs-string">name:</span> <span class="hljs-string">'name'</span>, <span class="hljs-string">title:</span> <span class="hljs-string">'Employee Name'</span> },
+    { <span class="hljs-string">name:</span> <span class="hljs-string">'age'</span>, <span class="hljs-string">title:</span> <span class="hljs-string">'Age'</span>, <span class="hljs-string">sortType:</span> <span class="hljs-string">'number'</span> },
+    { <span class="hljs-string">name:</span> <span class="hljs-string">'salary'</span>, <span class="hljs-string">title:</span> <span class="hljs-string">'Salary'</span>, <span class="hljs-string">sortType:</span> <span class="hljs-string">'number'</span> },
+    { <span class="hljs-string">name:</span> <span class="hljs-string">'department'</span>, <span class="hljs-string">title:</span> <span class="hljs-string">'Department'</span> }
+  ],
+<span class="hljs-symbol">  sorting:</span> {
+<span class="hljs-symbol">    enabled:</span> <span class="hljs-literal">true</span>,
+<span class="hljs-symbol">    multiColumn:</span> <span class="hljs-literal">true</span>,
+<span class="hljs-symbol">    defaultSortType:</span> <span class="hljs-string">'auto'</span>
+  }
+});
+</code></pre>
+<h3 id="column-configuration-options">Column Configuration Options</h3>
+<pre><code class="lang-javascript">columns: [
+  {
+    name: <span class="hljs-string">'name'</span>,
+    title: <span class="hljs-string">'Name'</span>,
+    sortable: <span class="hljs-literal">true</span>,          <span class="hljs-regexp">//</span> Enable/disable sorting <span class="hljs-keyword">for</span> <span class="hljs-keyword">this</span> column
+    sortType: <span class="hljs-string">'string'</span>       <span class="hljs-regexp">//</span> <span class="hljs-string">'auto'</span>, <span class="hljs-string">'string'</span>, <span class="hljs-string">'number'</span>, <span class="hljs-string">'date'</span>, <span class="hljs-string">'boolean'</span>
+  },
+  {
+    name: <span class="hljs-string">'salary'</span>, 
+    title: <span class="hljs-string">'Salary'</span>,
+    sortType: <span class="hljs-string">'number'</span>,
+    sortFunction: <span class="hljs-function"><span class="hljs-params">(a, b)</span> =&gt;</span> {
+      <span class="hljs-regexp">//</span> Custom sort function
+      <span class="hljs-keyword">return</span> parseFloat(a) - parseFloat(b);
+    }
+  },
+  {
+    name: <span class="hljs-string">'joinDate'</span>,
+    title: <span class="hljs-string">'Join Date'</span>, 
+    sortType: <span class="hljs-string">'date'</span>,
+    sortFunction: <span class="hljs-function"><span class="hljs-params">(a, b)</span> =&gt;</span> <span class="hljs-keyword">new</span> Date(a) - <span class="hljs-keyword">new</span> Date(b)
+  },
+  {
+    name: <span class="hljs-string">'status'</span>,
+    title: <span class="hljs-string">'Status'</span>,
+    sortable: <span class="hljs-literal">false</span>          <span class="hljs-regexp">//</span> Disable sorting <span class="hljs-keyword">for</span> <span class="hljs-keyword">this</span> column
+  }
+]
+</code></pre>
+<h2 id="api-reference">API Reference</h2>
+<h3 id="table-methods">Table Methods</h3>
+<h4 id="-sort-columnname-direction-addtoexisting-"><code>sort(columnName, direction, addToExisting)</code></h4>
+<p>Sort by a specific column programmatically.</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Sort by name ascending</span>
+<span class="hljs-function">await table.<span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-string">'name'</span>, <span class="hljs-string">'asc'</span>)</span></span>;
+
+<span class="hljs-comment">// Sort by salary descending  </span>
+<span class="hljs-function">await table.<span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-string">'salary'</span>, <span class="hljs-string">'desc'</span>)</span></span>;
+
+<span class="hljs-comment">// Clear sort for a column</span>
+<span class="hljs-function">await table.<span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-string">'name'</span>, <span class="hljs-keyword">null</span>)</span></span>;
+
+<span class="hljs-comment">// Multi-column sort: add to existing sorts</span>
+<span class="hljs-function">await table.<span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-string">'department'</span>, <span class="hljs-string">'asc'</span>, <span class="hljs-keyword">false</span>)</span></span>;  <span class="hljs-comment">// Primary sort</span>
+<span class="hljs-function">await table.<span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-string">'salary'</span>, <span class="hljs-string">'desc'</span>, <span class="hljs-keyword">true</span>)</span></span>;      <span class="hljs-comment">// Add secondary sort</span>
+</code></pre>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>columnName</code> (string): Column to sort by</li>
+<li><code>direction</code> (string|null): &#39;asc&#39;, &#39;desc&#39;, or null for unsorted</li>
+<li><code>addToExisting</code> (boolean): Add to existing sorts vs replace all</li>
+</ul>
+<h4 id="-togglesort-columnname-addtoexisting-"><code>toggleSort(columnName, addToExisting)</code></h4>
+<p>Toggle sort state for a column (mimics header click).</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Toggle sort for name column</span>
+<span class="hljs-function">await table.<span class="hljs-title">toggleSort</span><span class="hljs-params">(<span class="hljs-string">'name'</span>)</span></span>;
+
+<span class="hljs-comment">// Toggle with multi-column support</span>
+<span class="hljs-function">await table.<span class="hljs-title">toggleSort</span><span class="hljs-params">(<span class="hljs-string">'salary'</span>, <span class="hljs-keyword">true</span>)</span></span>;
+</code></pre>
+<h4 id="-clearsorting-"><code>clearSorting()</code></h4>
+<p>Clear all sorting and return to original data order.</p>
+<pre><code class="lang-javascript">await <span class="hljs-keyword">table</span>.clearSorting();
+</code></pre>
+<h4 id="-getsortstate-"><code>getSortState()</code></h4>
+<p>Get current sort state information.</p>
+<pre><code class="lang-javascript">const sortState = table.getSortState();
+console.log(sortState);
+<span class="hljs-regexp">//</span> Output: {
+<span class="hljs-regexp">//</span>   sorts: [
+<span class="hljs-regexp">//</span>     { column: <span class="hljs-string">'department'</span>, direction: <span class="hljs-string">'asc'</span> },
+<span class="hljs-regexp">//</span>     { column: <span class="hljs-string">'salary'</span>, direction: <span class="hljs-string">'desc'</span> }
+<span class="hljs-regexp">//</span>   ],
+<span class="hljs-regexp">//</span>   mode: <span class="hljs-string">'client'</span>,
+<span class="hljs-regexp">//</span>   multiColumn: true
+<span class="hljs-regexp">//</span> }
+</code></pre>
+<h3 id="sorting-configuration">Sorting Configuration</h3>
+<pre><code class="lang-javascript"><span class="hljs-attribute">sorting</span>: {
+  <span class="hljs-attribute">enabled</span>: true,              <span class="hljs-comment">// Enable/disable sorting</span>
+  <span class="hljs-attribute">mode</span>: <span class="hljs-string">'client'</span>,            <span class="hljs-comment">// 'client' or 'server'</span>
+  <span class="hljs-attribute">multiColumn</span>: true,         <span class="hljs-comment">// Allow multi-column sorting</span>
+  <span class="hljs-attribute">serverSortLoader</span>: null,    <span class="hljs-comment">// Function for server-side sorting</span>
+  <span class="hljs-attribute">defaultSortType</span>: <span class="hljs-string">'auto'</span>,   <span class="hljs-comment">// Default sort type</span>
+  <span class="hljs-attribute">caseSensitive</span>: false,      <span class="hljs-comment">// String comparison case sensitivity</span>
+  <span class="hljs-attribute">nullsFirst</span>: false         <span class="hljs-comment">// Put null values first or last</span>
+}
+</code></pre>
+<h2 id="custom-sort-functions">Custom Sort Functions</h2>
+<h3 id="date-sorting">Date Sorting</h3>
+<pre><code class="lang-javascript">{
+  <span class="hljs-attribute">name</span>: <span class="hljs-string">'createdAt'</span>,
+  title: <span class="hljs-string">'Created Date'</span>,
+  sortFunction: (a, b) =&gt; {
+    return new <span class="hljs-built_in">Date</span>(a) - new <span class="hljs-built_in">Date</span>(b);
+  }
+}
+</code></pre>
+<h3 id="custom-priority-sorting">Custom Priority Sorting</h3>
+<pre><code class="lang-javascript">{
+  name: 'priority',
+  title: 'Priority', 
+  sortFunction: (<span class="hljs-name">a</span>, b) =&gt; {
+    const priorities = { 'High': <span class="hljs-number">3</span>, 'Medium': <span class="hljs-number">2</span>, 'Low': <span class="hljs-number">1</span> }<span class="hljs-comment">;</span>
+    return (<span class="hljs-name">priorities</span>[b] || <span class="hljs-number">0</span>) - (<span class="hljs-name">priorities</span>[a] || <span class="hljs-number">0</span>)<span class="hljs-comment">;</span>
+  }
+}
+</code></pre>
+<h3 id="numeric-string-sorting">Numeric String Sorting</h3>
+<pre><code class="lang-javascript">{
+  <span class="hljs-attr">name</span>: <span class="hljs-string">'version'</span>,
+  <span class="hljs-attr">title</span>: <span class="hljs-string">'Version'</span>,
+  <span class="hljs-attr">sortFunction</span>: <span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> parseVersion = <span class="hljs-function">(<span class="hljs-params">v</span>) =&gt;</span> v.split(<span class="hljs-string">'.'</span>).map(<span class="hljs-function"><span class="hljs-params">n</span> =&gt;</span> <span class="hljs-built_in">parseInt</span>(n) || <span class="hljs-number">0</span>);
+    <span class="hljs-keyword">const</span> aVersion = parseVersion(a);
+    <span class="hljs-keyword">const</span> bVersion = parseVersion(b);
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">Math</span>.max(aVersion.length, bVersion.length); i++) {
+      <span class="hljs-keyword">const</span> aPart = aVersion[i] || <span class="hljs-number">0</span>;
+      <span class="hljs-keyword">const</span> bPart = bVersion[i] || <span class="hljs-number">0</span>;
+      <span class="hljs-keyword">if</span> (aPart !== bPart) <span class="hljs-keyword">return</span> aPart - bPart;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+  }
+}
+</code></pre>
+<h2 id="event-handling">Event Handling</h2>
+<h3 id="sort-events">Sort Events</h3>
+<pre><code class="lang-javascript">table.<span class="hljs-keyword">on</span>(<span class="hljs-string">'beforeSort'</span>, (<span class="hljs-built_in">data</span>) =&gt; {
+  console.<span class="hljs-keyword">log</span>(<span class="hljs-string">'About to sort:'</span>, {
+    columnName: <span class="hljs-built_in">data</span>.columnName,
+    direction: <span class="hljs-built_in">data</span>.direction, 
+    addToExisting: <span class="hljs-built_in">data</span>.addToExisting,
+    currentSorts: <span class="hljs-built_in">data</span>.currentSorts
+  });
+});
+
+table.<span class="hljs-keyword">on</span>(<span class="hljs-string">'afterSort'</span>, (<span class="hljs-built_in">data</span>) =&gt; {
+  console.<span class="hljs-keyword">log</span>(<span class="hljs-string">'Sort completed:'</span>, {
+    columnName: <span class="hljs-built_in">data</span>.columnName,
+    direction: <span class="hljs-built_in">data</span>.direction,
+    currentSorts: <span class="hljs-built_in">data</span>.currentSorts
+  });
+
+  <span class="hljs-comment">// Update external UI or save state</span>
+  localStorage.setItem(<span class="hljs-string">'tableSortState'</span>, JSON.stringify(<span class="hljs-built_in">data</span>.currentSorts));
+});
+</code></pre>
+<h2 id="server-side-sorting">Server-side Sorting</h2>
+<p>For large datasets, implement server-side sorting:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> table = <span class="hljs-keyword">new</span> Table(<span class="hljs-string">'#myTable'</span>, {
+  columns: [...],
+  sorting: {
+    enabled: <span class="hljs-literal">true</span>,
+    mode: <span class="hljs-string">'server'</span>,
+    serverSortLoader: <span class="hljs-keyword">async</span> (<span class="hljs-keyword">params</span>) =&gt; {
+      <span class="hljs-comment">// params contains: { sorts, filters, page, pageSize }</span>
+      <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'/api/data'</span>, {
+        method: <span class="hljs-string">'POST'</span>,
+        headers: { <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span> },
+        body: JSON.stringify(<span class="hljs-keyword">params</span>)
+      });
+
+      <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> response.json();
+
+      <span class="hljs-keyword">return</span> {
+        data: result.items,
+        totalRows: result.totalCount
+      };
+    }
+  }
+});
+</code></pre>
+<h3 id="server-request-format">Server Request Format</h3>
+<pre><code class="lang-javascript">{
+  <span class="hljs-attribute">sorts</span>: [
+    { column: <span class="hljs-string">'name'</span>, direction: <span class="hljs-string">'asc'</span> },
+    { <span class="hljs-attribute">column</span>: <span class="hljs-string">'salary'</span>, direction: <span class="hljs-string">'desc'</span> }
+  ],
+  <span class="hljs-selector-tag">filters</span>: { <span class="hljs-attribute">department</span>: <span class="hljs-string">'Engineering'</span> },
+  <span class="hljs-selector-tag">page</span>: 1,
+  <span class="hljs-selector-tag">pageSize</span>: 10
+}
+</code></pre>
+<h2 id="user-interaction">User Interaction</h2>
+<h3 id="mouse-interactions">Mouse Interactions</h3>
+<ul>
+<li><strong>Single Click</strong>: Toggle sort for column (asc → desc → null)</li>
+<li><strong>Ctrl/Cmd + Click</strong>: Add column to multi-column sort</li>
+<li><strong>Header Hover</strong>: Visual feedback shows sortable columns</li>
+</ul>
+<h3 id="keyboard-interactions">Keyboard Interactions</h3>
+<ul>
+<li><strong>Tab</strong>: Navigate to sortable headers</li>
+<li><strong>Enter/Space</strong>: Toggle sort for focused column</li>
+<li><strong>Ctrl/Cmd + Enter</strong>: Add to multi-column sort</li>
+</ul>
+<h3 id="visual-indicators">Visual Indicators</h3>
+<ul>
+<li><strong>↑</strong>: Ascending sort</li>
+<li><strong>↓</strong>: Descending sort  </li>
+<li><strong>↕</strong>: No sort (hover state)</li>
+<li><strong>Numbers</strong>: Sort order for multi-column (1, 2, 3...)</li>
+</ul>
+<h2 id="css-customization">CSS Customization</h2>
+<h3 id="sort-arrow-styling">Sort Arrow Styling</h3>
+<pre><code class="lang-css"><span class="hljs-selector-pseudo">:root</span> {
+  <span class="hljs-attribute">--tablix-sort-active-color</span>: <span class="hljs-number">#007acc</span>;
+  <span class="hljs-attribute">--tablix-sort-inactive-color</span>: <span class="hljs-number">#ccc</span>;
+  <span class="hljs-attribute">--tablix-sort-arrow-size</span>: <span class="hljs-number">12px</span>;
+  <span class="hljs-attribute">--tablix-header-hover-bg</span>: <span class="hljs-built_in">rgba</span>(0, 0, 0, 0.05);
+  <span class="hljs-attribute">--tablix-sorted-header-bg</span>: <span class="hljs-built_in">rgba</span>(0, 122, 204, 0.05);
+}
+</code></pre>
+<h3 id="custom-sort-indicators">Custom Sort Indicators</h3>
+<pre><code class="lang-css"><span class="hljs-selector-class">.tablix-sort-asc</span><span class="hljs-selector-pseudo">::before</span> {
+  <span class="hljs-attribute">content</span>: <span class="hljs-string">'▲'</span>;
+}
+
+<span class="hljs-selector-class">.tablix-sort-desc</span><span class="hljs-selector-pseudo">::before</span> {
+  <span class="hljs-attribute">content</span>: <span class="hljs-string">'▼'</span>;
+}
+
+<span class="hljs-selector-class">.tablix-sort-none</span> {
+  <span class="hljs-attribute">opacity</span>: <span class="hljs-number">0.3</span>;
+}
+</code></pre>
+<h2 id="integration-with-pagination-filtering">Integration with Pagination &amp; Filtering</h2>
+<p>Sorting automatically integrates with other table features:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Sorting resets pagination to page 1</span>
+<span class="hljs-keyword">await</span> table.sort(<span class="hljs-string">'name'</span>, <span class="hljs-string">'asc'</span>);
+<span class="hljs-built_in">console</span>.log(table.getPaginationInfo().currentPage); <span class="hljs-comment">// 1</span>
+
+<span class="hljs-comment">// Sorting works with filtered data</span>
+<span class="hljs-keyword">await</span> table.filter({ <span class="hljs-attr">department</span>: <span class="hljs-string">'Engineering'</span> });
+<span class="hljs-keyword">await</span> table.sort(<span class="hljs-string">'salary'</span>, <span class="hljs-string">'desc'</span>); <span class="hljs-comment">// Sorts only filtered results</span>
+</code></pre>
+<h2 id="performance-considerations">Performance Considerations</h2>
+<h3 id="client-side-performance">Client-side Performance</h3>
+<ul>
+<li>Sorting is performed on filtered data, not full dataset</li>
+<li>Large datasets (&gt;10,000 rows) should consider server-side sorting</li>
+<li>Custom sort functions should be optimized for repeated calls</li>
+</ul>
+<h3 id="server-side-benefits">Server-side Benefits</h3>
+<ul>
+<li>Handles unlimited data sizes</li>
+<li>Reduces client memory usage</li>
+<li>Allows database-level optimization</li>
+<li>Supports complex sorting logic</li>
+</ul>
+<h2 id="browser-support">Browser Support</h2>
+<ul>
+<li>Modern browsers with ES6 modules</li>
+<li>Full keyboard navigation support</li>
+<li>Screen reader compatible with ARIA labels</li>
+<li>Touch-friendly on mobile devices</li>
+</ul>
+<h2 id="migration-from-legacy-code">Migration from Legacy Code</h2>
+<p>If updating from a basic sorting implementation:</p>
+<pre><code class="lang-javascript">// OLD: Basic array-based sorting
+await <span class="hljs-built_in">table</span>.sort([{ column: 'name', direction: 'asc' }]);
+
+// NEW: Enhanced single-column sorting
+await <span class="hljs-built_in">table</span>.sort('name', 'asc');
+
+// OLD: Manual sort <span class="hljs-keyword">state</span> management
+<span class="hljs-built_in">table</span>.sortState = [...];
+
+// NEW: Built-in sort <span class="hljs-keyword">state</span>
+const <span class="hljs-keyword">state</span> = <span class="hljs-built_in">table</span>.getSortState();
+</code></pre>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="common-issues">Common Issues</h3>
+<p><strong>Sort not working</strong>: Check if <code>sortable: false</code> is set on column
+<strong>Custom sort not applied</strong>: Ensure <code>sortFunction</code> returns -1, 0, or 1
+<strong>Server sort errors</strong>: Verify <code>serverSortLoader</code> returns correct format
+<strong>Performance issues</strong>: Consider server-side sorting for large datasets</p>
+<h3 id="debug-helpers">Debug Helpers</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Check if sorting is enabled</span>
+console.<span class="hljs-built-in">log</span>(<span class="hljs-keyword">table</span>.sortingManager?.options);
+
+<span class="hljs-comment">// View current sort state</span>
+console.log(<span class="hljs-keyword">table</span>.getSortState());
+
+<span class="hljs-comment">// Test sort function</span>
+const column = <span class="hljs-keyword">table</span>.options.columns.find(c <span class="hljs-comment">=&gt; c.name ===</span> <span class="hljs-comment">'salary'</span><span class="hljs-comment">)</span>;
+console.log(column.sortFunction?.(<span class="hljs-number">100</span>, <span class="hljs-number">200</span>)); <span class="hljs-comment">// Should return -100</span>
+</code></pre>
+<h2 id="examples">Examples</h2>
+<p>See the included examples for working demonstrations:</p>
+<ul>
+<li><code>examples/sorting-test.html</code> - Basic sorting functionality</li>
+<li><code>examples/sorting-demo.html</code> - Comprehensive feature showcase</li>
+<li><code>examples/server-sorting.html</code> - Server-side sorting example</li>
+</ul>
+<p>The sorting feature is now ready for production use and provides a solid foundation for future enhancements like advanced filtering integration and custom sort controls.</p>

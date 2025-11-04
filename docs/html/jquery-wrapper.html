@@ -1,0 +1,419 @@
+<h1 id="tablixjs-jquery-wrapper">TablixJS jQuery Wrapper</h1>
+<p>The TablixJS jQuery wrapper provides a familiar jQuery plugin interface for initializing and interacting with TablixJS tables.</p>
+<h2 id="installation">Installation</h2>
+<h3 id="via-npm">Via npm</h3>
+<pre><code class="lang-bash">npm <span class="hljs-keyword">install</span> tablixjs
+</code></pre>
+<h3 id="via-cdn">Via CDN</h3>
+<pre><code class="lang-html"><span class="hljs-comment">&lt;!-- Include jQuery first --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://code.jquery.com/jquery-3.6.0.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+<span class="hljs-comment">&lt;!-- Include TablixJS and jQuery wrapper --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/tablixjs@latest/dist/tablix.jquery.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+<span class="hljs-comment">&lt;!-- Include TablixJS CSS --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"https://unpkg.com/tablixjs@latest/dist/tablix.css"</span>&gt;</span>
+</code></pre>
+<h3 id="manual-download">Manual Download</h3>
+<p>Download the <code>tablix.jquery.js</code> and <code>tablix.css</code> files from the <a href="https://github.com/ivkeapp/TablixJS/releases">releases page</a> and include them in your project.</p>
+<h2 id="basic-usage">Basic Usage</h2>
+<h3 id="initialization">Initialization</h3>
+<p>Initialize a TablixJS table using jQuery:</p>
+<pre><code class="lang-javascript">$(<span class="hljs-string">'#myTable'</span>).tablixJS({
+<span class="hljs-symbol">  data:</span> [
+    { <span class="hljs-string">id:</span> <span class="hljs-number">1</span>, <span class="hljs-string">name:</span> <span class="hljs-string">'John Doe'</span>, <span class="hljs-string">email:</span> <span class="hljs-string">'john@example.com'</span>, <span class="hljs-string">age:</span> <span class="hljs-number">30</span> },
+    { <span class="hljs-string">id:</span> <span class="hljs-number">2</span>, <span class="hljs-string">name:</span> <span class="hljs-string">'Jane Smith'</span>, <span class="hljs-string">email:</span> <span class="hljs-string">'jane@example.com'</span>, <span class="hljs-string">age:</span> <span class="hljs-number">25</span> },
+    { <span class="hljs-string">id:</span> <span class="hljs-number">3</span>, <span class="hljs-string">name:</span> <span class="hljs-string">'Bob Johnson'</span>, <span class="hljs-string">email:</span> <span class="hljs-string">'bob@example.com'</span>, <span class="hljs-string">age:</span> <span class="hljs-number">35</span> }
+  ],
+<span class="hljs-symbol">  columns:</span> [
+    { <span class="hljs-string">name:</span> <span class="hljs-string">'id'</span>, <span class="hljs-string">title:</span> <span class="hljs-string">'ID'</span> },
+    { <span class="hljs-string">name:</span> <span class="hljs-string">'name'</span>, <span class="hljs-string">title:</span> <span class="hljs-string">'Full Name'</span> },
+    { <span class="hljs-string">name:</span> <span class="hljs-string">'email'</span>, <span class="hljs-string">title:</span> <span class="hljs-string">'Email Address'</span> },
+    { <span class="hljs-string">name:</span> <span class="hljs-string">'age'</span>, <span class="hljs-string">title:</span> <span class="hljs-string">'Age'</span> }
+  ]
+});
+</code></pre>
+<h3 id="alternative-initialization-syntax">Alternative Initialization Syntax</h3>
+<p>You can also use a nested options structure:</p>
+<pre><code class="lang-javascript">$(<span class="hljs-string">'#myTable'</span>).tablixJS({
+<span class="hljs-symbol">  data:</span> myData,
+<span class="hljs-symbol">  columns:</span> myColumns,
+<span class="hljs-symbol">  options:</span> {
+<span class="hljs-symbol">    pagination:</span> { <span class="hljs-string">pageSize:</span> <span class="hljs-number">20</span> },
+<span class="hljs-symbol">    sorting:</span> { <span class="hljs-string">enabled:</span> <span class="hljs-literal">true</span> },
+<span class="hljs-symbol">    filtering:</span> { <span class="hljs-string">enabled:</span> <span class="hljs-literal">true</span> },
+<span class="hljs-symbol">    selection:</span> { <span class="hljs-string">enabled:</span> <span class="hljs-literal">true</span>, <span class="hljs-string">mode:</span> <span class="hljs-string">'multi'</span> }
+  }
+});
+</code></pre>
+<h2 id="configuration-options">Configuration Options</h2>
+<p>The wrapper accepts all the same options as the core TablixJS library. Here are some common configurations:</p>
+<h3 id="basic-table-with-pagination">Basic Table with Pagination</h3>
+<pre><code class="lang-javascript">$(<span class="hljs-string">'#myTable'</span>).tablixJS({
+<span class="hljs-attr">  data:</span> myData,
+<span class="hljs-attr">  columns:</span> myColumns,
+<span class="hljs-attr">  pagination:</span> {
+<span class="hljs-attr">    enabled:</span> <span class="hljs-literal">true</span>,
+<span class="hljs-attr">    pageSize:</span> <span class="hljs-number">10</span>,
+<span class="hljs-attr">    showPageNumbers:</span> <span class="hljs-literal">true</span>,
+<span class="hljs-attr">    showPageSizes:</span> <span class="hljs-literal">true</span>,
+<span class="hljs-attr">    pageSizeOptions:</span> [<span class="hljs-number">5</span>, <span class="hljs-number">10</span>, <span class="hljs-number">25</span>, <span class="hljs-number">50</span>]
+  }
+});
+</code></pre>
+<h3 id="table-with-sorting-and-filtering">Table with Sorting and Filtering</h3>
+<pre><code class="lang-javascript">$(<span class="hljs-string">'#myTable'</span>).tablixJS({
+<span class="hljs-attr">  data:</span> myData,
+<span class="hljs-attr">  columns:</span> myColumns,
+<span class="hljs-attr">  sorting:</span> {
+<span class="hljs-attr">    enabled:</span> <span class="hljs-literal">true</span>,
+<span class="hljs-attr">    mode:</span> <span class="hljs-string">'client'</span>
+  },
+<span class="hljs-attr">  filtering:</span> {
+<span class="hljs-attr">    enabled:</span> <span class="hljs-literal">true</span>,
+<span class="hljs-attr">    showBadges:</span> <span class="hljs-literal">true</span>
+  },
+<span class="hljs-attr">  search:</span> {
+<span class="hljs-attr">    enabled:</span> <span class="hljs-literal">true</span>,
+<span class="hljs-attr">    placeholder:</span> <span class="hljs-string">'Search records...'</span>
+  }
+});
+</code></pre>
+<h3 id="table-with-row-selection">Table with Row Selection</h3>
+<pre><code class="lang-javascript"><span class="hljs-variable">$(</span><span class="hljs-string">'#myTable'</span>).tablixJS({
+  <span class="hljs-symbol">data:</span> myData,
+  <span class="hljs-symbol">columns:</span> myColumns,
+  <span class="hljs-symbol">selection:</span> {
+    <span class="hljs-symbol">enabled:</span> <span class="hljs-keyword">true</span>,
+    <span class="hljs-symbol">mode:</span> <span class="hljs-string">'multi'</span>, <span class="hljs-regexp">//</span> <span class="hljs-string">'single'</span> <span class="hljs-keyword">or</span> <span class="hljs-string">'multi'</span>
+    <span class="hljs-symbol">dataIdKey:</span> <span class="hljs-string">'id'</span>
+  }
+});
+</code></pre>
+<h3 id="table-with-virtual-scrolling">Table with Virtual Scrolling</h3>
+<pre><code class="lang-javascript">$(<span class="hljs-string">'#myTable'</span>).tablixJS({
+<span class="hljs-attr">  data:</span> largeDataSet,
+<span class="hljs-attr">  columns:</span> myColumns,
+<span class="hljs-attr">  virtualScroll:</span> {
+<span class="hljs-attr">    enabled:</span> <span class="hljs-literal">true</span>,
+<span class="hljs-attr">    containerHeight:</span> <span class="hljs-number">400</span>,
+<span class="hljs-attr">    buffer:</span> <span class="hljs-number">5</span>
+  }
+});
+</code></pre>
+<h2 id="method-calls">Method Calls</h2>
+<p>Once initialized, you can call methods on the TablixJS instance:</p>
+<h3 id="data-management">Data Management</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Reload table with new data</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'loadData'</span>, newDataArray);
+
+<span class="hljs-comment">// Alternative reload method</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'reload'</span>, newDataArray);
+
+<span class="hljs-comment">// Refresh table with current data</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'refresh'</span>);
+
+<span class="hljs-comment">// Get current data</span>
+<span class="hljs-keyword">var</span> currentData = $(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'getData'</span>);
+
+<span class="hljs-comment">// Get original unfiltered data</span>
+<span class="hljs-keyword">var</span> originalData = $(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'getOriginalData'</span>);
+</code></pre>
+<h3 id="selection-methods">Selection Methods</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Get selected row data</span>
+<span class="hljs-keyword">var</span> selectedData = $(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'getSelectedData'</span>);
+
+<span class="hljs-comment">// Get selected row IDs</span>
+<span class="hljs-keyword">var</span> selectedIds = $(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'getSelectedIds'</span>);
+
+<span class="hljs-comment">// Select rows by ID</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'selectRows'</span>, [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]);
+
+<span class="hljs-comment">// Deselect rows by ID</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'deselectRows'</span>, [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>]);
+
+<span class="hljs-comment">// Clear all selections</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'clearSelection'</span>);
+
+<span class="hljs-comment">// Select all visible rows</span>
+<span class="hljs-keyword">var</span> selectedCount = $(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'selectAllRows'</span>);
+</code></pre>
+<h3 id="filtering-methods">Filtering Methods</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Apply simple filter</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'filter'</span>, { name: <span class="hljs-string">'John'</span> });
+
+<span class="hljs-comment">// Apply advanced column filter</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'applyFilter'</span>, <span class="hljs-string">'status'</span>, {
+  <span class="hljs-keyword">type</span>: <span class="hljs-string">'value'</span>,
+  values: [<span class="hljs-string">'Active'</span>, <span class="hljs-string">'Pending'</span>]
+});
+
+<span class="hljs-comment">// Clear specific column filter</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'clearFilter'</span>, <span class="hljs-string">'status'</span>);
+
+<span class="hljs-comment">// Clear all filters</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'clearAllFilters'</span>);
+</code></pre>
+<h3 id="sorting-methods">Sorting Methods</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Sort by column</span>
+<span class="hljs-symbol">$</span>(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'sort'</span>, <span class="hljs-string">'name'</span>, <span class="hljs-string">'asc'</span>); <span class="hljs-comment">// or 'desc'</span>
+
+<span class="hljs-comment">// Toggle sort for a column</span>
+<span class="hljs-symbol">$</span>(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'toggleSort'</span>, <span class="hljs-string">'name'</span>);
+
+<span class="hljs-comment">// Clear all sorting</span>
+<span class="hljs-symbol">$</span>(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'clearSorting'</span>);
+</code></pre>
+<h3 id="search-methods">Search Methods</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Set search term</span>
+<span class="hljs-symbol">$</span>(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'setSearchTerm'</span>, <span class="hljs-string">'john'</span>);
+
+<span class="hljs-comment">// Clear search</span>
+<span class="hljs-symbol">$</span>(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'clearSearch'</span>);
+</code></pre>
+<h3 id="pagination-methods">Pagination Methods</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Navigate pages</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'nextPage'</span>);
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'prevPage'</span>);
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'firstPage'</span>);
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'lastPage'</span>);
+
+<span class="hljs-comment">// Go to specific page</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'goToPage'</span>, <span class="hljs-number">3</span>);
+
+<span class="hljs-comment">// Change page size</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'changePageSize'</span>, <span class="hljs-number">25</span>);
+
+<span class="hljs-comment">// Get pagination info</span>
+<span class="hljs-keyword">var</span> pageInfo = $(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'getPaginationInfo'</span>);
+</code></pre>
+<h3 id="localization-methods">Localization Methods</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Set language</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'setLanguage'</span>, <span class="hljs-string">'fr'</span>);
+
+<span class="hljs-comment">// Get current language</span>
+<span class="hljs-keyword">var</span> currentLang = $(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'getCurrentLanguage'</span>);
+
+<span class="hljs-comment">// Get available languages</span>
+<span class="hljs-keyword">var</span> availableLangs = $(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'getAvailableLanguages'</span>);
+</code></pre>
+<h3 id="configuration-methods">Configuration Methods</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Update options</span>
+<span class="hljs-symbol">$</span>(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'setOptions'</span>, {
+  pagination: { pageSize: <span class="hljs-number">20</span> }
+});
+
+<span class="hljs-comment">// Get current options</span>
+var <span class="hljs-keyword">options</span> = <span class="hljs-symbol">$</span>(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'getOptions'</span>);
+</code></pre>
+<h3 id="event-handling">Event Handling</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Add event listener</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'on'</span>, <span class="hljs-string">'afterLoad'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">data</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Data loaded:'</span>, data);
+});
+
+<span class="hljs-comment">// Remove event listener</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'off'</span>, <span class="hljs-string">'afterLoad'</span>, handlerFunction);
+
+<span class="hljs-comment">// Trigger custom event</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'trigger'</span>, <span class="hljs-string">'customEvent'</span>, customData);
+</code></pre>
+<h3 id="instance-management">Instance Management</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Get the underlying TablixJS instance</span>
+<span class="hljs-keyword">var</span> tablixInstance = $(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'getInstance'</span>);
+
+<span class="hljs-comment">// Destroy the table</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'destroy'</span>);
+</code></pre>
+<h2 id="jquery-events">jQuery Events</h2>
+<p>The wrapper automatically forwards TablixJS events as jQuery events with the <code>tablixjs:</code> prefix:</p>
+<pre><code class="lang-javascript">$(<span class="hljs-string">'#myTable'</span>)
+  .on(<span class="hljs-string">'tablixjs:afterLoad'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event, data, instance</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Table loaded with data:'</span>, data);
+  })
+  .on(<span class="hljs-string">'tablixjs:selectionChanged'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event, selectionData, instance</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Selection changed:'</span>, selectionData);
+  })
+  .on(<span class="hljs-string">'tablixjs:afterFilter'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event, filterData, instance</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Table filtered:'</span>, filterData);
+  })
+  .on(<span class="hljs-string">'tablixjs:afterSort'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event, sortData, instance</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Table sorted:'</span>, sortData);
+  })
+  .on(<span class="hljs-string">'tablixjs:afterPageChange'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event, pageInfo, instance</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Page changed:'</span>, pageInfo);
+  });
+</code></pre>
+<h3 id="available-jquery-events">Available jQuery Events</h3>
+<ul>
+<li><code>tablixjs:afterLoad</code> - Fired after data is loaded</li>
+<li><code>tablixjs:beforeLoad</code> - Fired before data loading starts</li>
+<li><code>tablixjs:loadError</code> - Fired when data loading fails</li>
+<li><code>tablixjs:afterFilter</code> - Fired after filtering is applied</li>
+<li><code>tablixjs:afterSort</code> - Fired after sorting is applied</li>
+<li><code>tablixjs:afterPageChange</code> - Fired after page navigation</li>
+<li><code>tablixjs:afterSearch</code> - Fired after search is performed</li>
+<li><code>tablixjs:selectionChanged</code> - Fired when row selection changes</li>
+<li><code>tablixjs:selectAll</code> - Fired when all rows are selected</li>
+<li><code>tablixjs:rowSelected</code> - Fired when a row is selected</li>
+<li><code>tablixjs:rowDeselected</code> - Fired when a row is deselected</li>
+</ul>
+<h2 id="static-methods">Static Methods</h2>
+<p>The wrapper provides some static utility methods:</p>
+<pre><code class="lang-javascript">// Get TablixJS<span class="hljs-built_in"> instance </span>from any element
+var<span class="hljs-built_in"> instance </span>= $.fn.tablixJS.getInstance('<span class="hljs-comment">#myTable');</span>
+
+// Check<span class="hljs-built_in"> if </span>element has TablixJS initialized
+var isInitialized = $.fn.tablixJS.isInitialized('<span class="hljs-comment">#myTable');</span>
+
+// Destroy all TablixJS instances on the page
+$.fn.tablixJS.destroyAll();
+
+// Get wrapper version
+console.log('TablixJS jQuery Wrapper version:', $.fn.tablixJS.version);
+</code></pre>
+<h2 id="multiple-tables">Multiple Tables</h2>
+<p>You can initialize multiple tables on the same page:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Initialize multiple tables</span>
+$(<span class="hljs-string">'.data-table'</span>).tablixJS({
+  <span class="hljs-attr">pagination</span>: { <span class="hljs-attr">pageSize</span>: <span class="hljs-number">10</span> },
+  <span class="hljs-attr">sorting</span>: { <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span> }
+});
+
+<span class="hljs-comment">// Call methods on specific tables</span>
+$(<span class="hljs-string">'#table1'</span>).tablixJS(<span class="hljs-string">'loadData'</span>, data1);
+$(<span class="hljs-string">'#table2'</span>).tablixJS(<span class="hljs-string">'loadData'</span>, data2);
+
+<span class="hljs-comment">// Or call methods on all tables</span>
+$(<span class="hljs-string">'.data-table'</span>).tablixJS(<span class="hljs-string">'clearSearch'</span>);
+</code></pre>
+<h2 id="integration-with-existing-jquery-code">Integration with Existing jQuery Code</h2>
+<p>The wrapper integrates seamlessly with existing jQuery workflows:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Chain with other jQuery methods</span>
+$(<span class="hljs-string">'#myTable'</span>)
+  .tablixJS(tableOptions)
+  .addClass(<span class="hljs-string">'my-custom-class'</span>)
+  .on(<span class="hljs-string">'tablixjs:afterLoad'</span>, handleDataLoad);
+
+<span class="hljs-comment">// Use in jQuery document ready</span>
+$(<span class="hljs-built_in">document</span>).ready(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  $(<span class="hljs-string">'#myTable'</span>).tablixJS({
+    <span class="hljs-attr">data</span>: myData,
+    <span class="hljs-attr">columns</span>: myColumns
+  });
+});
+
+<span class="hljs-comment">// Dynamic initialization based on data attributes</span>
+$(<span class="hljs-string">'[data-tablix]'</span>).each(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">var</span> $table = $(<span class="hljs-keyword">this</span>);
+  <span class="hljs-keyword">var</span> config = $table.data(<span class="hljs-string">'tablix-config'</span>);
+  $table.tablixJS(config);
+});
+</code></pre>
+<h2 id="error-handling">Error Handling</h2>
+<p>The wrapper includes error handling for common scenarios:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">try</span> {
+  $(<span class="hljs-string">'#myTable'</span>).tablixJS({
+    data: invalidData,
+    columns: myColumns
+  });
+} <span class="hljs-keyword">catch</span> (<span class="hljs-built_in">error</span>) {
+  console.<span class="hljs-built_in">error</span>(<span class="hljs-string">'Failed to initialize table:'</span>, <span class="hljs-built_in">error</span>);
+}
+
+<span class="hljs-comment">// Handle load errors with events</span>
+$(<span class="hljs-string">'#myTable'</span>).on(<span class="hljs-string">'tablixjs:loadError'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(event, errorInfo)</span> {</span>
+  console.<span class="hljs-built_in">error</span>(<span class="hljs-string">'Data loading failed:'</span>, errorInfo.<span class="hljs-built_in">error</span>);
+  <span class="hljs-comment">// Show user-friendly error message</span>
+  alert(<span class="hljs-string">'Failed to load table data. Please try again.'</span>);
+});
+</code></pre>
+<h2 id="performance-tips">Performance Tips</h2>
+<ol>
+<li><p><strong>Batch Updates</strong>: When making multiple changes, consider destroying and reinitializing rather than multiple method calls.</p>
+</li>
+<li><p><strong>Event Debouncing</strong>: For frequently triggered events, consider debouncing your handlers:</p>
+</li>
+</ol>
+<pre><code class="lang-javascript"><span class="hljs-keyword">let</span> searchTimeout;
+$(<span class="hljs-string">'#searchInput'</span>).on(<span class="hljs-string">'input'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    $(<span class="hljs-string">'#myTable'</span>).tablixJS(<span class="hljs-string">'setSearchTerm'</span>, $(<span class="hljs-keyword">this</span>).val());
+  }, <span class="hljs-number">300</span>);
+});
+</code></pre>
+<ol>
+<li><strong>Virtual Scrolling</strong>: For large datasets, enable virtual scrolling:</li>
+</ol>
+<pre><code class="lang-javascript">$(<span class="hljs-string">'#myTable'</span>).tablixJS({
+<span class="hljs-attr">  data:</span> largeDataSet,
+<span class="hljs-attr">  columns:</span> myColumns,
+<span class="hljs-attr">  virtualScroll:</span> { enabled: <span class="hljs-literal">true</span> }
+});
+</code></pre>
+<h2 id="migration-from-other-table-libraries">Migration from Other Table Libraries</h2>
+<h3 id="from-datatables">From DataTables</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// DataTables initialization</span>
+$(<span class="hljs-string">'#myTable'</span>).DataTable({
+<span class="hljs-symbol">  data:</span> myData,
+<span class="hljs-symbol">  columns:</span> myColumns
+});
+
+<span class="hljs-comment">// TablixJS equivalent</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS({
+<span class="hljs-symbol">  data:</span> myData,
+<span class="hljs-symbol">  columns:</span> myColumns,
+<span class="hljs-symbol">  pagination:</span> { <span class="hljs-string">enabled:</span> <span class="hljs-literal">true</span> },
+<span class="hljs-symbol">  sorting:</span> { <span class="hljs-string">enabled:</span> <span class="hljs-literal">true</span> },
+<span class="hljs-symbol">  search:</span> { <span class="hljs-string">enabled:</span> <span class="hljs-literal">true</span> }
+});
+</code></pre>
+<h3 id="from-jquery-table-plugins">From jQuery Table Plugins</h3>
+<p>Most jQuery table plugins follow similar patterns. Replace the plugin name and adjust the options structure:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Generic jQuery table plugin</span>
+$(<span class="hljs-string">'#myTable'</span>).someTablePlugin({
+<span class="hljs-symbol">  data:</span> myData,
+<span class="hljs-symbol">  pagination:</span> <span class="hljs-literal">true</span>,
+<span class="hljs-symbol">  sorting:</span> <span class="hljs-literal">true</span>
+});
+
+<span class="hljs-comment">// TablixJS equivalent</span>
+$(<span class="hljs-string">'#myTable'</span>).tablixJS({
+<span class="hljs-symbol">  data:</span> myData,
+<span class="hljs-symbol">  pagination:</span> { <span class="hljs-string">enabled:</span> <span class="hljs-literal">true</span> },
+<span class="hljs-symbol">  sorting:</span> { <span class="hljs-string">enabled:</span> <span class="hljs-literal">true</span> }
+});
+</code></pre>
+<h2 id="browser-support">Browser Support</h2>
+<p>The jQuery wrapper supports the same browsers as the core TablixJS library:</p>
+<ul>
+<li>Chrome 60+</li>
+<li>Firefox 55+</li>
+<li>Safari 12+</li>
+<li>Edge 79+</li>
+<li>Internet Explorer 11 (with polyfills)</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="common-issues">Common Issues</h3>
+<ol>
+<li><strong>jQuery not loaded</strong>: Ensure jQuery is loaded before the TablixJS wrapper.</li>
+<li><strong>CSS not included</strong>: Make sure to include the TablixJS CSS file.</li>
+<li><strong>Method not found</strong>: Check that the table is initialized before calling methods.</li>
+<li><strong>Data not displaying</strong>: Verify that your data array contains objects with properties matching column names.</li>
+</ol>
+<h3 id="debugging">Debugging</h3>
+<p>Enable debugging mode to get more detailed console output:</p>
+<pre><code class="lang-javascript">$(<span class="hljs-string">'#myTable'</span>).tablixJS({
+<span class="hljs-attr">  data:</span> myData,
+<span class="hljs-attr">  columns:</span> myColumns,
+<span class="hljs-attr">  debug:</span> <span class="hljs-literal">true</span>
+});
+</code></pre>
+<p>Or check if the table is properly initialized:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">if</span> ($.fn.tablixJS.isInitialized('<span class="hljs-comment">#myTable')) {</span>
+  console.<span class="hljs-built_in">log</span>('Table <span class="hljs-keyword">is</span> initialized');
+} <span class="hljs-keyword">else</span> {
+  console.<span class="hljs-built_in">log</span>('Table <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> initialized');
+}
+</code></pre>

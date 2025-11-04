@@ -1,0 +1,387 @@
+<h1 id="tablixjs-advanced-filtering">TablixJS Advanced Filtering</h1>
+<p>TablixJS provides powerful column filtering capabilities with support for multiple filter types, custom operators, and both client-side and server-side filtering.</p>
+<h2 id="features">Features</h2>
+<ul>
+<li><strong>Multi-column filtering</strong> with independent filter states</li>
+<li><strong>Two filter types</strong>: Value-based (checkbox selection) and Condition-based (operators)</li>
+<li><strong>Multiple conditions</strong> per column with AND logic</li>
+<li><strong>Built-in operators</strong>: equals, contains, begins with, ends with, empty checks, etc.</li>
+<li><strong>Custom operators</strong> for extensibility</li>
+<li><strong>Client-side and server-side</strong> filtering modes</li>
+<li><strong>Visual indicators</strong> with optional badges and tooltips</li>
+<li><strong>Event hooks</strong> for <code>beforeFilter</code> and <code>afterFilter</code></li>
+<li><strong>Integration</strong> with sorting and pagination</li>
+</ul>
+<h2 id="basic-setup">Basic Setup</h2>
+<pre><code class="lang-javascript">const table = new Table(<span class="hljs-string">'#myTable'</span>, {
+<span class="hljs-attr">  data:</span> myData,
+<span class="hljs-attr">  columns:</span> myColumns,
+<span class="hljs-attr">  filtering:</span> {
+<span class="hljs-attr">    enabled:</span> <span class="hljs-literal">true</span>,
+<span class="hljs-attr">    mode:</span> <span class="hljs-string">'client'</span>, // <span class="hljs-string">'client'</span> or <span class="hljs-string">'server'</span>
+<span class="hljs-attr">    showBadges:</span> <span class="hljs-literal">true</span>,
+<span class="hljs-attr">    showTooltips:</span> <span class="hljs-literal">true</span>,
+<span class="hljs-attr">    debounceDelay:</span> <span class="hljs-number">300</span>
+  }
+});
+</code></pre>
+<h2 id="configuration-options">Configuration Options</h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Enable/disable filtering</td>
+</tr>
+<tr>
+<td><code>mode</code></td>
+<td>string</td>
+<td><code>&#39;client&#39;</code></td>
+<td>Filtering mode: &#39;client&#39; or &#39;server&#39;</td>
+</tr>
+<tr>
+<td><code>serverFilterLoader</code></td>
+<td>function</td>
+<td><code>null</code></td>
+<td>Function for server-side filtering</td>
+</tr>
+<tr>
+<td><code>debounceDelay</code></td>
+<td>number</td>
+<td><code>300</code></td>
+<td>Debounce delay for input filters (ms)</td>
+</tr>
+<tr>
+<td><code>showBadges</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Show filter count badges</td>
+</tr>
+<tr>
+<td><code>showTooltips</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Show filter summary tooltips</td>
+</tr>
+</tbody>
+</table>
+<h2 id="user-interface">User Interface</h2>
+<h3 id="filter-icons">Filter Icons</h3>
+<p>Filter icons (🞃) appear in column headers next to sort indicators. Clicking opens a dropdown with filtering options.</p>
+<h3 id="filter-dropdown">Filter Dropdown</h3>
+<p>The dropdown provides two tabs:</p>
+<ul>
+<li><strong>Filter by Value</strong>: Checkbox list of unique column values</li>
+<li><strong>Filter by Condition</strong>: Condition builder with operators and values</li>
+</ul>
+<h3 id="visual-indicators">Visual Indicators</h3>
+<ul>
+<li><strong>Active filters</strong>: Filter icon changes color and shows badge</li>
+<li><strong>Filter badges</strong>: Show count of selected values or active conditions</li>
+<li><strong>Column highlighting</strong>: Filtered columns are visually distinguished</li>
+</ul>
+<h2 id="api-reference">API Reference</h2>
+<h3 id="table-methods">Table Methods</h3>
+<h4 id="-applyfilter-columnname-filterconfig-"><code>applyFilter(columnName, filterConfig)</code></h4>
+<p>Apply a filter to a specific column.</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Value filter</span>
+<span class="hljs-selector-tag">await</span> <span class="hljs-selector-tag">table</span><span class="hljs-selector-class">.applyFilter</span>(<span class="hljs-string">'status'</span>, {
+  <span class="hljs-attribute">type</span>: <span class="hljs-string">'value'</span>,
+  <span class="hljs-attribute">values</span>: [<span class="hljs-string">'Active'</span>, <span class="hljs-string">'Pending'</span>]
+});
+
+<span class="hljs-comment">// Condition filter</span>
+<span class="hljs-selector-tag">await</span> <span class="hljs-selector-tag">table</span><span class="hljs-selector-class">.applyFilter</span>(<span class="hljs-string">'name'</span>, {
+  <span class="hljs-attribute">type</span>: <span class="hljs-string">'condition'</span>,
+  <span class="hljs-attribute">conditions</span>: [
+    { <span class="hljs-attribute">operator</span>: <span class="hljs-string">'beginsWith'</span>, <span class="hljs-attribute">value</span>: <span class="hljs-string">'A'</span> },
+    { <span class="hljs-attribute">operator</span>: <span class="hljs-string">'contains'</span>, <span class="hljs-attribute">value</span>: <span class="hljs-string">'son'</span> }
+  ]
+});
+</code></pre>
+<h4 id="-clearfilter-columnname-"><code>clearFilter(columnName)</code></h4>
+<p>Clear filter for a specific column.</p>
+<pre><code class="lang-javascript"><span class="hljs-function">await table.<span class="hljs-title">clearFilter</span><span class="hljs-params">(<span class="hljs-string">'status'</span>)</span></span>;
+</code></pre>
+<h4 id="-clearallfilters-"><code>clearAllFilters()</code></h4>
+<p>Clear all active filters.</p>
+<pre><code class="lang-javascript">await <span class="hljs-keyword">table</span>.clearAllFilters();
+</code></pre>
+<h4 id="-getactivefilters-"><code>getActiveFilters()</code></h4>
+<p>Get all active filters.</p>
+<pre><code class="lang-javascript">const filters = <span class="hljs-keyword">table</span>.getActiveFilters();
+<span class="hljs-comment">// Returns: { columnName: filterConfig, ... }</span>
+</code></pre>
+<h4 id="-getcolumnfilter-columnname-"><code>getColumnFilter(columnName)</code></h4>
+<p>Get filter state for a specific column.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> filter = table.getColumnFilter(<span class="hljs-string">'status'</span>)<span class="hljs-comment">;</span>
+// Returns: { type, config, isActive } <span class="hljs-literal">or</span> <span class="hljs-literal">null</span>
+</code></pre>
+<h2 id="filter-types">Filter Types</h2>
+<h3 id="value-filter">Value Filter</h3>
+<p>Allows users to select/deselect specific values from the column.</p>
+<pre><code class="lang-javascript">{
+  <span class="hljs-attribute">type</span>: <span class="hljs-string">'value'</span>,
+  values: [<span class="hljs-string">'Active'</span>, <span class="hljs-string">'Pending'</span>, <span class="hljs-string">'Inactive'</span>]
+}
+</code></pre>
+<h3 id="condition-filter">Condition Filter</h3>
+<p>Allows users to create conditions using operators.</p>
+<pre><code class="lang-javascript">{
+  <span class="hljs-attribute">type</span>: <span class="hljs-string">'condition'</span>,
+  conditions: [
+    { operator: <span class="hljs-string">'beginsWith'</span>, value: <span class="hljs-string">'A'</span> },
+    { <span class="hljs-attribute">operator</span>: <span class="hljs-string">'contains'</span>, value: <span class="hljs-string">'manager'</span> }
+  ]
+}
+</code></pre>
+<h2 id="built-in-operators">Built-in Operators</h2>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Label</th>
+<th>Description</th>
+<th>Requires Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>none</code></td>
+<td>None</td>
+<td>No filtering</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>isEmpty</code></td>
+<td>Is empty</td>
+<td>Field is empty/null</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>isNotEmpty</code></td>
+<td>Is not empty</td>
+<td>Field has value</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>equals</code></td>
+<td>Is equal to</td>
+<td>Exact match</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>notEquals</code></td>
+<td>Is not equal to</td>
+<td>Does not match</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>beginsWith</code></td>
+<td>Begins with</td>
+<td>Starts with value</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>endsWith</code></td>
+<td>Ends with</td>
+<td>Ends with value</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>contains</code></td>
+<td>Contains</td>
+<td>Contains value</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>notContains</code></td>
+<td>Does not contain</td>
+<td>Does not contain value</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h2 id="custom-operators">Custom Operators</h2>
+<p>Register custom operators for specialized filtering:</p>
+<pre><code class="lang-javascript">table.filterManager.registerOperator(<span class="hljs-string">'isEven'</span>, {
+  label: <span class="hljs-string">'Is even number'</span>,
+  apply: (value) =&gt; {
+    <span class="hljs-keyword">const</span> <span class="hljs-built_in">num</span> = parseInt(value);
+    <span class="hljs-keyword">return</span> !isNaN(<span class="hljs-built_in">num</span>) &amp;&amp; <span class="hljs-built_in">num</span> % <span class="hljs-number">2</span> === <span class="hljs-number">0</span>;
+  }
+});
+
+<span class="hljs-comment">// Use custom operator</span>
+<span class="hljs-keyword">await</span> table.applyFilter(<span class="hljs-string">'id'</span>, {
+  type: <span class="hljs-string">'condition'</span>,
+  conditions: [{ <span class="hljs-keyword">operator</span>: <span class="hljs-string">'isEven'</span> }]
+});
+</code></pre>
+<h3 id="custom-operator-structure">Custom Operator Structure</h3>
+<pre><code class="lang-javascript">{
+  <span class="hljs-attribute">label</span>: <span class="hljs-string">'Display label'</span>,
+  apply: (cellValue, filterValue) =&gt; boolean
+}
+</code></pre>
+<h2 id="server-side-filtering">Server-Side Filtering</h2>
+<p>For large datasets, implement server-side filtering:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> table = <span class="hljs-keyword">new</span> Table(<span class="hljs-string">'#myTable'</span>, {
+  filtering: {
+    enabled: <span class="hljs-literal">true</span>,
+    mode: <span class="hljs-string">'server'</span>,
+    serverFilterLoader: <span class="hljs-keyword">async</span> (<span class="hljs-keyword">params</span>) =&gt; {
+      <span class="hljs-comment">// params: { filters, sort, page, pageSize }</span>
+      <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'/api/data'</span>, {
+        method: <span class="hljs-string">'POST'</span>,
+        headers: { <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span> },
+        body: JSON.stringify(<span class="hljs-keyword">params</span>)
+      });
+
+      <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> response.json();
+
+      <span class="hljs-keyword">return</span> {
+        data: result.items,
+        totalRows: result.totalCount
+      };
+    }
+  }
+});
+</code></pre>
+<h3 id="server-parameters">Server Parameters</h3>
+<p>The <code>serverFilterLoader</code> receives:</p>
+<pre><code class="lang-javascript">{
+  <span class="hljs-attribute">filters</span>: {
+    columnName: { type: <span class="hljs-string">'value'</span>|<span class="hljs-string">'condition'</span>, ... }
+  },
+  <span class="hljs-selector-tag">sort</span>: { <span class="hljs-attribute">column</span>: <span class="hljs-string">'name'</span>, direction: <span class="hljs-string">'asc'</span> },
+  <span class="hljs-selector-tag">page</span>: 1,
+  <span class="hljs-selector-tag">pageSize</span>: 10
+}
+</code></pre>
+<h2 id="event-handling">Event Handling</h2>
+<p>Listen for filter events to respond to user actions:</p>
+<pre><code class="lang-javascript">table.eventManager.<span class="hljs-literal">on</span>(<span class="hljs-string">'beforeFilter'</span>, <span class="hljs-function"><span class="hljs-params">(data)</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'About to filter:'</span>, data);
+  <span class="hljs-regexp">//</span> data: { columnName, filterConfig, currentFilters }
+});
+
+table.eventManager.<span class="hljs-literal">on</span>(<span class="hljs-string">'afterFilter'</span>, <span class="hljs-function"><span class="hljs-params">(data)</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Filter applied:'</span>, data);
+  <span class="hljs-regexp">//</span> data: { columnName, filterConfig, filteredData, activeFilters }
+});
+</code></pre>
+<h2 id="integration-with-other-features">Integration with Other Features</h2>
+<h3 id="sorting">Sorting</h3>
+<p>Filters work seamlessly with sorting:</p>
+<pre><code class="lang-javascript"><span class="hljs-selector-tag">await</span> <span class="hljs-selector-tag">table</span><span class="hljs-selector-class">.applyFilter</span>(<span class="hljs-string">'department'</span>, {
+  <span class="hljs-attribute">type</span>: <span class="hljs-string">'value'</span>,
+  <span class="hljs-attribute">values</span>: [<span class="hljs-string">'Engineering'</span>]
+});
+<span class="hljs-selector-tag">await</span> <span class="hljs-selector-tag">table</span><span class="hljs-selector-class">.sort</span>(<span class="hljs-string">'name'</span>, <span class="hljs-string">'asc'</span>); <span class="hljs-comment">// Sort filtered results</span>
+</code></pre>
+<h3 id="pagination">Pagination</h3>
+<p>Pagination automatically resets to first page when filters change:</p>
+<pre><code class="lang-javascript">await <span class="hljs-keyword">table</span>.applyFilter('status', {
+  type: <span class="hljs-string">'value'</span>,
+  values: [<span class="hljs-string">'Active'</span>]
+});
+<span class="hljs-comment">// Pagination automatically goes to page 1</span>
+</code></pre>
+<h2 id="styling-and-theming">Styling and Theming</h2>
+<p>Filtering uses CSS custom properties for theming:</p>
+<pre><code class="lang-css"><span class="hljs-selector-pseudo">:root</span> {
+  <span class="hljs-attribute">--tablix-btn-active-color</span>: <span class="hljs-number">#007bff</span>;
+  <span class="hljs-attribute">--tablix-dropdown-bg</span>: white;
+  <span class="hljs-attribute">--tablix-border-color</span>: <span class="hljs-number">#dee2e6</span>;
+  <span class="hljs-comment">/* ... more variables */</span>
+}
+
+<span class="hljs-comment">/* Dark theme support */</span>
+<span class="hljs-selector-attr">[data-theme="dark"]</span> {
+  <span class="hljs-attribute">--tablix-dropdown-bg</span>: <span class="hljs-number">#343a40</span>;
+  <span class="hljs-attribute">--tablix-border-color</span>: <span class="hljs-number">#495057</span>;
+  <span class="hljs-comment">/* ... dark theme overrides */</span>
+}
+</code></pre>
+<h2 id="performance-considerations">Performance Considerations</h2>
+<h3 id="client-side-filtering">Client-Side Filtering</h3>
+<ul>
+<li>Efficient for datasets up to ~10,000 rows</li>
+<li>All filtering happens in memory</li>
+<li>Instant results with no network requests</li>
+</ul>
+<h3 id="server-side-filtering">Server-Side Filtering</h3>
+<ul>
+<li>Required for large datasets (10,000+ rows)</li>
+<li>Reduces memory usage</li>
+<li>Requires backend implementation</li>
+</ul>
+<h3 id="optimization-tips">Optimization Tips</h3>
+<ol>
+<li>Use server-side filtering for large datasets</li>
+<li>Implement debouncing for condition filters</li>
+<li>Consider limiting unique values in value filters</li>
+<li>Use pagination to limit rendered rows</li>
+</ol>
+<h2 id="advanced-examples">Advanced Examples</h2>
+<h3 id="batch-filter-application">Batch Filter Application</h3>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> batchApplyFilters = <span class="hljs-keyword">async</span> (filterConfigs) =&gt; {
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [columnName, config] of <span class="hljs-built_in">Object</span>.entries(filterConfigs)) {
+    <span class="hljs-keyword">await</span> table.applyFilter(columnName, config);
+  }
+};
+
+<span class="hljs-keyword">await</span> batchApplyFilters({
+  status: { type: <span class="hljs-string">'value'</span>, values: [<span class="hljs-string">'Active'</span>] },
+  department: { type: <span class="hljs-string">'value'</span>, values: [<span class="hljs-string">'Engineering'</span>] },
+  salary: { type: <span class="hljs-string">'condition'</span>, conditions: [{ <span class="hljs-keyword">operator</span>: <span class="hljs-string">'contains'</span>, value: <span class="hljs-string">'7'</span> }] }
+});
+</code></pre>
+<h3 id="dynamic-filter-management">Dynamic Filter Management</h3>
+<pre><code class="lang-javascript">// Save current filter <span class="hljs-keyword">state</span>
+const currentFilters = <span class="hljs-built_in">table</span>.getActiveFilters();
+localStorage.<span class="hljs-built_in">set</span>Item('<span class="hljs-built_in">table</span>Filters', JSON.stringify(currentFilters));
+
+// Restore filter <span class="hljs-keyword">state</span>
+const savedFilters = JSON.parse(localStorage.getItem('<span class="hljs-built_in">table</span>Filters') || '{}');
+<span class="hljs-keyword">for</span> (const [columnName, config] of Object.entries(savedFilters)) {
+  await <span class="hljs-built_in">table</span>.applyFilter(columnName, config);
+}
+</code></pre>
+<h3 id="custom-filter-ui">Custom Filter UI</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Access FilterUI for customization</span>
+<span class="hljs-keyword">const</span> filterUI = table.filterUI;
+
+<span class="hljs-comment">// Extend with custom behaviors</span>
+filterUI.customMethod = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-comment">// Custom logic</span>
+};
+</code></pre>
+<h2 id="browser-support">Browser Support</h2>
+<ul>
+<li>Modern browsers with ES6+ support</li>
+<li>CSS custom properties support</li>
+<li>No external dependencies</li>
+</ul>
+<h2 id="migration-from-legacy-filtering">Migration from Legacy Filtering</h2>
+<p>If upgrading from the basic filtering in DataManager:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Old way (still supported)</span>
+<span class="hljs-selector-tag">await</span> <span class="hljs-selector-tag">table</span><span class="hljs-selector-class">.filter</span>({ <span class="hljs-attribute">name</span>: <span class="hljs-string">'John'</span> });
+
+<span class="hljs-comment">// New way (recommended)</span>
+<span class="hljs-selector-tag">await</span> <span class="hljs-selector-tag">table</span><span class="hljs-selector-class">.applyFilter</span>(<span class="hljs-string">'name'</span>, {
+  <span class="hljs-attribute">type</span>: <span class="hljs-string">'condition'</span>,
+  <span class="hljs-attribute">conditions</span>: [{ <span class="hljs-attribute">operator</span>: <span class="hljs-string">'contains'</span>, <span class="hljs-attribute">value</span>: <span class="hljs-string">'John'</span> }]
+});
+</code></pre>
+<p>The legacy <code>filter()</code> method continues to work for backward compatibility.</p>

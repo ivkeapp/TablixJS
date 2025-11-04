@@ -1,0 +1,482 @@
+<h1 id="tablixjs-plugin-architecture-extensibility">TablixJS Plugin Architecture &amp; Extensibility</h1>
+<p>This document explains how TablixJS is designed for extensibility and how to create plugins for additional functionality.</p>
+<h2 id="architecture-overview">Architecture Overview</h2>
+<p>TablixJS follows a modular architecture with clear separation of concerns:</p>
+<pre><code><span class="hljs-selector-tag">Table</span> (Core)
+├── <span class="hljs-selector-tag">DataManager</span> (Data handling)
+├── <span class="hljs-selector-tag">EventManager</span> (Event system)
+├── <span class="hljs-selector-tag">ColumnManager</span> (Column formatting)
+├── <span class="hljs-selector-tag">Renderer</span> (UI rendering)
+├── <span class="hljs-selector-tag">PaginationManager</span> (Pagination logic)
+├── <span class="hljs-selector-tag">SortingManager</span> (Sorting logic)
+├── <span class="hljs-selector-tag">FilterManager</span> (Filtering logic)
+└── <span class="hljs-selector-tag">FilterUI</span> (Filter interface)
+</code></pre><h2 id="plugin-development-guidelines">Plugin Development Guidelines</h2>
+<h3 id="1-manager-pattern">1. Manager Pattern</h3>
+<p>All major functionality is implemented as &quot;Manager&quot; classes that:</p>
+<ul>
+<li>Take the main <code>Table</code> instance as the first parameter</li>
+<li>Have their own configuration options</li>
+<li>Integrate via the EventManager for loose coupling</li>
+<li>Are conditionally initialized based on options</li>
+</ul>
+<h3 id="2-event-driven-architecture">2. Event-Driven Architecture</h3>
+<p>Managers communicate through events:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Trigger events</span>
+<span class="hljs-keyword">this</span>.table.eventManager.trigger(<span class="hljs-string">'eventName'</span>, payload);
+
+<span class="hljs-comment">// Listen to events</span>
+<span class="hljs-keyword">this</span>.table.eventManager.on(<span class="hljs-string">'eventName'</span>, callback);
+</code></pre>
+<h3 id="3-renderer-integration">3. Renderer Integration</h3>
+<p>UI components integrate with the main Renderer:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// In Renderer.renderTable()</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.table.filterUI) {
+  <span class="hljs-keyword">this</span>.table.filterUI.renderFilterIcons();
+}
+</code></pre>
+<h2 id="example-creating-a-column-resizing-plugin">Example: Creating a Column Resizing Plugin</h2>
+<p>Here&#39;s how to create a column resizing plugin following TablixJS patterns:</p>
+<h3 id="step-1-create-resizemanager">Step 1: Create ResizeManager</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// src/core/ResizeManager.js</span>
+export <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ResizeManager</span> </span>{
+  <span class="hljs-keyword">constructor</span>(table, options = {}) {
+    <span class="hljs-keyword">this</span>.table = table;
+    <span class="hljs-keyword">this</span>.options = {
+      enabled: <span class="hljs-literal">true</span>,
+      minWidth: <span class="hljs-number">50</span>,
+      maxWidth: <span class="hljs-number">500</span>,
+      persistState: <span class="hljs-literal">true</span>,
+      ...options
+    };
+
+    <span class="hljs-keyword">this</span>.columnWidths = new Map();
+    <span class="hljs-keyword">this</span>.isResizing = <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">this</span>.resizeData = <span class="hljs-literal">null</span>;
+
+    <span class="hljs-keyword">this</span>.handleMouseDown = <span class="hljs-keyword">this</span>.handleMouseDown.bind(<span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.handleMouseMove = <span class="hljs-keyword">this</span>.handleMouseMove.bind(<span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.handleMouseUp = <span class="hljs-keyword">this</span>.handleMouseUp.bind(<span class="hljs-keyword">this</span>);
+
+    <span class="hljs-keyword">this</span>.init();
+  }
+
+  init() {
+    <span class="hljs-comment">// Load saved column widths</span>
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.options.persistState) {
+      <span class="hljs-keyword">this</span>.loadColumnWidths();
+    }
+
+    <span class="hljs-comment">// Listen for table render events</span>
+    <span class="hljs-keyword">this</span>.table.eventManager.on(<span class="hljs-string">'afterRender'</span>, () =&gt; {
+      <span class="hljs-keyword">this</span>.renderResizeHandles();
+    });
+  }
+
+  renderResizeHandles() {
+    const headers = <span class="hljs-keyword">this</span>.table.container.querySelectorAll(<span class="hljs-string">'.tablix-th'</span>);
+
+    headers.forEach((header, index) =&gt; {
+      <span class="hljs-comment">// Skip if resize handle already exists</span>
+      <span class="hljs-keyword">if</span> (header.querySelector(<span class="hljs-string">'.tablix-resize-handle'</span>)) <span class="hljs-keyword">return</span>;
+
+      const resizeHandle = document.createElement(<span class="hljs-string">'div'</span>);
+      resizeHandle.className = <span class="hljs-string">'tablix-resize-handle'</span>;
+      resizeHandle.addEventListener(<span class="hljs-string">'mousedown'</span>, (e) =&gt; {
+        <span class="hljs-keyword">this</span>.handleMouseDown(e, header, index);
+      });
+
+      header.style.position = <span class="hljs-string">'relative'</span>;
+      header.appendChild(resizeHandle);
+
+      <span class="hljs-comment">// Apply saved width if available</span>
+      const columnName = header.dataset.column;
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.columnWidths.has(columnName)) {
+        header.style.width = <span class="hljs-keyword">this</span>.columnWidths.<span class="hljs-keyword">get</span>(columnName) + <span class="hljs-string">'px'</span>;
+      }
+    });
+  }
+
+  handleMouseDown(e, header, columnIndex) {
+    e.preventDefault();
+
+    <span class="hljs-keyword">this</span>.isResizing = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">this</span>.resizeData = {
+      header,
+      columnIndex,
+      startX: e.clientX,
+      startWidth: header.offsetWidth
+    };
+
+    document.addEventListener(<span class="hljs-string">'mousemove'</span>, <span class="hljs-keyword">this</span>.handleMouseMove);
+    document.addEventListener(<span class="hljs-string">'mouseup'</span>, <span class="hljs-keyword">this</span>.handleMouseUp);
+
+    <span class="hljs-comment">// Trigger event</span>
+    <span class="hljs-keyword">this</span>.table.eventManager.trigger(<span class="hljs-string">'beforeColumnResize'</span>, {
+      columnIndex,
+      columnName: header.dataset.column,
+      currentWidth: header.offsetWidth
+    });
+  }
+
+  handleMouseMove(e) {
+    <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">this</span>.isResizing || !<span class="hljs-keyword">this</span>.resizeData) <span class="hljs-keyword">return</span>;
+
+    const { header, startX, startWidth } = <span class="hljs-keyword">this</span>.resizeData;
+    const deltaX = e.clientX - startX;
+    const newWidth = Math.max(
+      <span class="hljs-keyword">this</span>.options.minWidth,
+      Math.min(<span class="hljs-keyword">this</span>.options.maxWidth, startWidth + deltaX)
+    );
+
+    header.style.width = newWidth + <span class="hljs-string">'px'</span>;
+
+    <span class="hljs-comment">// Update corresponding table cells</span>
+    <span class="hljs-keyword">this</span>.updateColumnWidth(<span class="hljs-keyword">this</span>.resizeData.columnIndex, newWidth);
+  }
+
+  handleMouseUp() {
+    <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">this</span>.isResizing) <span class="hljs-keyword">return</span>;
+
+    const { header, columnIndex } = <span class="hljs-keyword">this</span>.resizeData;
+    const newWidth = header.offsetWidth;
+    const columnName = header.dataset.column;
+
+    <span class="hljs-comment">// Save new width</span>
+    <span class="hljs-keyword">this</span>.columnWidths.<span class="hljs-keyword">set</span>(columnName, newWidth);
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.options.persistState) {
+      <span class="hljs-keyword">this</span>.saveColumnWidths();
+    }
+
+    <span class="hljs-comment">// Trigger event</span>
+    <span class="hljs-keyword">this</span>.table.eventManager.trigger(<span class="hljs-string">'afterColumnResize'</span>, {
+      columnIndex,
+      columnName,
+      newWidth
+    });
+
+    <span class="hljs-comment">// Cleanup</span>
+    <span class="hljs-keyword">this</span>.isResizing = <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">this</span>.resizeData = <span class="hljs-literal">null</span>;
+    document.removeEventListener(<span class="hljs-string">'mousemove'</span>, <span class="hljs-keyword">this</span>.handleMouseMove);
+    document.removeEventListener(<span class="hljs-string">'mouseup'</span>, <span class="hljs-keyword">this</span>.handleMouseUp);
+  }
+
+  updateColumnWidth(columnIndex, width) {
+    <span class="hljs-comment">// Update all cells in this column</span>
+    const table = <span class="hljs-keyword">this</span>.table.container.querySelector(<span class="hljs-string">'.tablix-table'</span>);
+    const cells = table.querySelectorAll(`td:nth-child(${columnIndex + <span class="hljs-number">1</span>})`);
+    cells.forEach(cell =&gt; {
+      cell.style.width = width + <span class="hljs-string">'px'</span>;
+    });
+  }
+
+  <span class="hljs-comment">// Public API methods</span>
+  setColumnWidth(columnName, width) {
+    <span class="hljs-keyword">this</span>.columnWidths.<span class="hljs-keyword">set</span>(columnName, width);
+    <span class="hljs-comment">// Trigger re-render or apply immediately</span>
+    <span class="hljs-keyword">this</span>.renderResizeHandles();
+  }
+
+  getColumnWidth(columnName) {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.columnWidths.<span class="hljs-keyword">get</span>(columnName);
+  }
+
+  resetColumnWidths() {
+    <span class="hljs-keyword">this</span>.columnWidths.clear();
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.options.persistState) {
+      localStorage.removeItem(<span class="hljs-string">'tablixColumnWidths'</span>);
+    }
+  }
+
+  saveColumnWidths() {
+    const widthsObj = Object.fromEntries(<span class="hljs-keyword">this</span>.columnWidths);
+    localStorage.setItem(<span class="hljs-string">'tablixColumnWidths'</span>, JSON.stringify(widthsObj));
+  }
+
+  loadColumnWidths() {
+    const saved = localStorage.getItem(<span class="hljs-string">'tablixColumnWidths'</span>);
+    <span class="hljs-keyword">if</span> (saved) {
+      const widthsObj = JSON.parse(saved);
+      <span class="hljs-keyword">this</span>.columnWidths = new Map(Object.entries(widthsObj));
+    }
+  }
+}
+</code></pre>
+<h3 id="step-2-create-resizeui-if-needed-">Step 2: Create ResizeUI (if needed)</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// src/core/ResizeUI.js</span>
+export <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ResizeUI</span> </span>{
+  <span class="hljs-keyword">constructor</span>(resizeManager) {
+    <span class="hljs-keyword">this</span>.resizeManager = resizeManager;
+    <span class="hljs-keyword">this</span>.table = resizeManager.table;
+  }
+
+  renderResizeIndicator() {
+    <span class="hljs-comment">// Create visual feedback during resize</span>
+    <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">this</span>.indicator) {
+      <span class="hljs-keyword">this</span>.indicator = document.createElement(<span class="hljs-string">'div'</span>);
+      <span class="hljs-keyword">this</span>.indicator.className = <span class="hljs-string">'tablix-resize-indicator'</span>;
+      document.body.appendChild(<span class="hljs-keyword">this</span>.indicator);
+    }
+  }
+
+  showResizeIndicator(x, width) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.indicator) {
+      <span class="hljs-keyword">this</span>.indicator.style.left = x + <span class="hljs-string">'px'</span>;
+      <span class="hljs-keyword">this</span>.indicator.style.width = width + <span class="hljs-string">'px'</span>;
+      <span class="hljs-keyword">this</span>.indicator.style.display = <span class="hljs-string">'block'</span>;
+    }
+  }
+
+  hideResizeIndicator() {
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.indicator) {
+      <span class="hljs-keyword">this</span>.indicator.style.display = <span class="hljs-string">'none'</span>;
+    }
+  }
+}
+</code></pre>
+<h3 id="step-3-create-css-styles">Step 3: Create CSS Styles</h3>
+<pre><code class="lang-css"><span class="hljs-comment">/* src/styles/resize-core.css */</span>
+<span class="hljs-selector-class">.tablix-resize-handle</span> {
+  <span class="hljs-attribute">position</span>: absolute;
+  <span class="hljs-attribute">top</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">right</span>: -<span class="hljs-number">2px</span>;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">4px</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">100%</span>;
+  <span class="hljs-attribute">cursor</span>: col-resize;
+  <span class="hljs-attribute">background</span>: transparent;
+  <span class="hljs-attribute">border-right</span>: <span class="hljs-number">2px</span> solid transparent;
+  <span class="hljs-attribute">transition</span>: border-color <span class="hljs-number">0.2s</span> ease;
+}
+
+<span class="hljs-selector-class">.tablix-resize-handle</span><span class="hljs-selector-pseudo">:hover</span> {
+  <span class="hljs-attribute">border-right-color</span>: <span class="hljs-built_in">var</span>(--tablix-btn-active-color, #007bff);
+}
+
+<span class="hljs-selector-class">.tablix-resize-indicator</span> {
+  <span class="hljs-attribute">position</span>: fixed;
+  <span class="hljs-attribute">top</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">100vh</span>;
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--tablix-btn-active-color, #007bff);
+  <span class="hljs-attribute">opacity</span>: <span class="hljs-number">0.3</span>;
+  <span class="hljs-attribute">pointer-events</span>: none;
+  <span class="hljs-attribute">z-index</span>: <span class="hljs-number">9999</span>;
+  <span class="hljs-attribute">display</span>: none;
+}
+
+<span class="hljs-comment">/* Resizing state */</span>
+<span class="hljs-selector-class">.tablix-table</span><span class="hljs-selector-class">.tablix-resizing</span> {
+  <span class="hljs-attribute">user-select</span>: none;
+}
+
+<span class="hljs-selector-class">.tablix-table</span><span class="hljs-selector-class">.tablix-resizing</span> * {
+  <span class="hljs-attribute">cursor</span>: col-resize <span class="hljs-meta">!important</span>;
+}
+</code></pre>
+<h3 id="step-4-integration-with-main-table">Step 4: Integration with Main Table</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Add to Table.js imports</span>
+<span class="hljs-keyword">import</span> ResizeManager from <span class="hljs-string">'./ResizeManager.js'</span>;
+<span class="hljs-keyword">import</span> ResizeUI from <span class="hljs-string">'./ResizeUI.js'</span>;
+
+<span class="hljs-comment">// Add to Table constructor options</span>
+<span class="hljs-keyword">this</span>.options = {
+  <span class="hljs-comment">// ...existing options...</span>
+  resize: {
+    enabled: <span class="hljs-literal">false</span>,
+    minWidth: <span class="hljs-number">50</span>,
+    maxWidth: <span class="hljs-number">500</span>,
+    persistState: <span class="hljs-literal">true</span>
+  },
+  ...options
+};
+
+<span class="hljs-comment">// Add to Table constructor initialization</span>
+<span class="hljs-comment">// Initialize resizing if enabled</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.options.resize &amp;&amp; <span class="hljs-keyword">this</span>.options.resize.enabled !== <span class="hljs-literal">false</span>) {
+  <span class="hljs-keyword">this</span>.resizeManager = new ResizeManager(<span class="hljs-keyword">this</span>, <span class="hljs-keyword">this</span>.options.resize);
+  <span class="hljs-keyword">this</span>.resizeUI = new ResizeUI(<span class="hljs-keyword">this</span>.resizeManager);
+}
+
+<span class="hljs-comment">// Add public API methods to Table class</span>
+setColumnWidth(columnName, width) {
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.resizeManager) {
+    <span class="hljs-keyword">this</span>.resizeManager.setColumnWidth(columnName, width);
+  }
+}
+
+getColumnWidth(columnName) {
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.resizeManager ? <span class="hljs-keyword">this</span>.resizeManager.getColumnWidth(columnName) : <span class="hljs-literal">null</span>;
+}
+
+resetColumnWidths() {
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.resizeManager) {
+    <span class="hljs-keyword">this</span>.resizeManager.resetColumnWidths();
+  }
+}
+</code></pre>
+<h2 id="creating-other-plugin-types">Creating Other Plugin Types</h2>
+<h3 id="1-data-export-plugin">1. Data Export Plugin</h3>
+<pre><code class="lang-javascript">export <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ExportManager</span> </span>{
+  <span class="hljs-keyword">constructor</span>(table, options = {}) {
+    <span class="hljs-keyword">this</span>.table = table;
+    <span class="hljs-keyword">this</span>.options = {
+      formats: [<span class="hljs-string">'csv'</span>, <span class="hljs-string">'json'</span>, <span class="hljs-string">'excel'</span>],
+      filename: <span class="hljs-string">'table-export'</span>,
+      includeHeaders: <span class="hljs-literal">true</span>,
+      ...options
+    };
+  }
+
+  exportData(format = <span class="hljs-string">'csv'</span>) {
+    const <span class="hljs-keyword">data</span> = <span class="hljs-keyword">this</span>.table.dataManager.getData();
+    const columns = <span class="hljs-keyword">this</span>.table.columnManager.getColumns();
+
+    switch (format) {
+      case <span class="hljs-string">'csv'</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.exportCSV(<span class="hljs-keyword">data</span>, columns);
+      case <span class="hljs-string">'json'</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.exportJSON(<span class="hljs-keyword">data</span>);
+      case <span class="hljs-string">'excel'</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.exportExcel(<span class="hljs-keyword">data</span>, columns);
+      <span class="hljs-keyword">default</span>:
+        <span class="hljs-keyword">throw</span> new Error(`Unsupported export format: ${format}`);
+    }
+  }
+
+  exportCSV(<span class="hljs-keyword">data</span>, columns) {
+    <span class="hljs-comment">// CSV export implementation</span>
+  }
+
+  exportJSON(<span class="hljs-keyword">data</span>) {
+    <span class="hljs-comment">// JSON export implementation</span>
+  }
+
+  exportExcel(<span class="hljs-keyword">data</span>, columns) {
+    <span class="hljs-comment">// Excel export implementation (requires library)</span>
+  }
+}
+</code></pre>
+<h3 id="2-inline-editing-plugin">2. Inline Editing Plugin</h3>
+<pre><code class="lang-javascript">export <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EditManager</span> </span>{
+  <span class="hljs-keyword">constructor</span>(table, options = {}) {
+    <span class="hljs-keyword">this</span>.table = table;
+    <span class="hljs-keyword">this</span>.options = {
+      enabled: <span class="hljs-literal">true</span>,
+      editableColumns: [],
+      saveOnBlur: <span class="hljs-literal">true</span>,
+      validators: {},
+      ...options
+    };
+
+    <span class="hljs-keyword">this</span>.editingCell = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">this</span>.originalValue = <span class="hljs-literal">null</span>;
+  }
+
+  startEdit(rowIndex, columnName) {
+    <span class="hljs-comment">// Begin editing a cell</span>
+    <span class="hljs-keyword">this</span>.table.eventManager.trigger(<span class="hljs-string">'beforeEdit'</span>, {
+      rowIndex,
+      columnName,
+      currentValue: <span class="hljs-keyword">this</span>.getCurrentValue(rowIndex, columnName)
+    });
+
+    <span class="hljs-comment">// Implementation...</span>
+  }
+
+  saveEdit() {
+    <span class="hljs-comment">// Save edited value</span>
+    <span class="hljs-keyword">this</span>.table.eventManager.trigger(<span class="hljs-string">'afterEdit'</span>, {
+      rowIndex: <span class="hljs-keyword">this</span>.editingCell.rowIndex,
+      columnName: <span class="hljs-keyword">this</span>.editingCell.columnName,
+      oldValue: <span class="hljs-keyword">this</span>.originalValue,
+      newValue: <span class="hljs-keyword">this</span>.getEditedValue()
+    });
+  }
+
+  cancelEdit() {
+    <span class="hljs-comment">// Cancel editing and restore original value</span>
+  }
+}
+</code></pre>
+<h3 id="3-drag-drop-plugin">3. Drag &amp; Drop Plugin</h3>
+<pre><code class="lang-javascript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DragDropManager</span> </span>{
+  <span class="hljs-keyword">constructor</span>(table, options = {}) {
+    <span class="hljs-keyword">this</span>.table = table;
+    <span class="hljs-keyword">this</span>.options = {
+      <span class="hljs-attr">rowDrag</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">columnDrag</span>: <span class="hljs-literal">true</span>,
+      ...options
+    };
+  }
+
+  enableRowDragging() {
+    <span class="hljs-comment">// Implementation for row reordering</span>
+  }
+
+  enableColumnDragging() {
+    <span class="hljs-comment">// Implementation for column reordering</span>
+  }
+}
+</code></pre>
+<h2 id="plugin-best-practices">Plugin Best Practices</h2>
+<h3 id="1-follow-manager-pattern">1. Follow Manager Pattern</h3>
+<ul>
+<li>Constructor takes <code>(table, options)</code></li>
+<li>Store reference to main table</li>
+<li>Implement public API methods</li>
+<li>Use EventManager for communication</li>
+</ul>
+<h3 id="2-event-integration">2. Event Integration</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Trigger events for extensibility</span>
+<span class="hljs-keyword">this</span>.table.eventManager.trigger(<span class="hljs-string">'beforeAction'</span>, <span class="hljs-keyword">data</span>);
+<span class="hljs-comment">// ... perform action ...</span>
+<span class="hljs-keyword">this</span>.table.eventManager.trigger(<span class="hljs-string">'afterAction'</span>, result);
+</code></pre>
+<h3 id="3-css-isolation">3. CSS Isolation</h3>
+<ul>
+<li>Use <code>tablix-</code> prefix for all CSS classes</li>
+<li>Support CSS custom properties for theming</li>
+<li>Provide both light and dark theme support</li>
+</ul>
+<h3 id="4-configuration">4. Configuration</h3>
+<ul>
+<li>Provide sensible defaults</li>
+<li>Support both global and per-instance configuration</li>
+<li>Document all options</li>
+</ul>
+<h3 id="5-memory-management">5. Memory Management</h3>
+<ul>
+<li>Clean up event listeners in destroy methods</li>
+<li>Remove DOM elements when plugin is disabled</li>
+<li>Avoid memory leaks in long-running applications</li>
+</ul>
+<h2 id="plugin-distribution">Plugin Distribution</h2>
+<h3 id="npm-package-structure">NPM Package Structure</h3>
+<pre><code>my-tablix-plugin/
+├── src/
+│   ├── MyPluginManager<span class="hljs-selector-class">.js</span>
+│   ├── MyPluginUI<span class="hljs-selector-class">.js</span>
+│   └── styles/
+│       └── my-plugin<span class="hljs-selector-class">.css</span>
+├── dist/
+│   ├── my-plugin<span class="hljs-selector-class">.js</span>
+│   └── my-plugin<span class="hljs-selector-class">.css</span>
+├── package<span class="hljs-selector-class">.json</span>
+└── README.md
+</code></pre><h3 id="usage-example">Usage Example</h3>
+<pre><code class="lang-javascript">import <span class="hljs-keyword">Table</span> from <span class="hljs-comment">'tablixjs'</span>;
+import MyPlugin from <span class="hljs-string">'my-tablix-plugin'</span>;
+
+<span class="hljs-comment">// Register plugin</span>
+<span class="hljs-keyword">Table</span>.registerPlugin('myPlugin', MyPlugin);
+
+<span class="hljs-comment">// Use plugin</span>
+const <span class="hljs-keyword">table</span> = new <span class="hljs-comment">Table(</span><span class="hljs-comment">'#myTable'</span><span class="hljs-comment">, {</span>
+  myPlugin: {
+    enabled: true,
+    <span class="hljs-comment">// plugin options</span>
+  }
+});
+</code></pre>
+<p>This plugin architecture ensures TablixJS remains lightweight while allowing for rich functionality through optional plugins.</p>

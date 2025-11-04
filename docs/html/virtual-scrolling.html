@@ -1,0 +1,222 @@
+<h1 id="virtual-scrolling">Virtual Scrolling</h1>
+<p>TablixJS supports high-performance virtual scrolling for handling large datasets (100,000+ rows) without compromising performance or user experience.</p>
+<h2 id="overview">Overview</h2>
+<p>Virtual scrolling renders only the visible rows plus a configurable buffer zone, maintaining the illusion that all rows are present in the DOM while dramatically reducing memory usage and improving performance.</p>
+<h2 id="features">Features</h2>
+<ul>
+<li>✅ <strong>Dynamic Row Height Detection</strong> - Automatically measures row height based on your CSS styling</li>
+<li>✅ <strong>Configurable Buffer Zones</strong> - Render extra rows above/below viewport for smooth scrolling</li>
+<li>✅ <strong>Smooth Scrolling</strong> - No visual gaps or flickering during fast scrolling</li>
+<li>✅ <strong>Selection Preservation</strong> - Maintains selected state for rows outside the viewport</li>
+<li>✅ <strong>Performance Monitoring</strong> - Built-in metrics for render times and scroll updates</li>
+<li>✅ <strong>Framework Compatibility</strong> - Works with React, jQuery, and vanilla JavaScript</li>
+</ul>
+<h2 id="configuration">Configuration</h2>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> table = <span class="hljs-keyword">new</span> <span class="hljs-keyword">Table</span>(<span class="hljs-string">'#container'</span>, {
+  virtualScroll: {
+    enabled: <span class="hljs-keyword">true</span>,              <span class="hljs-comment">// Enable virtual scrolling</span>
+    buffer: <span class="hljs-number">10</span>,                 <span class="hljs-comment">// Number of rows to render above/below viewport</span>
+    rowHeight: <span class="hljs-keyword">null</span>,            <span class="hljs-comment">// Auto-detect row height (or set fixed value)</span>
+    containerHeight: <span class="hljs-number">400</span>        <span class="hljs-comment">// Scroll container height in pixels</span>
+  },
+
+  <span class="hljs-comment">// <span class="hljs-doctag">Note:</span> Disable pagination when using virtual scrolling</span>
+  pagination: {
+    enabled: <span class="hljs-keyword">false</span>
+  }
+});
+</code></pre>
+<h2 id="basic-usage">Basic Usage</h2>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Generate large dataset</span>
+<span class="hljs-keyword">const</span> data = [];
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">100000</span>; i++) {
+  data.push({
+    <span class="hljs-attr">id</span>: i + <span class="hljs-number">1</span>,
+    <span class="hljs-attr">name</span>: <span class="hljs-string">`User <span class="hljs-subst">${i + <span class="hljs-number">1</span>}</span>`</span>,
+    <span class="hljs-attr">email</span>: <span class="hljs-string">`user<span class="hljs-subst">${i + <span class="hljs-number">1</span>}</span>@example.com`</span>,
+    <span class="hljs-attr">department</span>: departments[i % departments.length],
+    <span class="hljs-attr">salary</span>: <span class="hljs-built_in">Math</span>.floor(<span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">150000</span>) + <span class="hljs-number">30000</span>
+  });
+}
+
+<span class="hljs-comment">// Create table with virtual scrolling</span>
+<span class="hljs-keyword">const</span> table = <span class="hljs-keyword">new</span> Table(<span class="hljs-string">'#my-table'</span>, {
+  <span class="hljs-attr">virtualScroll</span>: {
+    <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">buffer</span>: <span class="hljs-number">15</span>,
+    <span class="hljs-attr">containerHeight</span>: <span class="hljs-number">500</span>
+  },
+  <span class="hljs-attr">pagination</span>: { <span class="hljs-attr">enabled</span>: <span class="hljs-literal">false</span> },
+  <span class="hljs-attr">sorting</span>: { <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span> },
+  <span class="hljs-attr">filtering</span>: { <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span> },
+  <span class="hljs-attr">selection</span>: { <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">mode</span>: <span class="hljs-string">'multi'</span> },
+  <span class="hljs-attr">columns</span>: [
+    { <span class="hljs-attr">name</span>: <span class="hljs-string">'id'</span>, <span class="hljs-attr">title</span>: <span class="hljs-string">'ID'</span> },
+    { <span class="hljs-attr">name</span>: <span class="hljs-string">'name'</span>, <span class="hljs-attr">title</span>: <span class="hljs-string">'Name'</span> },
+    { <span class="hljs-attr">name</span>: <span class="hljs-string">'email'</span>, <span class="hljs-attr">title</span>: <span class="hljs-string">'Email'</span> },
+    { 
+      <span class="hljs-attr">name</span>: <span class="hljs-string">'salary'</span>, 
+      <span class="hljs-attr">title</span>: <span class="hljs-string">'Salary'</span>,
+      <span class="hljs-attr">renderer</span>: <span class="hljs-function">(<span class="hljs-params">value</span>) =&gt;</span> <span class="hljs-string">`$<span class="hljs-subst">${value.toLocaleString()}</span>`</span>
+    }
+  ]
+});
+
+table.loadData(data);
+</code></pre>
+<h2 id="advanced-usage-with-custom-renderers">Advanced Usage with Custom Renderers</h2>
+<pre><code class="lang-javascript">const table = <span class="hljs-keyword">new</span> Table(<span class="hljs-string">'#advanced-table'</span>, {
+  virtualScroll: {
+    enabled: <span class="hljs-literal">true</span>,
+    buffer: <span class="hljs-number">20</span>,
+    containerHeight: <span class="hljs-number">600</span>
+  },
+  columns: [
+    {
+      name: <span class="hljs-string">'user'</span>,
+      title: <span class="hljs-string">'User Profile'</span>,
+      renderer: <span class="hljs-function"><span class="hljs-params">(value, row)</span> =&gt;</span> `<span class="javascript">
+        &lt;div style=<span class="hljs-string">"display: flex; align-items: center;"</span>&gt;
+          <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"${row.avatar}"</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">"${row.name}"</span> 
+               <span class="hljs-attr">style</span>=<span class="hljs-string">"width: 32px; height: 32px; border-radius: 50%; margin-right: 8px;"</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">strong</span>&gt;</span>${row.name}<span class="hljs-tag">&lt;/<span class="hljs-name">strong</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">br</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">small</span>&gt;</span>${row.email}<span class="hljs-tag">&lt;/<span class="hljs-name">small</span>&gt;</span>
+          <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      </span></span>`
+    },
+    {
+      name: <span class="hljs-string">'actions'</span>,
+      title: <span class="hljs-string">'Actions'</span>,
+      renderer: <span class="hljs-function"><span class="hljs-params">(value, row)</span> =&gt;</span> `<span class="javascript"><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onclick</span>=<span class="hljs-string">"editUser(${row.id})"</span>&gt;</span>Edit<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onclick</span>=<span class="hljs-string">"deleteUser(${row.id})"</span>&gt;</span>Delete<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      </span></span>`
+    }
+  ]
+});
+</code></pre>
+<h2 id="api-methods">API Methods</h2>
+<h3 id="enable-disable-virtual-scrolling">Enable/Disable Virtual Scrolling</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Enable virtual scrolling</span>
+<span class="hljs-keyword">table</span>.virtualScrollManager.setEnabled(true);
+
+<span class="hljs-comment">// Disable virtual scrolling</span>
+<span class="hljs-keyword">table</span>.virtualScrollManager.setEnabled(false);
+
+<span class="hljs-comment">// Check if virtual scrolling is enabled</span>
+if (<span class="hljs-keyword">table</span>.virtualScrollManager.isEnabled()) {
+  console.log(<span class="hljs-string">'Virtual scrolling is active'</span>);
+}
+</code></pre>
+<h3 id="scroll-to-specific-row">Scroll to Specific Row</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Scroll to row 5000</span>
+<span class="hljs-keyword">table</span>.virtualScrollManager.scrollToRow(5000);
+</code></pre>
+<h3 id="get-visible-range">Get Visible Range</h3>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> range = table.virtualScrollManager.getVisibleRange();
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Visible rows: <span class="hljs-subst">${range.start}</span> - <span class="hljs-subst">${range.end}</span>`</span>);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Rendered rows: <span class="hljs-subst">${range.renderedStart}</span> - <span class="hljs-subst">${range.renderedEnd}</span>`</span>);
+</code></pre>
+<h3 id="performance-monitoring">Performance Monitoring</h3>
+<pre><code class="lang-javascript">const stats = <span class="hljs-keyword">table</span>.virtualScrollManager.getPerformanceStats();
+console.log(<span class="hljs-string">'Performance Statistics:'</span>, {
+  averageRenderTime: stats.averageRenderTime + <span class="hljs-string">'ms'</span>,
+  maxRenderTime: stats.maxRenderTime + <span class="hljs-string">'ms'</span>,
+  scrollUpdates: stats.scrollUpdates,
+  totalRows: stats.totalRows,
+  renderedRows: stats.renderedRows
+});
+</code></pre>
+<h2 id="configuration-options">Configuration Options</h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enabled</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>Enable/disable virtual scrolling</td>
+</tr>
+<tr>
+<td><code>buffer</code></td>
+<td>number</td>
+<td><code>10</code></td>
+<td>Number of rows to render above/below viewport</td>
+</tr>
+<tr>
+<td><code>rowHeight</code></td>
+<td>number</td>
+<td><code>null</code></td>
+<td>Fixed row height in pixels (auto-detected if null)</td>
+</tr>
+<tr>
+<td><code>containerHeight</code></td>
+<td>number</td>
+<td><code>400</code></td>
+<td>Scroll container height in pixels</td>
+</tr>
+</tbody>
+</table>
+<h2 id="performance-considerations">Performance Considerations</h2>
+<h3 id="recommended-settings">Recommended Settings</h3>
+<ul>
+<li><strong>Small datasets (&lt; 1,000 rows)</strong>: Virtual scrolling not needed</li>
+<li><strong>Medium datasets (1,000 - 10,000 rows)</strong>: <code>buffer: 5-10</code></li>
+<li><strong>Large datasets (10,000 - 100,000 rows)</strong>: <code>buffer: 10-15</code></li>
+<li><strong>Very large datasets (100,000+ rows)</strong>: <code>buffer: 15-25</code></li>
+</ul>
+<h3 id="optimization-tips">Optimization Tips</h3>
+<ol>
+<li><strong>Use lightweight renderers</strong> - Avoid complex DOM manipulation in cell renderers</li>
+<li><strong>Optimize CSS</strong> - Use efficient selectors and avoid expensive styles</li>
+<li><strong>Monitor performance</strong> - Use built-in performance metrics to tune settings</li>
+<li><strong>Consider pagination</strong> - For extremely large datasets, combine with server-side pagination</li>
+</ol>
+<h2 id="browser-compatibility">Browser Compatibility</h2>
+<p>Virtual scrolling is supported in all modern browsers:</p>
+<ul>
+<li>Chrome 60+</li>
+<li>Firefox 55+</li>
+<li>Safari 12+</li>
+<li>Edge 79+</li>
+</ul>
+<h2 id="limitations">Limitations</h2>
+<ol>
+<li><strong>Fixed-height containers</strong> - Requires a container with defined height</li>
+<li><strong>Row height consistency</strong> - Works best with consistent row heights</li>
+<li><strong>Selection complexity</strong> - Complex selection operations may be slower with very large datasets</li>
+</ol>
+<h2 id="examples">Examples</h2>
+<p>See the complete examples in the <code>/examples</code> directory:</p>
+<ul>
+<li><code>virtual-scroll-demo.html</code> - Full-featured demo with 100,000+ rows</li>
+<li><code>virtual-scroll-test.html</code> - Simple test implementation</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="common-issues">Common Issues</h3>
+<p><strong>Problem</strong>: Blank rows or flickering during scroll
+<strong>Solution</strong>: Increase the buffer size or check for CSS issues affecting row height</p>
+<p><strong>Problem</strong>: Poor performance with custom renderers
+<strong>Solution</strong>: Optimize cell renderers and avoid DOM-heavy operations</p>
+<p><strong>Problem</strong>: Selection not working properly
+<strong>Solution</strong>: Ensure each row has a unique <code>id</code> field or configure <code>dataIdKey</code></p>
+<h3 id="debug-mode">Debug Mode</h3>
+<p>Enable debug logging to monitor virtual scrolling behavior:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> table = <span class="hljs-keyword">new</span> <span class="hljs-keyword">Table</span>(<span class="hljs-string">'#container'</span>, {
+  debug: <span class="hljs-keyword">true</span>,  <span class="hljs-comment">// Enable debug logging</span>
+  virtualScroll: {
+    enabled: <span class="hljs-keyword">true</span>,
+    buffer: <span class="hljs-number">10</span>
+  }
+});
+</code></pre>
+<p>This will log performance metrics and scroll events to the browser console.</p>

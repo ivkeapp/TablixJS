@@ -1,0 +1,198 @@
+<h1 id="tablixjs-css-theming-guide">TablixJS CSS Theming Guide</h1>
+<h2 id="new-theme-architecture">New Theme Architecture</h2>
+<p>TablixJS now uses a modular CSS architecture with CSS custom properties (CSS variables) for easy theming and customization.</p>
+<h2 id="file-structure">File Structure</h2>
+<pre><code>src<span class="hljs-regexp">/styles/</span>
+├── tablix.css              <span class="hljs-comment"># Main stylesheet (imports everything)</span>
+├── table-core.css          <span class="hljs-comment"># Core table structure (uses CSS variables)</span>
+├── pagination-core.css     <span class="hljs-comment"># Pagination components (uses CSS variables)</span>
+├── pagination.css          <span class="hljs-comment"># Legacy compatibility file</span>
+└── themes/
+    ├── <span class="hljs-keyword">default</span>.css         <span class="hljs-comment"># Default light theme (defines all variables)</span>
+    └── dark.css           <span class="hljs-comment"># Dark theme (overrides variables)</span>
+</code></pre><h2 id="basic-usage">Basic Usage</h2>
+<h3 id="include-the-main-stylesheet">Include the Main Stylesheet</h3>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"./src/styles/tablix.css"</span>&gt;</span>
+</code></pre>
+<p>This includes:</p>
+<ul>
+<li>Core table structure</li>
+<li>Pagination components  </li>
+<li>Default theme variables</li>
+</ul>
+<h2 id="theming-options">Theming Options</h2>
+<h3 id="1-use-built-in-dark-theme">1. Use Built-in Dark Theme</h3>
+<p><strong>Method 1: Data attribute (recommended)</strong></p>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">data-theme</span>=<span class="hljs-string">"dark"</span>&gt;</span>
+<span class="hljs-comment">&lt;!-- Your content --&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<p><strong>Method 2: CSS class</strong></p>
+<pre><code class="lang-html">&lt;div <span class="hljs-class"><span class="hljs-keyword">class</span></span>=<span class="hljs-string">"tablix-wrapper dark"</span>&gt;
+  <span class="xml"><span class="hljs-comment">&lt;!-- Table content --&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+</code></pre>
+<h3 id="2-create-custom-theme">2. Create Custom Theme</h3>
+<p>Override CSS custom properties to create your own theme:</p>
+<pre><code class="lang-css"><span class="hljs-comment">/* Custom green theme */</span>
+<span class="hljs-selector-class">.my-green-theme</span> {
+  <span class="hljs-attribute">--tablix-btn-active-color</span>: <span class="hljs-number">#28a745</span>;
+  <span class="hljs-attribute">--tablix-focus-color</span>: <span class="hljs-number">#28a745</span>;
+  <span class="hljs-attribute">--tablix-btn-hover-border-color</span>: <span class="hljs-number">#28a745</span>;
+  <span class="hljs-attribute">--tablix-header-bg</span>: <span class="hljs-number">#e8f5e9</span>;
+  <span class="hljs-attribute">--tablix-header-text-color</span>: <span class="hljs-number">#1b5e20</span>;
+}
+</code></pre>
+<p>Apply to your table:</p>
+<pre><code class="lang-html">&lt;<span class="hljs-keyword">div</span> <span class="hljs-built_in">id</span>=<span class="hljs-string">"myTable"</span> <span class="hljs-built_in">class</span>=<span class="hljs-string">"my-green-theme"</span>&gt;&lt;/<span class="hljs-keyword">div</span>&gt;
+</code></pre>
+<h3 id="3-global-theme-customization">3. Global Theme Customization</h3>
+<p>Override variables in your main CSS:</p>
+<pre><code class="lang-css"><span class="hljs-selector-pseudo">:root</span> {
+  <span class="hljs-attribute">--tablix-btn-active-color</span>: <span class="hljs-number">#9c27b0</span>;
+  <span class="hljs-attribute">--tablix-focus-color</span>: <span class="hljs-number">#9c27b0</span>;
+  <span class="hljs-attribute">--tablix-header-bg</span>: <span class="hljs-number">#f3e5f5</span>;
+  <span class="hljs-comment">/* ... more customizations */</span>
+}
+</code></pre>
+<h2 id="available-css-custom-properties">Available CSS Custom Properties</h2>
+<h3 id="typography">Typography</h3>
+<pre><code class="lang-css">--tablix-<span class="hljs-built_in">font</span>-<span class="hljs-attribute">family</span>: <span class="hljs-built_in">font</span> family <span class="hljs-keyword">for</span> all text
+--tablix-<span class="hljs-built_in">font</span>-<span class="hljs-attribute">size</span>: base <span class="hljs-built_in">font</span> <span class="hljs-built_in">size</span>
+--tablix-mobile-<span class="hljs-built_in">font</span>-<span class="hljs-attribute">size</span>: <span class="hljs-built_in">font</span> <span class="hljs-built_in">size</span> <span class="hljs-keyword">on</span> mobile
+</code></pre>
+<h3 id="colors-text">Colors - Text</h3>
+<pre><code class="lang-css">--tablix-<span class="hljs-keyword">text</span>-<span class="hljs-keyword">color</span>: main <span class="hljs-keyword">text</span> <span class="hljs-keyword">color</span>
+--tablix-header-<span class="hljs-keyword">text</span>-<span class="hljs-keyword">color</span>: header <span class="hljs-keyword">text</span> <span class="hljs-keyword">color</span>
+--tablix-empty-<span class="hljs-keyword">text</span>-<span class="hljs-keyword">color</span>: empty state <span class="hljs-keyword">text</span>
+--tablix-loading-<span class="hljs-keyword">text</span>-<span class="hljs-keyword">color</span>: loading indicator <span class="hljs-keyword">text</span>
+--tablix-<span class="hljs-keyword">error</span>-<span class="hljs-keyword">text</span>-<span class="hljs-keyword">color</span>: <span class="hljs-keyword">error</span> message <span class="hljs-keyword">text</span>
+</code></pre>
+<h3 id="colors-backgrounds">Colors - Backgrounds</h3>
+<pre><code class="lang-css">--tablix-table-bg: table <span class="hljs-built_in">background</span>
+--tablix-header-bg: header <span class="hljs-built_in">background</span>
+--tablix-<span class="hljs-built_in">row</span>-<span class="hljs-built_in">even</span>-bg: <span class="hljs-built_in">even</span> <span class="hljs-built_in">row</span> <span class="hljs-built_in">background</span>
+--tablix-<span class="hljs-built_in">row</span>-hover-bg: <span class="hljs-built_in">row</span> hover <span class="hljs-built_in">background</span>
+--tablix-<span class="hljs-built_in">error</span>-bg: <span class="hljs-built_in">error</span> message <span class="hljs-built_in">background</span>
+</code></pre>
+<h3 id="colors-borders">Colors - Borders</h3>
+<pre><code class="lang-css">--tablix-table-<span class="hljs-built_in">border</span>: table <span class="hljs-built_in">border</span>
+--tablix-cell-<span class="hljs-built_in">border</span>: cell <span class="hljs-built_in">border</span>
+--tablix-<span class="hljs-built_in">error</span>-<span class="hljs-built_in">border</span>: <span class="hljs-built_in">error</span> message <span class="hljs-built_in">border</span>
+--tablix-pagination-<span class="hljs-built_in">border</span>: pagination <span class="hljs-built_in">border</span>
+</code></pre>
+<h3 id="colors-interactive">Colors - Interactive</h3>
+<pre><code class="lang-css">--tablix-focus-<span class="hljs-keyword">color</span>: focus indicator <span class="hljs-keyword">color</span>
+--tablix-focus-<span class="hljs-built_in">shadow</span>: focus <span class="hljs-built_in">shadow</span>
+</code></pre>
+<h3 id="spacing">Spacing</h3>
+<pre><code class="lang-css">--tablix-cell-padding: cell padding
+--tablix-mobile-cell-padding: cell padding <span class="hljs-keyword">on</span> mobile
+--tablix-empty-padding: empty <span class="hljs-keyword">state</span> padding
+--tablix-loading-padding: loading <span class="hljs-keyword">state</span> padding
+--tablix-error-padding: error message padding
+</code></pre>
+<h3 id="pagination">Pagination</h3>
+<pre><code class="lang-css">-<span class="ruby">-tablix-pagination-margin-<span class="hljs-symbol">top:</span> spacing above pagination
+</span>-<span class="ruby">-tablix-pagination-<span class="hljs-symbol">padding:</span> pagination internal padding
+</span>-<span class="ruby">-tablix-pagination-<span class="hljs-symbol">gap:</span> gap between pagination elements
+</span>-<span class="ruby">-tablix-pagination-info-<span class="hljs-symbol">color:</span> info text color
+</span>-<span class="ruby">-tablix-pagination-info-font-<span class="hljs-symbol">size:</span> info text size</span>
+</code></pre>
+<h3 id="buttons">Buttons</h3>
+<pre><code class="lang-css">--tablix-<span class="hljs-keyword">btn-padding: </span><span class="hljs-keyword">button </span>padding
+--tablix-<span class="hljs-keyword">btn-border: </span><span class="hljs-keyword">button </span><span class="hljs-keyword">border
+</span>--tablix-<span class="hljs-keyword">btn-bg: </span><span class="hljs-keyword">button </span><span class="hljs-keyword">background
+</span>--tablix-<span class="hljs-keyword">btn-text-color: </span><span class="hljs-keyword">button </span>text color
+--tablix-<span class="hljs-keyword">btn-hover-bg: </span><span class="hljs-keyword">button </span>hover <span class="hljs-keyword">background
+</span>--tablix-<span class="hljs-keyword">btn-hover-border-color: </span><span class="hljs-keyword">button </span>hover <span class="hljs-keyword">border
+</span>--tablix-<span class="hljs-keyword">btn-active-bg: </span>active <span class="hljs-keyword">button </span><span class="hljs-keyword">background
+</span>--tablix-<span class="hljs-keyword">btn-active-color: </span>active <span class="hljs-keyword">button </span>color
+--tablix-<span class="hljs-keyword">btn-active-text: </span>active <span class="hljs-keyword">button </span>text
+--tablix-<span class="hljs-keyword">btn-disabled-bg: </span><span class="hljs-keyword">disabled </span><span class="hljs-keyword">button </span><span class="hljs-keyword">background
+</span>--tablix-<span class="hljs-keyword">btn-disabled-text: </span><span class="hljs-keyword">disabled </span><span class="hljs-keyword">button </span>text
+</code></pre>
+<h2 id="advanced-customization-examples">Advanced Customization Examples</h2>
+<h3 id="corporate-brand-theme">Corporate Brand Theme</h3>
+<pre><code class="lang-css"><span class="hljs-selector-class">.corporate-theme</span> {
+  <span class="hljs-attribute">--tablix-header-bg</span>: <span class="hljs-number">#003d82</span>;
+  <span class="hljs-attribute">--tablix-header-text-color</span>: white;
+  <span class="hljs-attribute">--tablix-btn-active-color</span>: <span class="hljs-number">#003d82</span>;
+  <span class="hljs-attribute">--tablix-focus-color</span>: <span class="hljs-number">#003d82</span>;
+  <span class="hljs-attribute">--tablix-table-border</span>: <span class="hljs-number">2px</span> solid <span class="hljs-number">#003d82</span>;
+}
+</code></pre>
+<h3 id="high-contrast-theme">High Contrast Theme</h3>
+<pre><code class="lang-css"><span class="hljs-selector-class">.high-contrast-theme</span> {
+  <span class="hljs-attribute">--tablix-text-color</span>: <span class="hljs-number">#000</span>;
+  <span class="hljs-attribute">--tablix-table-bg</span>: <span class="hljs-number">#fff</span>;
+  <span class="hljs-attribute">--tablix-header-bg</span>: <span class="hljs-number">#000</span>;
+  <span class="hljs-attribute">--tablix-header-text-color</span>: <span class="hljs-number">#fff</span>;
+  <span class="hljs-attribute">--tablix-cell-border</span>: <span class="hljs-number">2px</span> solid <span class="hljs-number">#000</span>;
+  <span class="hljs-attribute">--tablix-btn-border</span>: <span class="hljs-number">2px</span> solid <span class="hljs-number">#000</span>;
+  <span class="hljs-attribute">--tablix-btn-active-color</span>: <span class="hljs-number">#000</span>;
+  <span class="hljs-attribute">--tablix-focus-color</span>: <span class="hljs-number">#000</span>;
+}
+</code></pre>
+<h3 id="minimal-theme">Minimal Theme</h3>
+<pre><code class="lang-css"><span class="hljs-selector-class">.minimal-theme</span> {
+  <span class="hljs-attribute">--tablix-table-border</span>: none;
+  <span class="hljs-attribute">--tablix-cell-border</span>: none;
+  <span class="hljs-attribute">--tablix-pagination-border</span>: none;
+  <span class="hljs-attribute">--tablix-header-bg</span>: transparent;
+  <span class="hljs-attribute">--tablix-row-even-bg</span>: transparent;
+  <span class="hljs-attribute">--tablix-btn-border</span>: none;
+  <span class="hljs-attribute">--tablix-btn-bg</span>: transparent;
+}
+</code></pre>
+<h2 id="migration-from-old-css">Migration from Old CSS</h2>
+<p>If you&#39;re updating from the old <code>pagination.css</code>:</p>
+<p><strong>Old way:</strong></p>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"./src/styles/pagination.css"</span>&gt;</span>
+</code></pre>
+<p><strong>New way (recommended):</strong></p>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"./src/styles/tablix.css"</span>&gt;</span>
+</code></pre>
+<p><strong>For backward compatibility:</strong>
+The old <code>pagination.css</code> file now imports the new structure, so existing code will continue to work.</p>
+<h2 id="creating-theme-packages">Creating Theme Packages</h2>
+<p>You can create reusable theme packages:</p>
+<p><strong>themes/my-brand.css:</strong></p>
+<pre><code class="lang-css"><span class="hljs-comment">/* My Brand Theme */</span>
+<span class="hljs-selector-pseudo">:root</span> {
+  <span class="hljs-attribute">--tablix-font-family</span>: <span class="hljs-string">'Brand Font'</span>, sans-serif;
+  <span class="hljs-attribute">--tablix-header-bg</span>: #your-brand-color;
+  <span class="hljs-attribute">--tablix-btn-active-color</span>: #your-accent-color;
+  <span class="hljs-comment">/* ... more variables */</span>
+}
+</code></pre>
+<p><strong>Usage:</strong></p>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"./src/styles/tablix.css"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"./themes/my-brand.css"</span>&gt;</span>
+</code></pre>
+<h2 id="dynamic-theme-switching">Dynamic Theme Switching</h2>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Switch to dark theme</span>
+<span class="hljs-built_in">document</span>.documentElement.setAttribute(<span class="hljs-string">'data-theme'</span>, <span class="hljs-string">'dark'</span>);
+
+<span class="hljs-comment">// Switch back to light theme</span>
+<span class="hljs-built_in">document</span>.documentElement.removeAttribute(<span class="hljs-string">'data-theme'</span>);
+
+<span class="hljs-comment">// Apply custom theme class</span>
+<span class="hljs-built_in">document</span>.<span class="hljs-built_in">querySelector</span>(<span class="hljs-string">'.tablix-wrapper'</span>).classList.add(<span class="hljs-string">'my-custom-theme'</span>);
+</code></pre>
+<h2 id="performance-notes">Performance Notes</h2>
+<ul>
+<li>CSS custom properties have excellent browser support and performance</li>
+<li>Theme changes are instant (no JavaScript required)</li>
+<li>Only the changed properties are recalculated</li>
+<li>Inheritance works naturally with CSS custom properties</li>
+</ul>
+<h2 id="browser-support">Browser Support</h2>
+<p>CSS custom properties are supported in:</p>
+<ul>
+<li>Chrome 49+</li>
+<li>Firefox 31+  </li>
+<li>Safari 9.1+</li>
+<li>Edge 16+</li>
+</ul>
+<p>For older browsers, the default theme will be used as a fallback.</p>

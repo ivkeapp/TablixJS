@@ -1,0 +1,257 @@
+<h1 id="row-selection-guide">Row Selection Guide</h1>
+<p>TablixJS provides comprehensive row selection functionality with support for both single and multi-row selection modes. This guide covers all aspects of implementing and customizing row selection in your tables.</p>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#basic-setup">Basic Setup</a></li>
+<li><a href="#selection-modes">Selection Modes</a></li>
+<li><a href="#user-interactions">User Interactions</a></li>
+<li><a href="#programmatic-api">Programmatic API</a></li>
+<li><a href="#event-system">Event System</a></li>
+<li><a href="#integration-with-other-features">Integration with Other Features</a></li>
+<li><a href="#styling-and-theming">Styling and Theming</a></li>
+<li><a href="#advanced-usage">Advanced Usage</a></li>
+<li><a href="#best-practices">Best Practices</a></li>
+</ol>
+<h2 id="basic-setup">Basic Setup</h2>
+<p>To enable row selection, add the <code>selection</code> configuration to your table options:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> table = new Table(<span class="hljs-string">'#container'</span>, {
+  selection: {
+    enabled: <span class="hljs-literal">false</span>,       // <span class="hljs-keyword">Default</span>: selection is disabled
+    mode: <span class="hljs-string">'single'</span>,       // <span class="hljs-string">'single'</span> <span class="hljs-literal">or</span> <span class="hljs-string">'multi'</span>
+    dataIdKey: <span class="hljs-string">'id'</span>       // Key <span class="hljs-keyword">to</span> use as stable row identifier
+  }
+})<span class="hljs-comment">;</span>
+</code></pre>
+<h3 id="selection-options">Selection Options</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enabled</code></td>
+<td>Boolean</td>
+<td><code>false</code></td>
+<td>Enable/disable row selection</td>
+</tr>
+<tr>
+<td><code>mode</code></td>
+<td>String</td>
+<td><code>&#39;single&#39;</code></td>
+<td>Selection mode: <code>&#39;single&#39;</code> or <code>&#39;multi&#39;</code></td>
+</tr>
+<tr>
+<td><code>dataIdKey</code></td>
+<td>String</td>
+<td><code>&#39;id&#39;</code></td>
+<td>Data property to use as stable row identifier</td>
+</tr>
+</tbody>
+</table>
+<h2 id="user-interactions">User Interactions</h2>
+<h3 id="single-mode">Single Mode</h3>
+<ul>
+<li><strong>Click</strong>: Select the clicked row (clears previous selection)</li>
+</ul>
+<h3 id="multi-mode">Multi Mode</h3>
+<ul>
+<li><strong>Click</strong>: Select the clicked row (clears other selections)</li>
+<li><strong>Ctrl+Click</strong> (Cmd+Click on Mac): Add/remove individual rows</li>
+<li><strong>Shift+Click</strong>: Select range from last selected row to clicked row</li>
+</ul>
+<h2 id="events">Events</h2>
+<h3 id="beforeselect">beforeSelect</h3>
+<p>Fired before a selection changes.</p>
+<pre><code class="lang-javascript">table.eventManager.<span class="hljs-literal">on</span>(<span class="hljs-string">'beforeSelect'</span>, <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Before select:'</span>, event);
+  <span class="hljs-regexp">//</span> event contains: { rowData, rowId, currentSelection, isCtrlClick, isShiftClick }
+});
+</code></pre>
+<h3 id="afterselect">afterSelect</h3>
+<p>Fired after a selection changes.</p>
+<pre><code class="lang-javascript">table.eventManager.<span class="hljs-literal">on</span>(<span class="hljs-string">'afterSelect'</span>, <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'After select:'</span>, event);
+  <span class="hljs-regexp">//</span> event contains: { rowData, rowId, selectedRows, selectedData }
+});
+</code></pre>
+<h2 id="api-methods">API Methods</h2>
+<h3 id="getting-selection">Getting Selection</h3>
+<h4 id="-getselecteddata-"><code>getSelectedData()</code></h4>
+<p>Returns array of selected row data objects.</p>
+<pre><code class="lang-javascript">const selectedRows = <span class="hljs-keyword">table</span>.getSelectedData();
+console.log(<span class="hljs-string">'Selected rows:'</span>, selectedRows);
+</code></pre>
+<h4 id="-getselectedids-"><code>getSelectedIds()</code></h4>
+<p>Returns array of selected row IDs.</p>
+<pre><code class="lang-javascript">const selectedIds = <span class="hljs-keyword">table</span>.getSelectedIds();
+console.log(<span class="hljs-string">'Selected IDs:'</span>, selectedIds);
+</code></pre>
+<h4 id="-getselectioncount-"><code>getSelectionCount()</code></h4>
+<p>Returns number of selected rows.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> <span class="hljs-keyword">count</span> = <span class="hljs-keyword">table</span>.getSelectionCount();
+console.<span class="hljs-built_in">log</span>(`<span class="hljs-variable">${count}</span> rows selected`);
+</code></pre>
+<h4 id="-isrowselected-rowid-"><code>isRowSelected(rowId)</code></h4>
+<p>Checks if a specific row is selected.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">if</span> (<span class="hljs-keyword">table</span>.isRowSelected('123')) {
+  console.log(<span class="hljs-string">'Row 123 is selected'</span>);
+}
+</code></pre>
+<h3 id="modifying-selection">Modifying Selection</h3>
+<h4 id="-selectrows-rowids-"><code>selectRows(rowIds)</code></h4>
+<p>Programmatically select rows by ID(s).</p>
+<pre><code class="lang-javascript">// <span class="hljs-keyword">Select</span> single <span class="hljs-keyword">row</span>
+table.selectRows(<span class="hljs-string">'123'</span>);
+
+// <span class="hljs-keyword">Select</span> multiple <span class="hljs-keyword">rows</span>
+table.selectRows([<span class="hljs-string">'123'</span>, <span class="hljs-string">'456'</span>, <span class="hljs-string">'789'</span>]);
+</code></pre>
+<h4 id="-deselectrows-rowids-"><code>deselectRows(rowIds)</code></h4>
+<p>Programmatically deselect rows by ID(s).</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Deselect single row</span>
+<span class="hljs-selector-tag">table</span><span class="hljs-selector-class">.deselectRows</span>(<span class="hljs-string">'123'</span>);
+
+<span class="hljs-comment">// Deselect multiple rows</span>
+<span class="hljs-selector-tag">table</span><span class="hljs-selector-class">.deselectRows</span>([<span class="hljs-string">'123'</span>, <span class="hljs-string">'456'</span>]);
+</code></pre>
+<h4 id="-clearselection-"><code>clearSelection()</code></h4>
+<p>Clear all selections.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">table</span>.clearSelection();
+</code></pre>
+<h3 id="configuration-control">Configuration Control</h3>
+<h4 id="-enableselection-"><code>enableSelection()</code></h4>
+<p>Enable selection functionality.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">table</span>.enableSelection();
+</code></pre>
+<h4 id="-disableselection-"><code>disableSelection()</code></h4>
+<p>Disable selection functionality.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">table</span>.disableSelection();
+</code></pre>
+<h4 id="-setselectionmode-mode-"><code>setSelectionMode(mode)</code></h4>
+<p>Change selection mode.</p>
+<pre><code class="lang-javascript">table.setSelectionMode(<span class="hljs-string">'multi'</span>);  <span class="hljs-regexp">//</span> <span class="hljs-keyword">or</span> <span class="hljs-string">'single'</span>
+</code></pre>
+<h2 id="behavior-with-table-features">Behavior with Table Features</h2>
+<h3 id="pagination">Pagination</h3>
+<ul>
+<li>Selection is preserved for rows that remain visible</li>
+<li>Rows hidden by pagination keep their selection state</li>
+<li>Selection works across different pages</li>
+</ul>
+<h3 id="filtering-search">Filtering &amp; Search</h3>
+<ul>
+<li>Rows hidden by filters/search are automatically deselected</li>
+<li>Selection state is preserved for visible rows</li>
+<li>Filtering triggers <code>afterSelect</code> event if selection changes</li>
+</ul>
+<h3 id="sorting">Sorting</h3>
+<ul>
+<li>Selection is preserved using stable row IDs</li>
+<li>Visual selection updates after sorting</li>
+<li>No selection state is lost during sorting operations</li>
+</ul>
+<h2 id="css-customization">CSS Customization</h2>
+<p>Selection styles can be customized using CSS variables:</p>
+<pre><code class="lang-css"><span class="hljs-selector-pseudo">:root</span> {
+  <span class="hljs-comment">/* Regular selected row */</span>
+  <span class="hljs-attribute">--tablix-row-selected-bg</span>: <span class="hljs-number">#e3f2fd</span>;
+  <span class="hljs-attribute">--tablix-row-selected-hover-bg</span>: <span class="hljs-number">#bbdefb</span>;
+
+  <span class="hljs-comment">/* Last selected row (in multi-mode) */</span>
+  <span class="hljs-attribute">--tablix-row-last-selected-bg</span>: <span class="hljs-number">#abd5f8</span>; <span class="hljs-comment">/* will change */</span>
+  <span class="hljs-attribute">--tablix-row-last-selected-color</span>: <span class="hljs-number">#ffffff</span>;
+  <span class="hljs-attribute">--tablix-row-last-selected-hover-bg</span>: <span class="hljs-number">#9ec0e0</span>; <span class="hljs-comment">/* will change */</span>
+
+  <span class="hljs-comment">/* Selection indicator */</span>
+  <span class="hljs-attribute">--tablix-selection-indicator-color</span>: <span class="hljs-number">#9ec0e0</span>; <span class="hljs-comment">/* will change */</span>
+}
+</code></pre>
+<h2 id="examples">Examples</h2>
+<h3 id="single-selection">Single Selection</h3>
+<pre><code class="lang-javascript">const table = <span class="hljs-keyword">new</span> Table(<span class="hljs-string">'#container'</span>, {
+  data: users,
+  columns: columns,
+  selection: {
+    enabled: <span class="hljs-literal">true</span>,
+    mode: <span class="hljs-string">'single'</span>
+  }
+});
+
+table.eventManager.<span class="hljs-literal">on</span>(<span class="hljs-string">'afterSelect'</span>, <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span> {
+  const selected = event.selectedData[<span class="hljs-number">0</span>];
+  <span class="hljs-keyword">if</span> (selected) {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Selected user:'</span>, selected.name);
+  }
+});
+</code></pre>
+<h3 id="multi-selection-with-event-handling">Multi Selection with Event Handling</h3>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> table = <span class="hljs-keyword">new</span> Table(<span class="hljs-string">'#container'</span>, {
+  <span class="hljs-attr">data</span>: users,
+  <span class="hljs-attr">columns</span>: columns,
+  <span class="hljs-attr">selection</span>: {
+    <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">mode</span>: <span class="hljs-string">'multi'</span>,
+    <span class="hljs-attr">dataIdKey</span>: <span class="hljs-string">'userId'</span>
+  }
+});
+
+<span class="hljs-comment">// Handle selection changes</span>
+table.eventManager.on(<span class="hljs-string">'afterSelect'</span>, (event) =&gt; {
+  <span class="hljs-keyword">const</span> count = event.selectedData.length;
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'selectedCount'</span>).textContent = 
+    <span class="hljs-string">`<span class="hljs-subst">${count}</span> users selected`</span>;
+});
+
+<span class="hljs-comment">// Programmatically select specific users</span>
+<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'selectAdmins'</span>).addEventListener(<span class="hljs-string">'click'</span>, () =&gt; {
+  <span class="hljs-keyword">const</span> adminIds = users
+    .filter(<span class="hljs-function"><span class="hljs-params">user</span> =&gt;</span> user.role === <span class="hljs-string">'admin'</span>)
+    .map(<span class="hljs-function"><span class="hljs-params">user</span> =&gt;</span> user.userId);
+  table.selectRows(adminIds);
+});
+</code></pre>
+<h3 id="dynamic-selection-control">Dynamic Selection Control</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Toggle selection mode</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toggleSelectionMode</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> currentMode = table.selectionManager.options.mode;
+  <span class="hljs-keyword">const</span> newMode = currentMode === <span class="hljs-string">'single'</span> ? <span class="hljs-string">'multi'</span> : <span class="hljs-string">'single'</span>;
+  table.setSelectionMode(newMode);
+}
+
+<span class="hljs-comment">// Bulk operations</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">deleteSelected</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> selectedIds = table.getSelectedIds();
+  <span class="hljs-keyword">if</span> (selectedIds.length === <span class="hljs-number">0</span>) {
+    alert(<span class="hljs-string">'No rows selected'</span>);
+    <span class="hljs-keyword">return</span>;
+  }
+
+  <span class="hljs-keyword">if</span> (confirm(<span class="hljs-string">`Delete <span class="hljs-subst">${selectedIds.length}</span> selected items?`</span>)) {
+    <span class="hljs-comment">// Perform delete operation</span>
+    selectedIds.forEach(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> deleteUser(id));
+
+    <span class="hljs-comment">// Refresh table data</span>
+    table.loadData(updatedData);
+  }
+}
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<ol>
+<li><strong>Stable Row IDs</strong>: Always use a stable, unique identifier for <code>dataIdKey</code> (like database IDs)</li>
+<li><strong>Event Handling</strong>: Use <code>afterSelect</code> event for UI updates and actions</li>
+<li><strong>User Feedback</strong>: Provide clear visual feedback for selection states</li>
+<li><strong>Accessibility</strong>: Selection works with keyboard navigation (Enter/Space on rows)</li>
+<li><strong>Performance</strong>: Selection state is efficiently managed using Sets for O(1) lookups</li>
+</ol>
+<h2 id="limitations-considerations">Limitations &amp; Considerations</h2>
+<ul>
+<li>Selection is based on data IDs, not row indexes</li>
+<li>Filtered-out rows are automatically deselected</li>
+<li>Server-side pagination requires careful handling of selection persistence</li>
+<li>Maximum selection size is limited by browser memory (typically thousands of rows)</li>
+</ul>

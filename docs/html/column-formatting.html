@@ -1,0 +1,370 @@
+<h1 id="tablixjs-column-formatting-system">TablixJS Column Formatting System</h1>
+<p>The TablixJS Column Formatting System provides a flexible, lightweight, and fully optional way to format cell values using the modern Intl APIs. This system is inspired by Handsontable cell formats but designed to be more flexible and lightweight.</p>
+<h2 id="overview">Overview</h2>
+<h3 id="key-features">Key Features</h3>
+<ul>
+<li><strong>Flexible formatting</strong>: Text, date, currency, number, and percentage formats</li>
+<li><strong>Optional locale support</strong>: Uses browser default or specify custom locale</li>
+<li><strong>Intl API integration</strong>: Leverages native browser formatting capabilities</li>
+<li><strong>Custom renderer priority</strong>: User renderers can override or use formatted values</li>
+<li><strong>Performance optimized</strong>: Formatters are compiled and cached once per column</li>
+<li><strong>Graceful error handling</strong>: Invalid data doesn&#39;t break the table</li>
+<li><strong>No defaults</strong>: Pure behavior - values unchanged unless explicitly formatted</li>
+<li><strong>Extensible design</strong>: Ready for future custom format types</li>
+</ul>
+<h2 id="quick-start">Quick Start</h2>
+<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> Table from <span class="hljs-string">'./src/core/Table.js'</span>;
+
+const table = <span class="hljs-keyword">new</span> Table(<span class="hljs-string">'#container'</span>, {
+<span class="hljs-symbol">  data:</span> [
+    { <span class="hljs-string">name:</span> <span class="hljs-string">'Alice'</span>, <span class="hljs-string">salary:</span> <span class="hljs-number">95000</span>, <span class="hljs-string">joinDate:</span> <span class="hljs-string">'2022-03-15'</span>, <span class="hljs-string">bonus:</span> <span class="hljs-number">0.15</span> }
+  ],
+<span class="hljs-symbol">  columns:</span> [
+    { <span class="hljs-string">name:</span> <span class="hljs-string">'name'</span>, <span class="hljs-string">title:</span> <span class="hljs-string">'Employee'</span> }, <span class="hljs-comment">// Raw value</span>
+    { <span class="hljs-string">name:</span> <span class="hljs-string">'salary'</span>, <span class="hljs-string">title:</span> <span class="hljs-string">'Salary'</span>, <span class="hljs-string">format:</span> <span class="hljs-string">'currency'</span>, <span class="hljs-string">currency:</span> <span class="hljs-string">'USD'</span> },
+    { <span class="hljs-string">name:</span> <span class="hljs-string">'joinDate'</span>, <span class="hljs-string">title:</span> <span class="hljs-string">'Join Date'</span>, <span class="hljs-string">format:</span> <span class="hljs-string">'date'</span> },
+    { <span class="hljs-string">name:</span> <span class="hljs-string">'bonus'</span>, <span class="hljs-string">title:</span> <span class="hljs-string">'Bonus'</span>, <span class="hljs-string">format:</span> <span class="hljs-string">'percent'</span> }
+  ]
+});
+</code></pre>
+<h2 id="column-configuration">Column Configuration</h2>
+<h3 id="basic-structure">Basic Structure</h3>
+<pre><code class="lang-javascript">{
+  name: <span class="hljs-string">'columnName'</span>,        // Required: data property name
+  title: <span class="hljs-string">'Display Name'</span>,     // Optiona<span class="hljs-variable">l:</span> header <span class="hljs-keyword">display</span> text
+  forma<span class="hljs-variable">t:</span> <span class="hljs-string">'formatType'</span>,      // Optiona<span class="hljs-variable">l:</span> format <span class="hljs-built_in">type</span>
+  locale: <span class="hljs-string">'en-US'</span>,           // Optiona<span class="hljs-variable">l:</span> locale <span class="hljs-keyword">for</span> formatting
+  formatOption<span class="hljs-variable">s:</span> { ... },    // Optiona<span class="hljs-variable">l:</span> Intl API <span class="hljs-keyword">options</span>
+  currency: <span class="hljs-string">'USD'</span>,           // Required <span class="hljs-keyword">for</span> currency format
+  renderer: (value, row, formattedValue) =&gt; { ... } // Optiona<span class="hljs-variable">l:</span> custom renderer
+}
+</code></pre>
+<h3 id="format-types">Format Types</h3>
+<h4 id="1-text-format">1. Text Format</h4>
+<p>Basic string conversion with null/undefined handling.</p>
+<pre><code class="lang-javascript">{ <span class="hljs-attribute">name</span>: <span class="hljs-string">'description'</span>, title: <span class="hljs-string">'Description'</span>, format: <span class="hljs-string">'text'</span> }
+</code></pre>
+<h4 id="2-number-format">2. Number Format</h4>
+<p>Uses <code>Intl.NumberFormat</code> for numeric values.</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Basic number</span>
+{ <span class="hljs-attribute">name</span>: <span class="hljs-string">'rating'</span>, <span class="hljs-attribute">format</span>: <span class="hljs-string">'number'</span> }
+
+<span class="hljs-comment">// With decimal places</span>
+{ 
+  <span class="hljs-attribute">name</span>: <span class="hljs-string">'score'</span>, 
+  <span class="hljs-attribute">format</span>: <span class="hljs-string">'number'</span>,
+  <span class="hljs-attribute">formatOptions</span>: { 
+    <span class="hljs-attribute">minimumFractionDigits</span>: <span class="hljs-number">2</span>, 
+    <span class="hljs-attribute">maximumFractionDigits</span>: <span class="hljs-number">2</span> 
+  }
+}
+
+<span class="hljs-comment">// With locale</span>
+{ 
+  <span class="hljs-attribute">name</span>: <span class="hljs-string">'population'</span>, 
+  <span class="hljs-attribute">format</span>: <span class="hljs-string">'number'</span>,
+  <span class="hljs-attribute">locale</span>: <span class="hljs-string">'de-DE'</span>,
+  <span class="hljs-attribute">formatOptions</span>: { <span class="hljs-attribute">useGrouping</span>: true }
+}
+</code></pre>
+<h4 id="3-currency-format">3. Currency Format</h4>
+<p>Uses <code>Intl.NumberFormat</code> with currency style.</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Basic USD currency</span>
+{ 
+  <span class="hljs-attribute">name</span>: <span class="hljs-string">'salary'</span>, 
+  <span class="hljs-attribute">format</span>: <span class="hljs-string">'currency'</span>, 
+  <span class="hljs-attribute">currency</span>: <span class="hljs-string">'USD'</span> 
+}
+
+<span class="hljs-comment">// EUR with German locale</span>
+{ 
+  <span class="hljs-attribute">name</span>: <span class="hljs-string">'price'</span>, 
+  <span class="hljs-attribute">format</span>: <span class="hljs-string">'currency'</span>, 
+  <span class="hljs-attribute">currency</span>: <span class="hljs-string">'EUR'</span>, 
+  <span class="hljs-attribute">locale</span>: <span class="hljs-string">'de-DE'</span> 
+}
+
+<span class="hljs-comment">// Custom options</span>
+{ 
+  <span class="hljs-attribute">name</span>: <span class="hljs-string">'budget'</span>, 
+  <span class="hljs-attribute">format</span>: <span class="hljs-string">'currency'</span>, 
+  <span class="hljs-attribute">currency</span>: <span class="hljs-string">'GBP'</span>,
+  <span class="hljs-attribute">locale</span>: <span class="hljs-string">'en-GB'</span>,
+  <span class="hljs-attribute">formatOptions</span>: { 
+    <span class="hljs-attribute">minimumFractionDigits</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-attribute">maximumFractionDigits</span>: <span class="hljs-number">0</span> 
+  }
+}
+</code></pre>
+<h4 id="4-date-format">4. Date Format</h4>
+<p>Uses <code>Intl.DateTimeFormat</code> for date/time values.</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Basic date</span>
+{ <span class="hljs-attribute">name</span>: <span class="hljs-string">'joinDate'</span>, <span class="hljs-attribute">format</span>: <span class="hljs-string">'date'</span> }
+
+<span class="hljs-comment">// Short date style</span>
+{ 
+  <span class="hljs-attribute">name</span>: <span class="hljs-string">'createdAt'</span>, 
+  <span class="hljs-attribute">format</span>: <span class="hljs-string">'date'</span>,
+  <span class="hljs-attribute">formatOptions</span>: { <span class="hljs-attribute">dateStyle</span>: <span class="hljs-string">'short'</span> }
+}
+
+<span class="hljs-comment">// Custom format</span>
+{ 
+  <span class="hljs-attribute">name</span>: <span class="hljs-string">'updatedAt'</span>, 
+  <span class="hljs-attribute">format</span>: <span class="hljs-string">'date'</span>,
+  <span class="hljs-attribute">locale</span>: <span class="hljs-string">'fr-FR'</span>,
+  <span class="hljs-attribute">formatOptions</span>: { 
+    <span class="hljs-attribute">year</span>: <span class="hljs-string">'numeric'</span>, 
+    <span class="hljs-attribute">month</span>: <span class="hljs-string">'long'</span>, 
+    <span class="hljs-attribute">day</span>: <span class="hljs-string">'2-digit'</span>,
+    <span class="hljs-attribute">weekday</span>: <span class="hljs-string">'long'</span>
+  }
+}
+
+<span class="hljs-comment">// Date and time</span>
+{ 
+  <span class="hljs-attribute">name</span>: <span class="hljs-string">'timestamp'</span>, 
+  <span class="hljs-attribute">format</span>: <span class="hljs-string">'date'</span>,
+  <span class="hljs-attribute">formatOptions</span>: { 
+    <span class="hljs-attribute">dateStyle</span>: <span class="hljs-string">'short'</span>,
+    <span class="hljs-attribute">timeStyle</span>: <span class="hljs-string">'medium'</span>
+  }
+}
+</code></pre>
+<h4 id="5-percentage-format">5. Percentage Format</h4>
+<p>Uses <code>Intl.NumberFormat</code> with percent style.</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Basic percentage (0.15 → 15%)</span>
+{ <span class="hljs-attribute">name</span>: <span class="hljs-string">'bonus'</span>, <span class="hljs-attribute">format</span>: <span class="hljs-string">'percent'</span> }
+
+<span class="hljs-comment">// With decimals</span>
+{ 
+  <span class="hljs-attribute">name</span>: <span class="hljs-string">'commission'</span>, 
+  <span class="hljs-attribute">format</span>: <span class="hljs-string">'percent'</span>,
+  <span class="hljs-attribute">formatOptions</span>: { <span class="hljs-attribute">minimumFractionDigits</span>: <span class="hljs-number">2</span> }
+}
+
+<span class="hljs-comment">// With locale</span>
+{ 
+  <span class="hljs-attribute">name</span>: <span class="hljs-string">'growth'</span>, 
+  <span class="hljs-attribute">format</span>: <span class="hljs-string">'percent'</span>,
+  <span class="hljs-attribute">locale</span>: <span class="hljs-string">'de-DE'</span>,
+  <span class="hljs-attribute">formatOptions</span>: { <span class="hljs-attribute">signDisplay</span>: <span class="hljs-string">'always'</span> }
+}
+</code></pre>
+<h2 id="custom-renderers">Custom Renderers</h2>
+<p>Custom renderers have priority over formatting but can use formatted values.</p>
+<h3 id="renderer-function-signature">Renderer Function Signature</h3>
+<pre><code class="lang-javascript">render<span class="hljs-symbol">er:</span> (<span class="hljs-built_in">value</span>, <span class="hljs-built_in">row</span>, formattedValue) =&gt; {
+  // val<span class="hljs-symbol">ue:</span> raw <span class="hljs-built_in">cell</span> <span class="hljs-built_in">value</span>
+  // r<span class="hljs-symbol">ow:</span> complete <span class="hljs-built_in">row</span> object
+  // formattedVal<span class="hljs-symbol">ue:</span> formatted <span class="hljs-built_in">value</span> (<span class="hljs-built_in">if</span> format is specified)
+
+  return 'HTML string <span class="hljs-built_in">or</span> <span class="hljs-built_in">text</span>';
+}
+</code></pre>
+<h3 id="examples">Examples</h3>
+<h4 id="using-formatted-value">Using Formatted Value</h4>
+<pre><code class="lang-javascript">{
+  <span class="hljs-attr">name</span>: <span class="hljs-string">'salary'</span>,
+  <span class="hljs-attr">format</span>: <span class="hljs-string">'currency'</span>,
+  <span class="hljs-attr">currency</span>: <span class="hljs-string">'USD'</span>,
+  <span class="hljs-attr">renderer</span>: <span class="hljs-function">(<span class="hljs-params">value, row, formattedValue</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> color = value &gt;= <span class="hljs-number">80000</span> ? <span class="hljs-string">'green'</span> : <span class="hljs-string">'red'</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`&lt;span style="color: <span class="hljs-subst">${color}</span>"&gt;<span class="hljs-subst">${formattedValue}</span>&lt;/span&gt;`</span>;
+  }
+}
+</code></pre>
+<h4 id="completely-custom">Completely Custom</h4>
+<pre><code class="lang-javascript">{
+  name: <span class="hljs-string">'status'</span>,
+  renderer: <span class="hljs-function"><span class="hljs-params">(value)</span> =&gt;</span> {
+    <span class="hljs-keyword">return</span> value ? <span class="hljs-string">'Active'</span> : <span class="hljs-string">'Inactive'</span>;
+  }
+}
+</code></pre>
+<h4 id="using-row-context">Using Row Context</h4>
+<pre><code class="lang-javascript">{
+  <span class="hljs-attr">name</span>: <span class="hljs-string">'fullName'</span>,
+  <span class="hljs-attr">renderer</span>: <span class="hljs-function">(<span class="hljs-params">value, row</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`<span class="hljs-subst">${row.firstName}</span> <span class="hljs-subst">${row.lastName}</span>`</span>;
+  }
+}
+</code></pre>
+<h2 id="internationalization">Internationalization</h2>
+<h3 id="locale-support">Locale Support</h3>
+<ul>
+<li><strong>Default</strong>: Uses browser&#39;s default locale</li>
+<li><strong>Custom</strong>: Specify any valid locale string</li>
+<li><strong>Examples</strong>: <code>&#39;en-US&#39;</code>, <code>&#39;de-DE&#39;</code>, <code>&#39;fr-FR&#39;</code>, <code>&#39;ja-JP&#39;</code>, <code>&#39;ar-SA&#39;</code></li>
+</ul>
+<h3 id="format-options">Format Options</h3>
+<p>All <code>formatOptions</code> are passed directly to the respective Intl API:</p>
+<h4 id="datetimeformat-options">DateTimeFormat Options</h4>
+<pre><code class="lang-javascript"><span class="hljs-attribute">formatOptions</span>: {
+  <span class="hljs-attribute">dateStyle</span>: <span class="hljs-string">'full'</span> | <span class="hljs-string">'long'</span> | <span class="hljs-string">'medium'</span> | <span class="hljs-string">'short'</span>,
+  <span class="hljs-attribute">timeStyle</span>: <span class="hljs-string">'full'</span> | <span class="hljs-string">'long'</span> | <span class="hljs-string">'medium'</span> | <span class="hljs-string">'short'</span>,
+  <span class="hljs-attribute">year</span>: <span class="hljs-string">'numeric'</span> | <span class="hljs-string">'2-digit'</span>,
+  <span class="hljs-attribute">month</span>: <span class="hljs-string">'numeric'</span> | <span class="hljs-string">'2-digit'</span> | <span class="hljs-string">'long'</span> | <span class="hljs-string">'short'</span> | <span class="hljs-string">'narrow'</span>,
+  <span class="hljs-attribute">day</span>: <span class="hljs-string">'numeric'</span> | <span class="hljs-string">'2-digit'</span>,
+  <span class="hljs-attribute">weekday</span>: <span class="hljs-string">'long'</span> | <span class="hljs-string">'short'</span> | <span class="hljs-string">'narrow'</span>,
+  <span class="hljs-attribute">hour</span>: <span class="hljs-string">'numeric'</span> | <span class="hljs-string">'2-digit'</span>,
+  <span class="hljs-attribute">minute</span>: <span class="hljs-string">'numeric'</span> | <span class="hljs-string">'2-digit'</span>,
+  <span class="hljs-attribute">second</span>: <span class="hljs-string">'numeric'</span> | <span class="hljs-string">'2-digit'</span>,
+  <span class="hljs-attribute">timeZone</span>: <span class="hljs-string">'UTC'</span> | <span class="hljs-string">'America/New_York'</span> | ...
+}
+</code></pre>
+<h4 id="numberformat-options">NumberFormat Options</h4>
+<pre><code class="lang-javascript"><span class="hljs-attribute">formatOptions</span>: {
+  <span class="hljs-attribute">minimumFractionDigits</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attribute">maximumFractionDigits</span>: <span class="hljs-number">3</span>,
+  <span class="hljs-attribute">minimumSignificantDigits</span>: <span class="hljs-number">1</span>,
+  <span class="hljs-attribute">maximumSignificantDigits</span>: <span class="hljs-number">21</span>,
+  <span class="hljs-attribute">useGrouping</span>: true,
+  <span class="hljs-attribute">signDisplay</span>: <span class="hljs-string">'auto'</span> | <span class="hljs-string">'never'</span> | <span class="hljs-string">'always'</span> | <span class="hljs-string">'exceptZero'</span>
+}
+</code></pre>
+<h2 id="performance">Performance</h2>
+<h3 id="optimization-features">Optimization Features</h3>
+<ul>
+<li><strong>Formatter Caching</strong>: Compiled once per column, reused for all rows</li>
+<li><strong>Lazy Compilation</strong>: Only creates formatters for columns with <code>format</code> specified</li>
+<li><strong>Error Resilience</strong>: Invalid data doesn&#39;t break formatting for other cells</li>
+</ul>
+<h3 id="best-practices">Best Practices</h3>
+<ol>
+<li><strong>Use appropriate format types</strong>: Don&#39;t use <code>currency</code> for simple numbers</li>
+<li><strong>Minimize formatOptions</strong>: Only specify needed options</li>
+<li><strong>Cache heavy renderers</strong>: For complex custom renderers, consider memoization</li>
+<li><strong>Test with large datasets</strong>: Verify performance with your expected data size</li>
+</ol>
+<h2 id="error-handling">Error Handling</h2>
+<p>The formatting system gracefully handles various error conditions:</p>
+<h3 id="invalid-data-types">Invalid Data Types</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// These won't break the table:</span>
+{ <span class="hljs-string">date:</span> <span class="hljs-string">'invalid-date'</span>, <span class="hljs-string">number:</span> <span class="hljs-string">'not-a-number'</span>, <span class="hljs-string">currency:</span> <span class="hljs-literal">null</span> }
+</code></pre>
+<h3 id="unsupported-formats">Unsupported Formats</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Warns and falls back to raw value:</span>
+{ <span class="hljs-string">name:</span> <span class="hljs-string">'field'</span>, <span class="hljs-string">format:</span> <span class="hljs-string">'unsupported-format'</span> }
+</code></pre>
+<h3 id="missing-required-properties">Missing Required Properties</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Currency without currency code:</span>
+{ <span class="hljs-string">name:</span> <span class="hljs-string">'price'</span>, <span class="hljs-string">format:</span> <span class="hljs-string">'currency'</span> } <span class="hljs-comment">// Will show warning</span>
+</code></pre>
+<h2 id="-extensibility">🔮 Extensibility</h2>
+<p>The system is designed for future extension:</p>
+<h3 id="future-custom-formats-conceptual-">Future Custom Formats (Conceptual)</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Future API for custom formats:</span>
+table.columnManager.registerFormat(<span class="hljs-string">'filesize'</span>, (column) =&gt; {
+  <span class="hljs-keyword">return</span> (<span class="hljs-keyword">value</span>) =&gt; {
+    <span class="hljs-comment">// Custom formatting logic</span>
+    <span class="hljs-keyword">return</span> formatFileSize(<span class="hljs-keyword">value</span>);
+  };
+});
+
+<span class="hljs-comment">// Usage:</span>
+{ name: <span class="hljs-string">'fileSize'</span>, format: <span class="hljs-string">'filesize'</span> }
+</code></pre>
+<h3 id="plugin-architecture">Plugin Architecture</h3>
+<p>The modular design allows for future plugins that could add:</p>
+<ul>
+<li>Custom format types</li>
+<li>Advanced formatting rules</li>
+<li>Conditional formatting</li>
+<li>Template-based formatting</li>
+</ul>
+<h2 id="real-world-examples">Real-World Examples</h2>
+<h3 id="employee-table">Employee Table</h3>
+<pre><code class="lang-javascript">const employeeTable = new Table(<span class="hljs-string">'#employees'</span>, {
+  <span class="hljs-keyword">data</span>: employees,
+  columns: [
+    { <span class="hljs-keyword">name</span>: <span class="hljs-string">'id'</span>, <span class="hljs-built_in">title</span>: <span class="hljs-string">'ID'</span> },
+    { <span class="hljs-keyword">name</span>: <span class="hljs-string">'name'</span>, <span class="hljs-built_in">title</span>: <span class="hljs-string">'Employee Name'</span> },
+    { <span class="hljs-keyword">name</span>: <span class="hljs-string">'department'</span>, <span class="hljs-built_in">title</span>: <span class="hljs-string">'Department'</span> },
+    { 
+      <span class="hljs-keyword">name</span>: <span class="hljs-string">'salary'</span>, 
+      <span class="hljs-built_in">title</span>: <span class="hljs-string">'Annual Salary'</span>, 
+      format: <span class="hljs-string">'currency'</span>,
+      currency: <span class="hljs-string">'USD'</span>,
+      formatOptions: { minimumFractionDigits: <span class="hljs-number">0</span> }
+    },
+    { 
+      <span class="hljs-keyword">name</span>: <span class="hljs-string">'bonus'</span>, 
+      <span class="hljs-built_in">title</span>: <span class="hljs-string">'Bonus Rate'</span>, 
+      format: <span class="hljs-string">'percent'</span>,
+      formatOptions: { minimumFractionDigits: <span class="hljs-number">1</span> }
+    },
+    { 
+      <span class="hljs-keyword">name</span>: <span class="hljs-string">'joinDate'</span>, 
+      <span class="hljs-built_in">title</span>: <span class="hljs-string">'Hire Date'</span>, 
+      format: <span class="hljs-string">'date'</span>,
+      formatOptions: { 
+        year: <span class="hljs-string">'numeric'</span>, 
+        month: <span class="hljs-string">'short'</span>, 
+        day: <span class="hljs-string">'2-digit'</span> 
+      }
+    },
+    { 
+      <span class="hljs-keyword">name</span>: <span class="hljs-string">'rating'</span>, 
+      <span class="hljs-built_in">title</span>: <span class="hljs-string">'Performance'</span>, 
+      format: <span class="hljs-string">'number'</span>,
+      formatOptions: { minimumFractionDigits: <span class="hljs-number">1</span>, maximumFractionDigits: <span class="hljs-number">1</span> }
+    }
+  ]
+});
+</code></pre>
+<h3 id="financial-dashboard">Financial Dashboard</h3>
+<pre><code class="lang-javascript">const financialTable = new Table(<span class="hljs-string">'#financial'</span>, {
+  <span class="hljs-keyword">data</span>: transactions,
+  columns: [
+    { <span class="hljs-keyword">name</span>: <span class="hljs-string">'date'</span>, <span class="hljs-built_in">title</span>: <span class="hljs-string">'Date'</span>, format: <span class="hljs-string">'date'</span>, formatOptions: { dateStyle: <span class="hljs-string">'short'</span> } },
+    { <span class="hljs-keyword">name</span>: <span class="hljs-string">'description'</span>, <span class="hljs-built_in">title</span>: <span class="hljs-string">'Description'</span> },
+    { 
+      <span class="hljs-keyword">name</span>: <span class="hljs-string">'amount'</span>, 
+      <span class="hljs-built_in">title</span>: <span class="hljs-string">'Amount'</span>, 
+      format: <span class="hljs-string">'currency'</span>,
+      currency: <span class="hljs-string">'EUR'</span>,
+      locale: <span class="hljs-string">'de-DE'</span>,
+      renderer: (value, row, formattedValue) =&gt; {
+        const <span class="hljs-built_in">color</span> = value &gt;= <span class="hljs-number">0</span> ? <span class="hljs-string">'green'</span> : <span class="hljs-string">'red'</span>;
+        return `&lt;span style=<span class="hljs-string">"color: ${color}"</span>&gt;${formattedValue}&lt;/span&gt;`;
+      }
+    },
+    { 
+      <span class="hljs-keyword">name</span>: <span class="hljs-string">'tax'</span>, 
+      <span class="hljs-built_in">title</span>: <span class="hljs-string">'Tax Rate'</span>, 
+      format: <span class="hljs-string">'percent'</span>,
+      locale: <span class="hljs-string">'de-DE'</span>
+    }
+  ]
+});
+</code></pre>
+<h2 id="testing">Testing</h2>
+<p>Test your formatting with various data types:</p>
+<pre><code class="lang-javascript">const testData = [
+  { <span class="hljs-string">value:</span> <span class="hljs-number">123.456</span>, <span class="hljs-string">date:</span> <span class="hljs-string">'2023-12-25'</span>, <span class="hljs-string">currency:</span> <span class="hljs-number">50000</span> },
+  { <span class="hljs-string">value:</span> <span class="hljs-literal">null</span>, <span class="hljs-string">date:</span> <span class="hljs-literal">null</span>, <span class="hljs-string">currency:</span> <span class="hljs-literal">null</span> },
+  { <span class="hljs-string">value:</span> <span class="hljs-string">'invalid'</span>, <span class="hljs-string">date:</span> <span class="hljs-string">'invalid-date'</span>, <span class="hljs-string">currency:</span> <span class="hljs-string">'not-number'</span> },
+  { <span class="hljs-string">value:</span> <span class="hljs-number">0</span>, <span class="hljs-string">date:</span> <span class="hljs-keyword">new</span> Date(), <span class="hljs-string">currency:</span> <span class="hljs-number">0</span> }
+];
+</code></pre>
+<h2 id="api-reference">API Reference</h2>
+<h3 id="columnmanager-methods">ColumnManager Methods</h3>
+<h4 id="-initializecolumns-columns-"><code>initializeColumns(columns)</code></h4>
+<p>Initialize columns and compile formatters.</p>
+<h4 id="-formatcellvalue-columnname-value-row-"><code>formatCellValue(columnName, value, row)</code></h4>
+<p>Format a cell value for display.</p>
+<h4 id="-getcolumn-columnname-"><code>getColumn(columnName)</code></h4>
+<p>Get column definition by name.</p>
+<h4 id="-getcolumns-"><code>getColumns()</code></h4>
+<p>Get all column definitions.</p>
+<h4 id="-getsupportedformats-"><code>getSupportedFormats()</code></h4>
+<p>Get array of supported format types.</p>
+<h3 id="format-specific-options">Format-Specific Options</h3>
+<p>See the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl">Intl documentation</a> for complete options:</p>
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat">DateTimeFormat</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat">NumberFormat</a></li>
+</ul>
+<hr>
+<p><em>This formatting system integrates seamlessly with TablixJS&#39;s existing features including sorting, pagination, and event hooks.</em></p>
