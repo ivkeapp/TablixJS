@@ -44,7 +44,7 @@ const table = new Table('#myTable', {
 ## User Interface
 
 ### Filter Icons
-Filter icons (⚪) appear in column headers next to sort indicators. Clicking opens a dropdown with filtering options.
+Filter icons (🞃) appear in column headers next to sort indicators. Clicking opens a dropdown with filtering options.
 
 ### Filter Dropdown
 The dropdown provides two tabs:

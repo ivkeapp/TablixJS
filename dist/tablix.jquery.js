@@ -1,5 +1,5 @@
 /**
- * TablixJS with jQuery Wrapper v0.1.3
+ * TablixJS with jQuery Wrapper v1.0.4
  * TablixJS is a lightweight, dependency-free JavaScript library for building powerful, responsive data tables.
  * (c) 2025 Ivan Zarkovic
  * Released under the MIT License.
@@ -2250,7 +2250,7 @@
         filterIndicator = document.createElement('span');
         filterIndicator.className = 'tablix-filter-indicator';
         filterIndicator.innerHTML = `
-        <span class="tablix-filter-icon" title="${this.table.t('filter.filterColumn')}">⚪</span>
+        <span class="tablix-filter-icon" title="${this.table.t('filter.filterColumn')}">🞃</span>
       `;
 
         // Add click handler
