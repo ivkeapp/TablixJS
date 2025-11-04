@@ -78,6 +78,11 @@ This folder contains comprehensive examples and tests for TablixJS functionality
 - `theme-demo.html` - Theme switching and customization
 - **Available Themes**: Default, Dark, and custom theme examples
 
+### Mobile & Responsive Examples
+- `mobile-scroll-test.html` - Mobile horizontal scrolling demonstration
+- **Features**: Wide tables on mobile, controls stay accessible
+- **Usage**: Test mobile responsiveness and horizontal scroll behavior
+
 ### Localization Examples
 - `localization-demo.html` - Multi-language support
 - `localization-test.html` - Language switching test
