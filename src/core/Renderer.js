@@ -38,6 +38,9 @@ export default class Renderer {
       html += `<div class="tablix-scroll-container" style="height: ${containerHeight}px; overflow: auto; position: relative; border: 1px solid #ddd;">`;
     }
     
+    // Table wrapper for horizontal scrolling (mobile support)
+    html += '<div class="tablix-table-wrapper" style="overflow-x: auto;">';
+    
     // Table
     html += '<table class="tablix-table" style="width:100%; border-collapse:collapse;">';
 
@@ -116,6 +119,7 @@ export default class Renderer {
     }
     html += '</tbody>';
     html += '</table>';
+    html += '</div>'; // Close tablix-table-wrapper
     
     // Close virtual scroll container if enabled
     if (isVirtualScrollEnabled) {
