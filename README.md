@@ -957,7 +957,26 @@ Create custom themes using CSS custom properties:
 
 ### **Responsive Design**
 
-TablixJS includes responsive breakpoints for mobile-friendly tables:
+TablixJS includes responsive breakpoints and mobile-friendly features:
+
+#### **Mobile Horizontal Scrolling**
+
+Tables automatically wrap with horizontal scrolling for mobile devices:
+
+```html
+<!-- Automatic structure for mobile support -->
+<div class="tablix-wrapper">
+  <div class="tablix-controls"><!-- stays visible --></div>
+  <div class="tablix-table-wrapper" style="overflow-x: auto;">
+    <table class="tablix-table"><!-- scrolls horizontally --></table>
+  </div>
+  <div class="tablix-pagination-container"><!-- stays visible --></div>
+</div>
+```
+
+This ensures controls remain accessible while wide tables scroll horizontally on small screens. See [Mobile Responsive Design](docs/mobile-responsive.md) for details.
+
+#### **Responsive Breakpoints**
 
 ```css
 /* Mobile styles (< 768px) */
