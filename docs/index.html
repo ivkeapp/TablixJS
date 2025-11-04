@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS Documentation</title>
+    
+    <!-- TablixJS Styles (for consistency with project design system) -->
+    <link rel="stylesheet" href="../dist/tablixjs.css">
+    <link rel="stylesheet" href="../dist/tablixjs-theme-default.css">
+    
+    <!-- Documentation-specific styles -->
+    <link rel="stylesheet" href="./docs.css">
+</head>
+<body>
+    <!-- Main Documentation Container -->
+    <div class="docs-container">
+        
+        <!-- Mobile Header with Hamburger Menu -->
+        <header class="docs-header">
+            <button 
+                class="docs-menu-toggle" 
+                id="menuToggle"
+                aria-label="Toggle navigation menu"
+                aria-expanded="false"
+                aria-controls="docsSidebar">
+                <span class="hamburger-icon"></span>
+            </button>
+            <h1 class="docs-title">TablixJS Documentation</h1>
+            <div class="docs-spacer"></div>
+        </header>
+
+        <!-- Sidebar Navigation -->
+        <aside class="docs-sidebar" id="docsSidebar" role="navigation" aria-label="Documentation navigation">
+            <div class="sidebar-header">
+                <h2>TablixJS</h2>
+                <p class="sidebar-version" id="sidebarVersion">Loading...</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <!-- Getting Started Category -->
+                <div class="nav-category">
+                    <button 
+                        class="nav-category-header" 
+                        aria-expanded="true"
+                        data-category="getting-started">
+                        <span class="category-icon">▼</span>
+                        <span class="category-title">Getting Started</span>
+                    </button>
+                    <ul class="nav-links" data-category-content="getting-started">
+                        <li>
+                            <a href="#integration-guide" 
+                               class="nav-link active" 
+                               data-doc="integration-guide.html"
+                               role="menuitem">
+                                Integration Guide
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Core Features Category -->
+                <div class="nav-category">
+                    <button 
+                        class="nav-category-header" 
+                        aria-expanded="true"
+                        data-category="core-features">
+                        <span class="category-icon">▼</span>
+                        <span class="category-title">Core Features</span>
+                    </button>
+                    <ul class="nav-links" data-category-content="core-features">
+                        <li>
+                            <a href="#sorting" 
+                               class="nav-link" 
+                               data-doc="sorting.html"
+                               role="menuitem">
+                                Sorting
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#sorting-simple" 
+                               class="nav-link" 
+                               data-doc="sorting-simple.html"
+                               role="menuitem">
+                                Simple Sorting
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#filtering" 
+                               class="nav-link" 
+                               data-doc="filtering.html"
+                               role="menuitem">
+                                Filtering
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#pagination" 
+                               class="nav-link" 
+                               data-doc="pagination.html"
+                               role="menuitem">
+                                Pagination
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#selection" 
+                               class="nav-link" 
+                               data-doc="selection.html"
+                               role="menuitem">
+                                Selection
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#select-all-api" 
+                               class="nav-link" 
+                               data-doc="select-all-api.html"
+                               role="menuitem">
+                                Select All API
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Advanced Features Category -->
+                <div class="nav-category">
+                    <button 
+                        class="nav-category-header" 
+                        aria-expanded="true"
+                        data-category="advanced-features">
+                        <span class="category-icon">▼</span>
+                        <span class="category-title">Advanced Features</span>
+                    </button>
+                    <ul class="nav-links" data-category-content="advanced-features">
+                        <li>
+                            <a href="#virtual-scrolling" 
+                               class="nav-link" 
+                               data-doc="virtual-scrolling.html"
+                               role="menuitem">
+                                Virtual Scrolling
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#virtual-scrolling-bugfixes" 
+                               class="nav-link" 
+                               data-doc="virtual-scrolling-bugfixes.html"
+                               role="menuitem">
+                                Virtual Scrolling Bugfixes
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#async-data-loading" 
+                               class="nav-link" 
+                               data-doc="async-data-loading.html"
+                               role="menuitem">
+                                Async Data Loading
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#column-formatting" 
+                               class="nav-link" 
+                               data-doc="column-formatting.html"
+                               role="menuitem">
+                                Column Formatting
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Customization Category -->
+                <div class="nav-category">
+                    <button 
+                        class="nav-category-header" 
+                        aria-expanded="true"
+                        data-category="customization">
+                        <span class="category-icon">▼</span>
+                        <span class="category-title">Customization</span>
+                    </button>
+                    <ul class="nav-links" data-category-content="customization">
+                        <li>
+                            <a href="#theming" 
+                               class="nav-link" 
+                               data-doc="theming.html"
+                               role="menuitem">
+                                Theming
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#localization" 
+                               class="nav-link" 
+                               data-doc="localization.html"
+                               role="menuitem">
+                                Localization
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Framework Integration Category -->
+                <div class="nav-category">
+                    <button 
+                        class="nav-category-header" 
+                        aria-expanded="true"
+                        data-category="frameworks">
+                        <span class="category-icon">▼</span>
+                        <span class="category-title">Framework Integration</span>
+                    </button>
+                    <ul class="nav-links" data-category-content="frameworks">
+                        <li>
+                            <a href="#jquery-wrapper" 
+                               class="nav-link" 
+                               data-doc="jquery-wrapper.html"
+                               role="menuitem">
+                                jQuery Wrapper
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#jquery-wrapper-technical-summary" 
+                               class="nav-link" 
+                               data-doc="jquery-wrapper-technical-summary.html"
+                               role="menuitem">
+                                jQuery Technical Summary
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#jquery-bundle-constructor-fix" 
+                               class="nav-link" 
+                               data-doc="jquery-bundle-constructor-fix.html"
+                               role="menuitem">
+                                jQuery Bundle Constructor Fix
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Developer Guide Category -->
+                <div class="nav-category">
+                    <button 
+                        class="nav-category-header" 
+                        aria-expanded="true"
+                        data-category="developer">
+                        <span class="category-icon">▼</span>
+                        <span class="category-title">Developer Guide</span>
+                    </button>
+                    <ul class="nav-links" data-category-content="developer">
+                        <li>
+                            <a href="#plugin-architecture" 
+                               class="nav-link" 
+                               data-doc="plugin-architecture.html"
+                               role="menuitem">
+                                Plugin Architecture
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <a href="https://github.com/ivkeapp/TablixJS" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="sidebar-link">
+                    GitHub Repository
+                </a>
+                <a href="../examples/" 
+                   class="sidebar-link">
+                    View Examples
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="docs-content" id="docsContent" role="main">
+            <!-- Loading State -->
+            <div class="content-loading" id="contentLoading">
+                <div class="loading-spinner"></div>
+                <p>Loading documentation...</p>
+            </div>
+
+            <!-- Error State -->
+            <div class="content-error" id="contentError" style="display: none;">
+                <div class="error-icon">⚠️</div>
+                <h2>Documentation Not Found</h2>
+                <p id="errorMessage">The requested documentation page could not be loaded.</p>
+                <button onclick="location.reload()" class="error-retry-btn">Reload Page</button>
+            </div>
+
+            <!-- Documentation Content (Loaded Dynamically) -->
+            <div class="content-wrapper" id="contentWrapper" style="display: none;">
+                <!-- Content loaded here via JavaScript -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Documentation JavaScript -->
+    <script src="./docs.js"></script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<h1 id="selectallrows-api">selectAllRows() API</h1>
+<p>The <code>selectAllRows()</code> method has been added to the TablixJS Table class to provide a convenient way to select all currently visible/filtered rows.</p>
+<h2 id="method-signature">Method Signature</h2>
+<pre><code class="lang-javascript"><span class="hljs-keyword">table</span>.selectAllRows(): number
+</code></pre>
+<h2 id="parameters">Parameters</h2>
+<p>None</p>
+<h2 id="returns">Returns</h2>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Description:</strong> The number of rows that were selected</li>
+</ul>
+<h2 id="behavior">Behavior</h2>
+<ul>
+<li>Selects all rows that are currently visible based on:<ul>
+<li>Applied filters (column filters)</li>
+<li>Active search terms</li>
+<li>Current pagination view (selects across all pages, not just current page)</li>
+</ul>
+</li>
+<li>Respects the <code>dataIdKey</code> option specified during table initialization</li>
+<li>Only works when selection is enabled (<code>selection.enabled: true</code>)</li>
+<li>Works with both <code>single</code> and <code>multi</code> selection modes</li>
+<li>Triggers a custom <code>selectAll</code> event</li>
+</ul>
+<h2 id="events">Events</h2>
+<p>The method triggers a custom <code>selectAll</code> event with the following payload:</p>
+<pre><code class="lang-javascript">{
+<span class="hljs-symbol">  selectedIds:</span> string[],    <span class="hljs-comment">// Array of selected row IDs</span>
+<span class="hljs-symbol">  selectedData:</span> object[],   <span class="hljs-comment">// Array of selected row data objects  </span>
+<span class="hljs-symbol">  count:</span> number            <span class="hljs-comment">// Number of rows selected</span>
+}
+</code></pre>
+<h2 id="usage-examples">Usage Examples</h2>
+<h3 id="basic-usage">Basic Usage</h3>
+<pre><code class="lang-javascript">// <span class="hljs-keyword">Select </span>all visible rows
+<span class="hljs-symbol">const</span> <span class="hljs-keyword">selectedCount </span>= table.<span class="hljs-keyword">selectAllRows();
+</span><span class="hljs-symbol">console.log</span>(`<span class="hljs-keyword">Selected </span>${<span class="hljs-keyword">selectedCount} </span>rows`)<span class="hljs-comment">;</span>
+</code></pre>
+<h3 id="with-event-listener">With Event Listener</h3>
+<pre><code class="lang-javascript"><span class="hljs-regexp">//</span> Listen <span class="hljs-keyword">for</span> selectAll events
+table.eventManager.<span class="hljs-literal">on</span>(<span class="hljs-string">'selectAll'</span>, <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(`<span class="javascript">Selected ${event.count} rows:</span>`, event.selectedData);
+});
+
+<span class="hljs-regexp">//</span> Trigger selection
+table.selectAllRows();
+</code></pre>
+<h3 id="with-keyboard-shortcut">With Keyboard Shortcut</h3>
+<pre><code class="lang-javascript"><span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'keydown'</span>, <span class="hljs-function"><span class="hljs-params">(e)</span> =&gt;</span> {
+  <span class="hljs-keyword">if</span> (e.key === <span class="hljs-string">'a'</span> &amp;&amp; (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    table.selectAllRows();
+  }
+});
+</code></pre>
+<h3 id="respecting-filters">Respecting Filters</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Apply a filter first</span>
+await <span class="hljs-keyword">table</span>.applyFilter('department', { 
+  type: <span class="hljs-string">'value'</span>, 
+  values: [<span class="hljs-string">'Engineering'</span>] 
+});
+
+<span class="hljs-comment">// Select all filtered rows (only Engineering employees)</span>
+const count = <span class="hljs-keyword">table</span>.selectAllRows();
+console.log(`Selected ${count} Engineering employees`);
+</code></pre>
+<h2 id="error-handling">Error Handling</h2>
+<p>The method includes built-in warnings for common issues:</p>
+<ul>
+<li><strong>Selection disabled:</strong> Logs warning if <code>selection.enabled</code> is false</li>
+<li><strong>No data available:</strong> Logs warning if no rows are available to select</li>
+<li><strong>Returns 0</strong> in both error cases</li>
+</ul>
+<h2 id="compatibility">Compatibility</h2>
+<ul>
+<li><strong>Minimum Version:</strong> TablixJS v1.0.0 (with this enhancement)</li>
+<li><strong>Browser Support:</strong> All modern browsers</li>
+<li><strong>Dependencies:</strong> Requires SelectionManager to be initialized</li>
+</ul>
+<h2 id="related-methods">Related Methods</h2>
+<ul>
+<li><code>table.getSelectedData()</code> - Get selected row objects</li>
+<li><code>table.getSelectedIds()</code> - Get selected row IDs  </li>
+<li><code>table.getSelectionCount()</code> - Get count of selected rows</li>
+<li><code>table.clearSelection()</code> - Clear all selections</li>
+<li><code>table.selectRows(ids)</code> - Select specific rows by ID</li>
+<li><code>table.deselectRows(ids)</code> - Deselect specific rows by ID</li>
+</ul>
+<h2 id="migration-notes">Migration Notes</h2>
+<p>If you were previously using a custom <code>selectAllRows()</code> implementation like:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Old custom implementation</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">selectAllRows</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> allData = table.getData();
+  <span class="hljs-keyword">const</span> allIds = allData.map(<span class="hljs-function"><span class="hljs-params">row</span> =&gt;</span> row.id.toString());
+  table.selectRows(allIds);
+}
+</code></pre>
+<p>You can now replace it with the built-in method:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// New built-in API</span>
+<span class="hljs-keyword">const</span> <span class="hljs-keyword">count</span> = <span class="hljs-keyword">table</span>.selectAllRows();
+</code></pre>
+<p>The built-in method provides better error handling, event triggering, and return value for improved developer experience.</p>

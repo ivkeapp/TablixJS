@@ -1,0 +1,291 @@
+<h1 id="tablixjs-integration-guide">TablixJS Integration Guide</h1>
+<p>This guide explains the different ways to use TablixJS in your projects, including vanilla JavaScript, jQuery integration, React, and various module systems.</p>
+<h2 id="core-principles">Core Principles</h2>
+<p>TablixJS maintains a <strong>dependency-free core</strong> architecture, meaning:</p>
+<ul>
+<li>The core library works standalone without any external dependencies</li>
+<li>Optional integrations (jQuery, React) are provided as separate wrappers</li>
+<li>You can use TablixJS with or without these optional wrappers</li>
+</ul>
+<h2 id="installation-options">Installation Options</h2>
+<h3 id="1-npm-package-recommended-">1. NPM Package (Recommended)</h3>
+<pre><code class="lang-bash">npm <span class="hljs-keyword">install</span> tablixjs
+</code></pre>
+<h3 id="2-cdn">2. CDN</h3>
+<pre><code class="lang-html"><span class="hljs-comment">&lt;!-- Core TablixJS --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/tablixjs@latest/dist/tablixjs.umd.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+<span class="hljs-comment">&lt;!-- OR with jQuery wrapper bundled --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/tablixjs@latest/dist/tablix.jquery.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+<span class="hljs-comment">&lt;!-- OR standalone jQuery plugin (requires separate TablixJS) --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/tablixjs@latest/dist/tablixjs.umd.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/tablixjs@latest/dist/tablix-jquery-plugin.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<h3 id="3-direct-download">3. Direct Download</h3>
+<p>Download the files you need from the <code>dist/</code> folder in the repository.</p>
+<h2 id="usage-scenarios">Usage Scenarios</h2>
+<h3 id="vanilla-javascript">Vanilla JavaScript</h3>
+<p><strong>ES Modules (Modern)</strong></p>
+<pre><code class="lang-javascript">import { <span class="hljs-keyword">Table</span> } from <span class="hljs-comment">'tablixjs'</span>;
+
+const <span class="hljs-keyword">table</span> = new <span class="hljs-comment">Table(document.getElementById(</span><span class="hljs-comment">'myTable'</span><span class="hljs-comment">), {</span>
+    data: myData,
+    sortable: true,
+    filterable: true
+});
+</code></pre>
+<p><strong>CommonJS (Node.js)</strong></p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> { Table } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tablixjs'</span>);
+</code></pre>
+<p><strong>Browser Script Tags</strong></p>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"path/to/tablixjs.umd.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+    <span class="hljs-keyword">const</span> table = <span class="hljs-keyword">new</span> TablixJS.Table(<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'myTable'</span>), {
+        <span class="hljs-attr">data</span>: myData,
+        <span class="hljs-attr">sortable</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">filterable</span>: <span class="hljs-literal">true</span>
+    });
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<h3 id="jquery-integration">jQuery Integration</h3>
+<p>TablixJS provides <strong>multiple jQuery integration options</strong> to suit different needs:</p>
+<h4 id="option-1-bundled-jquery-wrapper-easiest-">Option 1: Bundled jQuery Wrapper (Easiest)</h4>
+<p>This includes both TablixJS core and jQuery wrapper in a single file:</p>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://code.jquery.com/jquery-3.6.0.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"path/to/tablix.jquery.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+    $(<span class="hljs-string">'#myTable'</span>).tablixjs({
+        <span class="hljs-attr">data</span>: myData,
+        <span class="hljs-attr">sortable</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">filterable</span>: <span class="hljs-literal">true</span>
+    });
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<p><strong>NPM Usage:</strong></p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Import the bundled version</span>
+import <span class="hljs-string">'tablixjs/jquery'</span>;
+
+<span class="hljs-comment">// Use jQuery as normal</span>
+<span class="hljs-symbol">$</span>(<span class="hljs-string">'#myTable'</span>).tablixjs(<span class="hljs-keyword">options</span>);
+</code></pre>
+<h4 id="option-2-standalone-plugin-maximum-flexibility-">Option 2: Standalone Plugin (Maximum Flexibility)</h4>
+<p>Load TablixJS and the jQuery plugin separately:</p>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://code.jquery.com/jquery-3.6.0.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"path/to/tablixjs.umd.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"path/to/tablix-jquery-plugin.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+    $(<span class="hljs-string">'#myTable'</span>).tablixjs({
+        <span class="hljs-attr">data</span>: myData,
+        <span class="hljs-attr">sortable</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">filterable</span>: <span class="hljs-literal">true</span>
+    });
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<p><strong>Benefits of Standalone Plugin:</strong></p>
+<ul>
+<li>Use existing TablixJS installation</li>
+<li>Smaller file if you already have TablixJS loaded</li>
+<li>Mix vanilla and jQuery usage in same project</li>
+<li>Better for Progressive Enhancement</li>
+</ul>
+<h4 id="option-3-manual-jquery-integration">Option 3: Manual jQuery Integration</h4>
+<p>You can also use TablixJS with jQuery manually:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> { Table } <span class="hljs-keyword">from</span> <span class="hljs-string">'tablixjs'</span>;
+
+$.fn.myCustomTable = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">options</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.each(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">new</span> Table(<span class="hljs-keyword">this</span>, options);
+    });
+};
+
+$(<span class="hljs-string">'#myTable'</span>).myCustomTable(options);
+</code></pre>
+<h3 id="react-integration">React Integration</h3>
+<pre><code class="lang-jsx"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { TableReact } <span class="hljs-keyword">from</span> <span class="hljs-string">'tablixjs/react'</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">MyComponent</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> data = [
+        { <span class="hljs-attr">name</span>: <span class="hljs-string">'John'</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">30</span> },
+        { <span class="hljs-attr">name</span>: <span class="hljs-string">'Jane'</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">25</span> }
+    ];
+
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">TableReact</span> 
+            <span class="hljs-attr">data</span>=<span class="hljs-string">{data}</span>
+            <span class="hljs-attr">sortable</span>=<span class="hljs-string">{true}</span>
+            <span class="hljs-attr">filterable</span>=<span class="hljs-string">{true}</span>
+            <span class="hljs-attr">className</span>=<span class="hljs-string">"my-table"</span>
+        /&gt;</span>
+    );
+}</span>
+</code></pre>
+<h2 id="build-configuration-impact">Build Configuration Impact</h2>
+<h3 id="does-jquery-wrapper-affect-core-library-">Does jQuery Wrapper Affect Core Library?</h3>
+<p><strong>No!</strong> The jQuery wrapper has zero impact on:</p>
+<ul>
+<li>Core TablixJS functionality</li>
+<li>Bundle size when not used</li>
+<li>Performance of vanilla usage</li>
+<li>Dependency requirements</li>
+</ul>
+<h3 id="build-outputs-explained">Build Outputs Explained</h3>
+<p>The build system generates multiple files for different use cases:</p>
+<pre><code><span class="hljs-keyword">dist/
+</span>├── tablixjs.esm.<span class="hljs-keyword">js </span>         <span class="hljs-comment"># ES Modules (modern)</span>
+├── tablixjs.esm.min.<span class="hljs-keyword">js </span>     <span class="hljs-comment"># ES Modules (minified)</span>
+├── tablixjs.cjs.<span class="hljs-keyword">js </span>         <span class="hljs-comment"># CommonJS (Node.js)</span>
+├── tablixjs.umd.<span class="hljs-keyword">js </span>         <span class="hljs-comment"># Universal (browser script tag)</span>
+├── tablixjs.umd.min.<span class="hljs-keyword">js </span>     <span class="hljs-comment"># Universal (minified)</span>
+├── tablix.<span class="hljs-keyword">jquery.js </span>        <span class="hljs-comment"># TablixJS + jQuery wrapper bundled</span>
+├── tablix.<span class="hljs-keyword">jquery.min.js </span>    <span class="hljs-comment"># TablixJS + jQuery wrapper (minified)</span>
+├── tablix-<span class="hljs-keyword">jquery-plugin.js </span> <span class="hljs-comment"># jQuery plugin only (standalone)</span>
+└── tablix-<span class="hljs-keyword">jquery-plugin.min.js </span> <span class="hljs-comment"># jQuery plugin only (minified)</span>
+</code></pre><h3 id="npm-package-exports">NPM Package Exports</h3>
+<p>The package.json includes multiple export paths:</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"main"</span>: <span class="hljs-string">"./dist/tablixjs.cjs.js"</span>,
+  <span class="hljs-attr">"module"</span>: <span class="hljs-string">"./dist/tablixjs.esm.js"</span>,
+  <span class="hljs-attr">"browser"</span>: <span class="hljs-string">"./dist/tablixjs.umd.min.js"</span>,
+  <span class="hljs-attr">"exports"</span>: {
+    <span class="hljs-attr">"."</span>: {
+      <span class="hljs-attr">"import"</span>: <span class="hljs-string">"./dist/tablixjs.esm.js"</span>,
+      <span class="hljs-attr">"require"</span>: <span class="hljs-string">"./dist/tablixjs.cjs.js"</span>,
+      <span class="hljs-attr">"browser"</span>: <span class="hljs-string">"./dist/tablixjs.umd.min.js"</span>
+    },
+    <span class="hljs-attr">"./jquery"</span>: {
+      <span class="hljs-attr">"import"</span>: <span class="hljs-string">"./dist/tablix.jquery.js"</span>,
+      <span class="hljs-attr">"require"</span>: <span class="hljs-string">"./dist/tablix.jquery.js"</span>,
+      <span class="hljs-attr">"browser"</span>: <span class="hljs-string">"./dist/tablix.jquery.min.js"</span>
+    },
+    <span class="hljs-attr">"./react"</span>: <span class="hljs-string">"./src/react/TableReact.jsx"</span>
+  }
+}
+</code></pre>
+<h2 id="dependency-management">Dependency Management</h2>
+<h3 id="peer-dependencies">Peer Dependencies</h3>
+<p>TablixJS uses <strong>optional peer dependencies</strong>:</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"peerDependencies"</span>: {
+    <span class="hljs-attr">"jquery"</span>: <span class="hljs-string">"&gt;=3.0.0"</span>,
+    <span class="hljs-attr">"react"</span>: <span class="hljs-string">"&gt;=16.8.0"</span>,
+    <span class="hljs-attr">"react-dom"</span>: <span class="hljs-string">"&gt;=16.8.0"</span>
+  },
+  <span class="hljs-attr">"peerDependenciesMeta"</span>: {
+    <span class="hljs-attr">"jquery"</span>: { <span class="hljs-attr">"optional"</span>: <span class="hljs-literal">true</span> },
+    <span class="hljs-attr">"react"</span>: { <span class="hljs-attr">"optional"</span>: <span class="hljs-literal">true</span> },
+    <span class="hljs-attr">"react-dom"</span>: { <span class="hljs-attr">"optional"</span>: <span class="hljs-literal">true</span> }
+  }
+}
+</code></pre>
+<p>This means:</p>
+<ul>
+<li>✅ Core TablixJS installs with zero dependencies</li>
+<li>✅ Warnings only appear if you use the wrappers without dependencies</li>
+<li>✅ No forced installations of jQuery or React</li>
+</ul>
+<h3 id="runtime-detection">Runtime Detection</h3>
+<p>Both jQuery and React wrappers include runtime detection:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// jQuery wrapper checks</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> $ !== <span class="hljs-string">'undefined'</span> &amp;&amp; $.fn) {
+    <span class="hljs-comment">// Register jQuery plugin</span>
+}
+
+<span class="hljs-comment">// React wrapper checks  </span>
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> React !== <span class="hljs-string">'undefined'</span>) {
+    <span class="hljs-comment">// Export React component</span>
+}
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="for-library-authors">For Library Authors</h3>
+<p>If you&#39;re building a library that uses TablixJS:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// ✅ Good: Use core import</span>
+import { <span class="hljs-keyword">Table</span> } from <span class="hljs-comment">'tablixjs'</span>;
+
+<span class="hljs-comment">// ❌ Avoid: Don't force jQuery on users</span>
+import <span class="hljs-string">'tablixjs/jquery'</span>;
+</code></pre>
+<h3 id="for-application-developers">For Application Developers</h3>
+<p>Choose the import that matches your needs:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Vanilla JS project</span>
+<span class="hljs-keyword">import</span> { Table } <span class="hljs-keyword">from</span> <span class="hljs-string">'tablixjs'</span>;
+
+<span class="hljs-comment">// jQuery-heavy project  </span>
+<span class="hljs-keyword">import</span> <span class="hljs-string">'tablixjs/jquery'</span>;
+
+<span class="hljs-comment">// React project</span>
+<span class="hljs-keyword">import</span> { TableReact } <span class="hljs-keyword">from</span> <span class="hljs-string">'tablixjs/react'</span>;
+</code></pre>
+<h3 id="for-progressive-enhancement">For Progressive Enhancement</h3>
+<p>Start with vanilla and add jQuery later:</p>
+<pre><code class="lang-html"><span class="hljs-comment">&lt;!-- Load core first --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"tablixjs.umd.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+<span class="hljs-comment">&lt;!-- Optionally enhance with jQuery --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> $ !== <span class="hljs-string">'undefined'</span>) {
+    <span class="hljs-keyword">const</span> script = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'script'</span>);
+    script.src = <span class="hljs-string">'tablix-jquery-plugin.min.js'</span>;
+    <span class="hljs-built_in">document</span>.head.appendChild(script);
+}
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<h2 id="migration-guide">Migration Guide</h2>
+<h3 id="from-vanilla-to-jquery">From Vanilla to jQuery</h3>
+<p><strong>Before:</strong></p>
+<pre><code class="lang-javascript">const <span class="hljs-keyword">table</span> = new <span class="hljs-comment">TablixJS.Table(element, options)</span>;
+</code></pre>
+<p><strong>After:</strong></p>
+<pre><code class="lang-javascript"><span class="hljs-symbol">$</span>(element).tablixjs(<span class="hljs-keyword">options</span>);
+const <span class="hljs-keyword">table</span> = $(element).data('tablixjs');
+</code></pre>
+<h3 id="from-jquery-to-vanilla">From jQuery to Vanilla</h3>
+<p><strong>Before:</strong></p>
+<pre><code class="lang-javascript"><span class="hljs-symbol">$</span>(<span class="hljs-string">'#table'</span>).tablixjs(<span class="hljs-keyword">options</span>);
+</code></pre>
+<p><strong>After:</strong></p>
+<pre><code class="lang-javascript">import { <span class="hljs-keyword">Table</span> } from <span class="hljs-comment">'tablixjs'</span>;
+const <span class="hljs-keyword">table</span> = new <span class="hljs-comment">Table(document.getElementById(</span><span class="hljs-comment">'table'</span><span class="hljs-comment">), options)</span>;
+</code></pre>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="jquery-plugin-not-working">jQuery Plugin Not Working</h3>
+<ol>
+<li><p><strong>Check jQuery is loaded:</strong></p>
+<pre><code class="lang-javascript">console.<span class="hljs-built-in">log</span>(typeof <span class="hljs-symbol">$</span>); <span class="hljs-comment">// Should be 'function'</span>
+</code></pre>
+</li>
+<li><p><strong>Check TablixJS is loaded:</strong></p>
+<pre><code class="lang-javascript"><span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">typeof</span> TablixJS); <span class="hljs-comment">// Should be 'object'</span>
+</code></pre>
+</li>
+<li><p><strong>Check plugin is registered:</strong></p>
+<pre><code class="lang-javascript"><span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">typeof</span> $.fn.tablixjs); <span class="hljs-comment">// Should be 'function'</span>
+</code></pre>
+</li>
+</ol>
+<h3 id="module-not-found-errors">Module Not Found Errors</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// ❌ If this fails:</span>
+<span class="hljs-keyword">import</span> <span class="hljs-string">'tablixjs/jquery'</span>;
+
+<span class="hljs-comment">// ✅ Try this instead:</span>
+<span class="hljs-keyword">import</span> { Table } <span class="hljs-keyword">from</span> <span class="hljs-string">'tablixjs'</span>;
+<span class="hljs-comment">// Use vanilla API</span>
+</code></pre>
+<h3 id="typescript-issues">TypeScript Issues</h3>
+<pre><code class="lang-typescript"><span class="hljs-comment">// Add type definitions</span>
+<span class="hljs-keyword">declare</span> <span class="hljs-keyword">global</span> {
+    <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">JQuery</span> </span>{
+        tablixjs(options?: any): JQuery;
+    }
+}
+</code></pre>
+<h2 id="summary">Summary</h2>
+<p>TablixJS provides flexible integration options while maintaining its core principle of <strong>zero dependencies</strong>. Choose the integration method that best fits your project:</p>
+<ul>
+<li><strong>Vanilla JS</strong>: Maximum performance, minimal bundle size</li>
+<li><strong>jQuery Bundled</strong>: Easiest jQuery integration</li>
+<li><strong>jQuery Plugin</strong>: Maximum flexibility for mixed usage</li>
+<li><strong>React</strong>: Idiomatic React component usage</li>
+</ul>
+<p>All approaches are fully supported and maintained, so you can pick the one that works best for your specific use case.</p>

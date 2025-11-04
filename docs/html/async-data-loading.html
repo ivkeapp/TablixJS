@@ -1,0 +1,314 @@
+<h1 id="async-data-loading">Async Data Loading</h1>
+<p>TablixJS supports flexible asynchronous data loading with three different approaches, while maintaining full backwards compatibility with existing synchronous array-based loading.</p>
+<h2 id="quick-start">Quick Start</h2>
+<pre><code class="lang-javascript">import <span class="hljs-keyword">Table</span> from <span class="hljs-comment">'./src/core/Table.js'</span>;
+
+const <span class="hljs-keyword">table</span> = new <span class="hljs-comment">Table(</span><span class="hljs-comment">'#myTable'</span><span class="hljs-comment">, {</span>
+  columns: [
+    { name: <span class="hljs-string">'id'</span>, title: <span class="hljs-string">'ID'</span> },
+    { name: <span class="hljs-string">'name'</span>, title: <span class="hljs-string">'Name'</span> },
+    { name: <span class="hljs-string">'email'</span>, title: <span class="hljs-string">'Email'</span> }
+  ]
+});
+
+<span class="hljs-comment">// Three ways to load data:</span>
+
+<span class="hljs-comment">// 1. Direct array (existing behavior)</span>
+<span class="hljs-keyword">table</span>.loadData([
+  { id: <span class="hljs-number">1</span>, name: <span class="hljs-string">'John'</span>, email: <span class="hljs-string">'john@example.com'</span> },
+  { id: <span class="hljs-number">2</span>, name: <span class="hljs-string">'Jane'</span>, email: <span class="hljs-string">'jane@example.com'</span> }
+]);
+
+<span class="hljs-comment">// 2. From URL</span>
+<span class="hljs-keyword">table</span>.loadData('https://api.example.com/users');
+
+<span class="hljs-comment">// 3. Custom async function</span>
+<span class="hljs-keyword">table</span>.loadData(() =&gt; 
+  fetch(<span class="hljs-string">'https://api.example.com/users'</span>)
+    .then(response =&gt; response.json())
+    .then(data =&gt; data.users) <span class="hljs-comment">// Transform if needed</span>
+);
+</code></pre>
+<h2 id="api-reference">API Reference</h2>
+<h3 id="-table-loaddata-source-"><code>table.loadData(source)</code></h3>
+<p>Loads data from various sources into the table.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>source</code> <em>(Array|string|Function)</em>: The data source<ul>
+<li><strong>Array</strong>: Direct data array (synchronous)</li>
+<li><strong>string</strong>: URL to fetch data from (asynchronous)</li>
+<li><strong>Function</strong>: Custom async function that returns a Promise resolving to data array</li>
+</ul>
+</li>
+</ul>
+<p><strong>Returns:</strong> </p>
+<ul>
+<li><code>Promise&lt;void&gt;</code>: Resolves when data is loaded and table is rendered</li>
+</ul>
+<p><strong>Throws:</strong></p>
+<ul>
+<li>Error if data source is invalid</li>
+<li>Network errors for URL-based loading</li>
+<li>Any errors from custom async functions</li>
+</ul>
+<h2 id="data-source-types">Data Source Types</h2>
+<h3 id="1-array-data-synchronous-">1. Array Data (Synchronous)</h3>
+<p>Load data directly from an array - the original behavior, fully preserved.</p>
+<pre><code class="lang-javascript">const data = [
+  { <span class="hljs-string">id:</span> <span class="hljs-number">1</span>, <span class="hljs-string">name:</span> <span class="hljs-string">'Alice'</span>, <span class="hljs-string">department:</span> <span class="hljs-string">'Engineering'</span> },
+  { <span class="hljs-string">id:</span> <span class="hljs-number">2</span>, <span class="hljs-string">name:</span> <span class="hljs-string">'Bob'</span>, <span class="hljs-string">department:</span> <span class="hljs-string">'Sales'</span> },
+  { <span class="hljs-string">id:</span> <span class="hljs-number">3</span>, <span class="hljs-string">name:</span> <span class="hljs-string">'Carol'</span>, <span class="hljs-string">department:</span> <span class="hljs-string">'Marketing'</span> }
+];
+
+await table.loadData(data);
+</code></pre>
+<h3 id="2-url-based-loading">2. URL-based Loading</h3>
+<p>Fetch data from a REST API endpoint. TablixJS uses the native <code>fetch</code> API.</p>
+<pre><code class="lang-javascript"><span class="hljs-regexp">//</span> Simple GET request
+await table.loadData(<span class="hljs-string">'https://jsonplaceholder.typicode.com/users'</span>);
+
+<span class="hljs-regexp">//</span> The URL must return JSON data <span class="hljs-keyword">in</span> array format
+<span class="hljs-regexp">//</span> Example API response:
+<span class="hljs-regexp">//</span> [
+<span class="hljs-regexp">//</span>   { <span class="hljs-string">"id"</span>: <span class="hljs-number">1</span>, <span class="hljs-string">"name"</span>: <span class="hljs-string">"John Doe"</span>, <span class="hljs-string">"email"</span>: <span class="hljs-string">"john@example.com"</span> },
+<span class="hljs-regexp">//</span>   { <span class="hljs-string">"id"</span>: <span class="hljs-number">2</span>, <span class="hljs-string">"name"</span>: <span class="hljs-string">"Jane Smith"</span>, <span class="hljs-string">"email"</span>: <span class="hljs-string">"jane@example.com"</span> }
+<span class="hljs-regexp">//</span> ]
+</code></pre>
+<p><strong>Requirements:</strong></p>
+<ul>
+<li>URL must return valid JSON</li>
+<li>Response must be an array of objects</li>
+<li>Endpoint must support CORS if loading from different domain</li>
+<li>Requires modern browser with <code>fetch</code> support</li>
+</ul>
+<h3 id="3-custom-async-functions">3. Custom Async Functions</h3>
+<p>For complex data loading scenarios, authentication, data transformation, or custom error handling.</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Basic custom loader</span>
+<span class="hljs-keyword">const</span> customLoader = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">return</span> fetch(<span class="hljs-string">'/api/users'</span>, {
+    <span class="hljs-attr">headers</span>: { <span class="hljs-string">'Authorization'</span>: <span class="hljs-string">'Bearer '</span> + authToken }
+  })
+  .then(<span class="hljs-function"><span class="hljs-params">response</span> =&gt;</span> response.json());
+};
+
+<span class="hljs-keyword">await</span> table.loadData(customLoader);
+
+<span class="hljs-comment">// Advanced example with data transformation</span>
+<span class="hljs-keyword">const</span> advancedLoader = <span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'/api/complex-data'</span>);
+    <span class="hljs-keyword">const</span> rawData = <span class="hljs-keyword">await</span> response.json();
+
+    <span class="hljs-comment">// Transform the data to match table columns</span>
+    <span class="hljs-keyword">return</span> rawData.results.map(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> ({
+      <span class="hljs-attr">id</span>: item.user_id,
+      <span class="hljs-attr">name</span>: <span class="hljs-string">`<span class="hljs-subst">${item.first_name}</span> <span class="hljs-subst">${item.last_name}</span>`</span>,
+      <span class="hljs-attr">email</span>: item.email_address,
+      <span class="hljs-attr">department</span>: item.dept?.name || <span class="hljs-string">'Unknown'</span>
+    }));
+  } <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Custom loader error:'</span>, error);
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Failed to load user data'</span>);
+  }
+};
+
+<span class="hljs-keyword">await</span> table.loadData(advancedLoader);
+
+<span class="hljs-comment">// With simulated delay for testing</span>
+<span class="hljs-keyword">const</span> delayedLoader = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> {
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+      resolve([
+        { <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">'Delayed User'</span>, <span class="hljs-attr">email</span>: <span class="hljs-string">'delayed@example.com'</span> }
+      ]);
+    }, <span class="hljs-number">2000</span>);
+  });
+};
+
+<span class="hljs-keyword">await</span> table.loadData(delayedLoader);
+</code></pre>
+<h2 id="event-hooks">Event Hooks</h2>
+<p>TablixJS provides three event hooks for data loading operations:</p>
+<h3 id="-beforeload-"><code>beforeLoad</code></h3>
+<p>Triggered before data loading starts. Useful for showing loading indicators.</p>
+<pre><code class="lang-javascript">table.<span class="hljs-literal">on</span>(<span class="hljs-string">'beforeLoad'</span>, <span class="hljs-function"><span class="hljs-params">(payload)</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Loading started:'</span>, payload);
+  <span class="hljs-regexp">//</span> payload.source contains the original source (URL, function, <span class="hljs-keyword">or</span> array)
+
+  <span class="hljs-regexp">//</span> Show loading indicator
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> payload.source === <span class="hljs-string">'string'</span> || <span class="hljs-keyword">typeof</span> payload.source === <span class="hljs-string">'function'</span>) {
+    showLoadingSpinner();
+  }
+});
+</code></pre>
+<h3 id="-afterload-"><code>afterLoad</code></h3>
+<p>Triggered after data is successfully loaded and table is rendered.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">table</span>.on('afterLoad', (payload) =&gt; {
+  console.log(<span class="hljs-string">'Loading completed:'</span>, payload);
+  <span class="hljs-comment">// payload.data contains the loaded data array</span>
+  <span class="hljs-comment">// payload.source contains the original source</span>
+
+  hideLoadingSpinner();
+  console.<span class="hljs-built-in">log</span>(`Loaded <span class="hljs-symbol">$</span>{payload.data.length} records`);
+});
+</code></pre>
+<h3 id="-loaderror-"><code>loadError</code></h3>
+<p>Triggered when data loading fails.</p>
+<pre><code class="lang-javascript"><span class="hljs-built_in">table</span>.on(<span class="hljs-string">'loadError'</span>, <span class="hljs-function"><span class="hljs-params">(payload)</span> =&gt;</span> {
+  console.<span class="hljs-built_in">error</span>(<span class="hljs-string">'Loading failed:'</span>, payload);
+  // payload.<span class="hljs-built_in">error</span> contains the <span class="hljs-built_in">error</span> object
+  // payload.source contains the original source that failed
+
+  hideLoadingSpinner();
+  showErrorMessage(payload.<span class="hljs-built_in">error</span>.message);
+});
+</code></pre>
+<h2 id="error-handling">Error Handling</h2>
+<h3 id="automatic-error-handling">Automatic Error Handling</h3>
+<p>TablixJS automatically handles common errors:</p>
+<ul>
+<li><strong>Network errors</strong>: Connection issues, timeouts, CORS problems</li>
+<li><strong>HTTP errors</strong>: 404, 500, etc. status codes</li>
+<li><strong>JSON parsing errors</strong>: Invalid JSON responses</li>
+<li><strong>Data validation errors</strong>: Non-array responses</li>
+<li><strong>Custom function errors</strong>: Any errors thrown by custom loaders</li>
+</ul>
+<h3 id="error-display">Error Display</h3>
+<p>When an error occurs:</p>
+<ol>
+<li>The error is logged to the console</li>
+<li>A <code>loadError</code> event is triggered</li>
+<li>The table displays an error message in the container</li>
+<li>The original error is re-thrown for custom handling</li>
+</ol>
+<h3 id="custom-error-handling">Custom Error Handling</h3>
+<pre><code class="lang-javascript"><span class="hljs-keyword">try</span> {
+  <span class="hljs-function">await table.<span class="hljs-title">loadData</span><span class="hljs-params">(<span class="hljs-string">'https://api.example.com/users'</span>)</span></span>;
+} <span class="hljs-keyword">catch</span> (<span class="hljs-keyword">error</span>) {
+  <span class="hljs-comment">// Handle the error according to your app's needs</span>
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">error</span>.message.includes(<span class="hljs-string">'HTTP error! status: 401'</span>)) {
+    redirectToLogin();
+  } <span class="hljs-keyword">else</span> {
+    showUserFriendlyErrorMessage();
+  }
+}
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="1-loading-indicators">1. Loading Indicators</h3>
+<p>Always provide user feedback for async operations:</p>
+<pre><code class="lang-javascript">table.<span class="hljs-literal">on</span>(<span class="hljs-string">'beforeLoad'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'loading'</span>).style.display = <span class="hljs-string">'block'</span>;
+});
+
+table.<span class="hljs-literal">on</span>(<span class="hljs-string">'afterLoad'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'loading'</span>).style.display = <span class="hljs-string">'none'</span>;
+});
+
+table.<span class="hljs-literal">on</span>(<span class="hljs-string">'loadError'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'loading'</span>).style.display = <span class="hljs-string">'none'</span>;
+});
+</code></pre>
+<h3 id="2-error-recovery">2. Error Recovery</h3>
+<p>Implement graceful error handling:</p>
+<pre><code class="lang-javascript">table.<span class="hljs-literal">on</span>(<span class="hljs-string">'loadError'</span>, <span class="hljs-function"><span class="hljs-params">(payload)</span> =&gt;</span> {
+  <span class="hljs-regexp">//</span> Log <span class="hljs-keyword">for</span> debugging
+  <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'Data loading failed:'</span>, payload.error);
+
+  <span class="hljs-regexp">//</span> Show user-friendly message
+  const errorDiv = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>);
+  errorDiv.className = <span class="hljs-string">'error-message'</span>;
+  errorDiv.textContent = <span class="hljs-string">'Unable to load data. Please try again.'</span>;
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'errorContainer'</span>).appendChild(errorDiv);
+
+  <span class="hljs-regexp">//</span> Optionally retry after delay
+  setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    table.loadData(payload.source);
+  }, <span class="hljs-number">5000</span>);
+});
+</code></pre>
+<h3 id="3-data-transformation">3. Data Transformation</h3>
+<p>Use custom functions for data transformation:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> loadUserData = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">return</span> fetch(<span class="hljs-string">'/api/users'</span>)
+    .then(<span class="hljs-function"><span class="hljs-params">response</span> =&gt;</span> response.json())
+    .then(<span class="hljs-function"><span class="hljs-params">apiData</span> =&gt;</span> {
+      <span class="hljs-comment">// Transform API response to table format</span>
+      <span class="hljs-keyword">return</span> apiData.map(<span class="hljs-function"><span class="hljs-params">user</span> =&gt;</span> ({
+        <span class="hljs-attr">id</span>: user.id,
+        <span class="hljs-attr">name</span>: user.fullName,
+        <span class="hljs-attr">email</span>: user.emailAddress,
+        <span class="hljs-attr">status</span>: user.isActive ? <span class="hljs-string">'Active'</span> : <span class="hljs-string">'Inactive'</span>,
+        <span class="hljs-attr">lastLogin</span>: user.lastLoginDate ? <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(user.lastLoginDate).toLocaleDateString() : <span class="hljs-string">'Never'</span>
+      }));
+    });
+};
+
+table.loadData(loadUserData);
+</code></pre>
+<h3 id="4-authentication">4. Authentication</h3>
+<p>Handle authenticated requests:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> loadSecureData = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">const</span> token = localStorage.getItem(<span class="hljs-string">'authToken'</span>);
+
+  <span class="hljs-keyword">return</span> fetch(<span class="hljs-string">'/api/secure-data'</span>, {
+    <span class="hljs-attr">headers</span>: {
+      <span class="hljs-string">'Authorization'</span>: <span class="hljs-string">`Bearer <span class="hljs-subst">${token}</span>`</span>,
+      <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>
+    }
+  })
+  .then(<span class="hljs-function"><span class="hljs-params">response</span> =&gt;</span> {
+    <span class="hljs-keyword">if</span> (response.status === <span class="hljs-number">401</span>) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Authentication required'</span>);
+    }
+    <span class="hljs-keyword">return</span> response.json();
+  });
+};
+
+table.loadData(loadSecureData);
+</code></pre>
+<h2 id="testing">Testing</h2>
+<h3 id="test-different-scenarios">Test Different Scenarios</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Test data loading</span>
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testDataLoading</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-comment">// Test array loading</span>
+    <span class="hljs-keyword">await</span> table.loadData([{<span class="hljs-attr">id</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">'Test'</span>}]);
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'✓ Array loading works'</span>);
+
+    <span class="hljs-comment">// Test URL loading</span>
+    <span class="hljs-keyword">await</span> table.loadData(<span class="hljs-string">'https://jsonplaceholder.typicode.com/users'</span>);
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'✓ URL loading works'</span>);
+
+    <span class="hljs-comment">// Test custom function</span>
+    <span class="hljs-keyword">await</span> table.loadData(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">Promise</span>.resolve([{<span class="hljs-attr">id</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">'Custom'</span>}]));
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'✓ Custom function loading works'</span>);
+
+  } <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'✗ Test failed:'</span>, error);
+  }
+}
+</code></pre>
+<h2 id="migration-guide">Migration Guide</h2>
+<h3 id="from-previous-versions">From Previous Versions</h3>
+<p>The new async loading is fully backwards compatible. No changes needed for existing code:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// This still works exactly as before</span>
+table.loadData([
+  { <span class="hljs-string">id:</span> <span class="hljs-number">1</span>, <span class="hljs-string">name:</span> <span class="hljs-string">'John'</span> },
+  { <span class="hljs-string">id:</span> <span class="hljs-number">2</span>, <span class="hljs-string">name:</span> <span class="hljs-string">'Jane'</span> }
+]);
+</code></pre>
+<h3 id="event-payload-changes">Event Payload Changes</h3>
+<p>The <code>afterLoad</code> event now receives a payload object instead of direct data:</p>
+<pre><code class="lang-javascript"><span class="hljs-regexp">//</span> Old format (still supported <span class="hljs-keyword">for</span> array data)
+table.<span class="hljs-literal">on</span>(<span class="hljs-string">'afterLoad'</span>, <span class="hljs-function"><span class="hljs-params">(data)</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Loaded data:'</span>, data);
+});
+
+<span class="hljs-regexp">//</span> New format (recommended)
+table.<span class="hljs-literal">on</span>(<span class="hljs-string">'afterLoad'</span>, <span class="hljs-function"><span class="hljs-params">(payload)</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Loaded data:'</span>, payload.data);
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Source type:'</span>, <span class="hljs-keyword">typeof</span> payload.source);
+});
+</code></pre>
+<h2 id="examples">Examples</h2>
+<p>See the <code>examples/async-data-loading-demo.html</code> file for a complete working demonstration of all async loading features.</p>

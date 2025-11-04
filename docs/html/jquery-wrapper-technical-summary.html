@@ -1,0 +1,206 @@
+<h1 id="jquery-wrapper-integration-technical-summary">jQuery Wrapper Integration - Technical Summary</h1>
+<h2 id="how-does-the-jquery-wrapper-work-with-rollup-build-and-npm-publishing-">How does the jQuery wrapper work with Rollup build and npm publishing?</h2>
+<h3 id="build-system-integration-">Build System Integration ✅</h3>
+<p>The jQuery wrapper is <strong>seamlessly integrated</strong> into the existing Rollup build system with <strong>zero impact</strong> on the core library:</p>
+<p><strong>Build Outputs:</strong></p>
+<pre><code><span class="hljs-keyword">dist/
+</span>├── tablixjs.esm.<span class="hljs-keyword">js </span>             <span class="hljs-comment"># Core library (ES Modules)</span>
+├── tablixjs.umd.<span class="hljs-keyword">js </span>             <span class="hljs-comment"># Core library (Universal)</span>
+├── tablix.<span class="hljs-keyword">jquery.js </span>            <span class="hljs-comment"># Bundled: TablixJS + jQuery wrapper  </span>
+├── tablix-<span class="hljs-keyword">jquery-plugin.js </span>     <span class="hljs-comment"># Standalone: jQuery plugin only</span>
+└── (minified versions of all)
+</code></pre><p><strong>Key Technical Details:</strong></p>
+<ul>
+<li>Core builds remain unchanged and dependency-free</li>
+<li>jQuery builds are <strong>separate targets</strong> with their own entry points</li>
+<li>External dependencies are properly marked in Rollup config</li>
+<li>No cross-contamination between vanilla and jQuery builds</li>
+</ul>
+<h3 id="npm-publishing-compatibility-">NPM Publishing Compatibility ✅</h3>
+<p>The wrapper enhances npm publishing without breaking existing functionality:</p>
+<p><strong>Package.json Structure:</strong></p>
+<pre><code class="lang-json">{
+  <span class="hljs-string">"main"</span>: <span class="hljs-string">"./dist/tablixjs.cjs.js"</span>,           // Core library (<span class="hljs-name">default</span>)
+  <span class="hljs-string">"module"</span>: <span class="hljs-string">"./dist/tablixjs.esm.js"</span>,         // Core library (<span class="hljs-name">ESM</span>)
+  <span class="hljs-string">"exports"</span>: {
+    <span class="hljs-string">"."</span>: {                                     // Core library entry
+      <span class="hljs-string">"import"</span>: <span class="hljs-string">"./dist/tablixjs.esm.js"</span>,
+      <span class="hljs-string">"require"</span>: <span class="hljs-string">"./dist/tablixjs.cjs.js"</span>,
+      <span class="hljs-string">"browser"</span>: <span class="hljs-string">"./dist/tablixjs.umd.min.js"</span>
+    },
+    <span class="hljs-string">"./jquery"</span>: {                              // jQuery wrapper entry
+      <span class="hljs-string">"import"</span>: <span class="hljs-string">"./dist/tablix.jquery.js"</span>,
+      <span class="hljs-string">"require"</span>: <span class="hljs-string">"./dist/tablix.jquery.js"</span>, 
+      <span class="hljs-string">"browser"</span>: <span class="hljs-string">"./dist/tablix.jquery.min.js"</span>
+    }
+  },
+  <span class="hljs-string">"peerDependencies"</span>: {
+    <span class="hljs-string">"jquery"</span>: <span class="hljs-string">"&gt;=3.0.0"</span>                       // Optional peer dependency
+  },
+  <span class="hljs-string">"peerDependenciesMeta"</span>: {
+    <span class="hljs-string">"jquery"</span>: { <span class="hljs-string">"optional"</span>: <span class="hljs-literal">true</span> }            // Marked as optional
+  }
+}
+</code></pre>
+<h2 id="will-it-make-a-difference-should-it-be-available-">Will it make a difference? Should it be available?</h2>
+<h3 id="impact-assessment-zero-breaking-changes-">Impact Assessment: <strong>ZERO BREAKING CHANGES</strong> ✅</h3>
+<p><strong>For Existing Users:</strong></p>
+<ul>
+<li>✅ All existing vanilla TablixJS code works unchanged</li>
+<li>✅ No performance impact on vanilla usage</li>
+<li>✅ No additional dependencies forced</li>
+<li>✅ Bundle size remains the same for vanilla usage</li>
+</ul>
+<p><strong>For New Users:</strong></p>
+<ul>
+<li>✅ Choose vanilla or jQuery based on preference</li>
+<li>✅ Progressive enhancement possible</li>
+<li>✅ Multiple integration patterns supported</li>
+</ul>
+<p><strong>Availability Decision: YES</strong> ✅</p>
+<ul>
+<li>Provides significant value for jQuery-heavy projects</li>
+<li>Maintains library flexibility and adoption potential</li>
+<li>Zero cost for users who don&#39;t need it</li>
+<li>Industry standard pattern for optional integrations</li>
+</ul>
+<h2 id="can-devs-skip-npm-and-import-tablixjs-regularly-with-jquery-">Can devs skip npm and import TablixJS regularly with jQuery?</h2>
+<h3 id="multiple-loading-scenarios-supported-">Multiple Loading Scenarios Supported ✅</h3>
+<p><strong>Option 1: NPM with Selective Imports</strong></p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Vanilla only (zero deps)</span>
+import { <span class="hljs-keyword">Table</span> } from <span class="hljs-comment">'tablixjs'</span>;
+
+<span class="hljs-comment">// With jQuery wrapper</span>
+import <span class="hljs-string">'tablixjs/jquery'</span>;
+<span class="hljs-symbol">$</span>(<span class="hljs-string">'#table'</span>).tablixjs(<span class="hljs-keyword">options</span>);
+</code></pre>
+<p><strong>Option 2: CDN/Direct File Loading</strong></p>
+<pre><code class="lang-html"><span class="hljs-comment">&lt;!-- Vanilla only --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"tablixjs.umd.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+<span class="hljs-comment">&lt;!-- OR bundled with jQuery --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"jquery.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"tablix.jquery.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+<span class="hljs-comment">&lt;!-- OR modular loading --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"jquery.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"tablixjs.umd.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"tablix-jquery-plugin.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<p><strong>Option 3: Mix and Match</strong></p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Use vanilla TablixJS via npm</span>
+import { <span class="hljs-keyword">Table</span> } from <span class="hljs-comment">'tablixjs'</span>;
+const table1 = new <span class="hljs-keyword">Table</span>(element1, options);
+
+<span class="hljs-comment">// Use jQuery via CDN</span>
+$(<span class="hljs-string">'#table2'</span>).tablixjs(options);
+</code></pre>
+<h2 id="is-there-a-check-if-jquery-is-loaded-">Is there a check if jQuery is loaded?</h2>
+<h3 id="robust-dependency-detection-">Robust Dependency Detection ✅</h3>
+<p><strong>Runtime Checks in Every jQuery File:</strong></p>
+<p><strong>1. Standalone Plugin (<code>tablix-jquery-plugin.js</code>):</strong></p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Multi-environment jQuery detection</span>
+<span class="hljs-keyword">const</span> $ = (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">window</span> !== <span class="hljs-string">'undefined'</span> &amp;&amp; (<span class="hljs-built_in">window</span>.jQuery || <span class="hljs-built_in">window</span>.$)) ||
+          (<span class="hljs-keyword">typeof</span> global !== <span class="hljs-string">'undefined'</span> &amp;&amp; (global.jQuery || global.$));
+
+<span class="hljs-comment">// TablixJS detection</span>
+<span class="hljs-keyword">const</span> TablixJS = (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">window</span> !== <span class="hljs-string">'undefined'</span> &amp;&amp; <span class="hljs-built_in">window</span>.TablixJS) ||
+                 (<span class="hljs-keyword">typeof</span> global !== <span class="hljs-string">'undefined'</span> &amp;&amp; global.TablixJS);
+
+<span class="hljs-comment">// Only register if both are available</span>
+<span class="hljs-keyword">if</span> ($ &amp;&amp; $.fn &amp;&amp; TablixJS) {
+    $.fn.tablixjs = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">options</span>) </span>{ <span class="hljs-comment">/* ... */</span> };
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-built_in">console</span>.warn(<span class="hljs-string">'TablixJS jQuery plugin requires both jQuery and TablixJS to be loaded'</span>);
+}
+</code></pre>
+<p><strong>2. Bundled Version (<code>tablix.jquery.js</code>):</strong></p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Check for jQuery availability</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">window</span> !== <span class="hljs-string">'undefined'</span> &amp;&amp; <span class="hljs-built_in">window</span>.jQuery) {
+    <span class="hljs-comment">// Register jQuery plugin</span>
+    <span class="hljs-built_in">window</span>.jQuery.fn.tablixjs = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">options</span>) </span>{ <span class="hljs-comment">/* ... */</span> };
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> $ !== <span class="hljs-string">'undefined'</span> &amp;&amp; $.fn) {
+    <span class="hljs-comment">// Alternative jQuery reference</span>
+    $.fn.tablixjs = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">options</span>) </span>{ <span class="hljs-comment">/* ... */</span> };
+}
+</code></pre>
+<p><strong>Graceful Degradation:</strong></p>
+<ul>
+<li>✅ No errors if jQuery is missing</li>
+<li>✅ Console warnings for debugging</li>
+<li>✅ Core functionality remains available</li>
+<li>✅ Can add jQuery support later dynamically</li>
+</ul>
+<h2 id="dependency-free-guarantee">Dependency-Free Guarantee</h2>
+<h3 id="core-principle-maintained-">Core Principle Maintained ✅</h3>
+<p><strong>Zero Forced Dependencies:</strong></p>
+<pre><code class="lang-json">{
+  <span class="hljs-string">"dependencies"</span>: {},                    // Core has NO dependencies
+  <span class="hljs-string">"peerDependencies"</span>: {                 // Optional integrations only
+    <span class="hljs-string">"jquery"</span>: <span class="hljs-string">"&gt;=3.0.0"</span>,
+    <span class="hljs-string">"react"</span>: <span class="hljs-string">"&gt;=16.8.0"</span>
+  },
+  <span class="hljs-string">"peerDependenciesMeta"</span>: {            // Marked as optional
+    <span class="hljs-string">"jquery"</span>: { <span class="hljs-string">"optional"</span>: <span class="hljs-literal">true</span> },
+    <span class="hljs-string">"react"</span>: { <span class="hljs-string">"optional"</span>: <span class="hljs-literal">true</span> }
+  }
+}
+</code></pre>
+<p><strong>Installation Behavior:</strong></p>
+<pre><code class="lang-bash">npm <span class="hljs-keyword">install</span> tablixjs
+<span class="hljs-comment"># ✅ Installs with ZERO dependencies</span>
+<span class="hljs-comment"># ✅ No jQuery/React downloaded unless you want them</span>
+<span class="hljs-comment"># ✅ No peer dependency warnings unless you use wrappers</span>
+</code></pre>
+<p><strong>Import Behavior:</strong></p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// ✅ Core import: Zero dependencies</span>
+import { <span class="hljs-keyword">Table</span> } from <span class="hljs-comment">'tablixjs'</span>;
+
+<span class="hljs-comment">// ✅ jQuery import: Checks for jQuery at runtime</span>
+import <span class="hljs-string">'tablixjs/jquery'</span>;
+
+<span class="hljs-comment">// ❌ Missing jQuery: Warning logged, no crash</span>
+</code></pre>
+<h2 id="conclusion">Conclusion</h2>
+<p>The jQuery wrapper integration is a <strong>perfect example</strong> of how to extend a dependency-free library:</p>
+<h3 id="-what-we-achieved-">✅ <strong>What We Achieved:</strong></h3>
+<ol>
+<li><strong>Zero Breaking Changes</strong> - All existing code works unchanged</li>
+<li><strong>Zero Forced Dependencies</strong> - Core remains dependency-free</li>
+<li><strong>Multiple Integration Options</strong> - NPM, CDN, mixed usage all supported</li>
+<li><strong>Robust Error Handling</strong> - Graceful degradation when dependencies missing</li>
+<li><strong>Industry Best Practices</strong> - Optional peer dependencies, proper exports</li>
+<li><strong>Build System Integration</strong> - Seamless Rollup integration with separate targets</li>
+</ol>
+<h3 id="-user-benefits-">✅ <strong>User Benefits:</strong></h3>
+<ul>
+<li><strong>Library Authors</strong>: Can use core TablixJS without jQuery concerns</li>
+<li><strong>jQuery Developers</strong>: Get familiar jQuery-style API</li>
+<li><strong>Enterprise Teams</strong>: Can adopt gradually (start vanilla, add jQuery later)</li>
+<li><strong>Bundle Optimizers</strong>: Only pay for what you use</li>
+</ul>
+<h3 id="-technical-excellence-">✅ <strong>Technical Excellence:</strong></h3>
+<ul>
+<li>UMD pattern for universal compatibility</li>
+<li>TypeScript definitions included</li>
+<li>Source maps for debugging</li>
+<li>Minified versions for production</li>
+<li>Comprehensive documentation and examples</li>
+</ul>
+<p>The jQuery wrapper <strong>enhances</strong> TablixJS without <strong>compromising</strong> its core principles. It&#39;s a textbook example of optional integration done right.</p>
+<h3 id="recommended-usage-">Recommended Usage:</h3>
+<p><strong>For New Projects:</strong></p>
+<ul>
+<li>Start with vanilla TablixJS for maximum flexibility</li>
+<li>Add jQuery wrapper only if your project heavily uses jQuery</li>
+</ul>
+<p><strong>For Existing jQuery Projects:</strong></p>
+<ul>
+<li>Use bundled version (<code>tablix.jquery.min.js</code>) for quickest integration</li>
+<li>Consider standalone plugin for better modularity</li>
+</ul>
+<p><strong>For Libraries:</strong></p>
+<ul>
+<li>Always use vanilla TablixJS to avoid forcing dependencies on users</li>
+<li>Let end users choose their integration approach</li>
+</ul>

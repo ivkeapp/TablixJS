@@ -1,0 +1,631 @@
+<h1 id="tablixjs-localization-system">TablixJS Localization System</h1>
+<p>The TablixJS localization system provides comprehensive internationalization (i18n) support, allowing you to create multilingual data tables with ease. The system is built into the core library and provides seamless translation of all user-facing strings.</p>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#quick-start">Quick Start</a></li>
+<li><a href="#api-reference">API Reference</a></li>
+<li><a href="#language-packs">Language Packs</a></li>
+<li><a href="#custom-translations">Custom Translations</a></li>
+<li><a href="#plugin-development">Plugin Development</a></li>
+<li><a href="#advanced-usage">Advanced Usage</a></li>
+<li><a href="#best-practices">Best Practices</a></li>
+</ol>
+<h2 id="overview">Overview</h2>
+<h3 id="key-features">Key Features</h3>
+<ul>
+<li><strong>Built-in Core Support</strong>: Localization is part of the core, not a plugin</li>
+<li><strong>Default English</strong>: Works out of the box with English as the fallback language</li>
+<li><strong>Auto-loading Languages</strong>: Common languages (fr, es, sr) are automatically loaded when requested</li>
+<li><strong>Dynamic Language Switching</strong>: Change languages on the fly without recreating the table</li>
+<li><strong>Smart Component Updates</strong>: Filter dropdowns and all UI components update with new translations</li>
+<li><strong>Fallback System</strong>: Missing translations automatically fall back to English</li>
+<li><strong>Parameter Substitution</strong>: Support for dynamic values in translations</li>
+<li><strong>Number &amp; Date Formatting</strong>: Locale-aware formatting using <code>Intl</code> APIs</li>
+<li><strong>Plugin Compatible</strong>: Plugin developers can easily add their own translations</li>
+<li><strong>No Dependencies</strong>: Zero external dependencies for localization</li>
+</ul>
+<h3 id="supported-languages">Supported Languages</h3>
+<p>Out of the box, TablixJS includes:</p>
+<ul>
+<li><strong>English (en)</strong> - Default fallback language</li>
+<li><strong>French (fr)</strong> - Complete translation pack</li>
+<li><strong>Spanish (es)</strong> - Complete translation pack  </li>
+<li><strong>Serbian (sr)</strong> - Complete translation pack</li>
+</ul>
+<p>Additional languages can be added by providing translation objects. Common languages are automatically loaded when needed.</p>
+<h2 id="quick-start">Quick Start</h2>
+<h3 id="basic-usage-english-default-">Basic Usage (English Default)</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Create a table with default English</span>
+const <span class="hljs-keyword">table</span> = new <span class="hljs-comment">Tablix(</span><span class="hljs-comment">'#myTable'</span><span class="hljs-comment">, {</span>
+    data: myData,
+    columns: myColumns
+});
+
+<span class="hljs-comment">// Access translations</span>
+console.<span class="hljs-built-in">log</span>(<span class="hljs-keyword">table</span>.t('pagination.next')); // "Next"
+</code></pre>
+<h3 id="initialize-with-a-different-language">Initialize with a Different Language</h3>
+<pre><code class="lang-javascript">import { frenchTranslations } from <span class="hljs-string">'./src/locales/fr.js'</span>;
+
+const <span class="hljs-keyword">table</span> = new <span class="hljs-comment">Tablix(</span><span class="hljs-comment">'#myTable'</span><span class="hljs-comment">, {</span>
+    data: myData,
+    columns: myColumns,
+    language: <span class="hljs-string">'fr'</span>,
+    translations: {
+        fr: frenchTranslations
+    }
+});
+
+console.<span class="hljs-built-in">log</span>(<span class="hljs-keyword">table</span>.t('pagination.next')); // "Suivant"
+</code></pre>
+<h3 id="dynamic-language-switching">Dynamic Language Switching</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Start with English</span>
+const <span class="hljs-keyword">table</span> = new <span class="hljs-comment">Tablix(</span><span class="hljs-comment">'#myTable'</span><span class="hljs-comment">, {</span>
+    data: myData,
+    columns: myColumns,
+    language: <span class="hljs-string">'en'</span>
+});
+
+<span class="hljs-comment">// Switch to French (auto-loads if not present)</span>
+<span class="hljs-keyword">table</span>.setLanguage('fr');
+<span class="hljs-comment">// Table automatically re-renders with French text, including filter dropdowns</span>
+
+<span class="hljs-comment">// Switch to Serbian (auto-loads translations)</span>
+<span class="hljs-keyword">table</span>.setLanguage('sr');
+
+<span class="hljs-comment">// Add custom translations and switch</span>
+<span class="hljs-keyword">table</span>.addTranslations('de', germanTranslations);
+<span class="hljs-keyword">table</span>.setLanguage('de');
+</code></pre>
+<h3 id="auto-loading-languages">Auto-loading Languages</h3>
+<p>TablixJS automatically loads common language packs when you switch to them:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// These languages are automatically loaded when requested</span>
+<span class="hljs-keyword">table</span>.setLanguage('fr'); // Auto-loads <span class="hljs-comment">French translations</span>
+<span class="hljs-keyword">table</span>.setLanguage('es'); // Auto-loads <span class="hljs-comment">Spanish translations</span>  
+<span class="hljs-keyword">table</span>.setLanguage('sr'); // Auto-loads <span class="hljs-comment">Serbian translations</span>
+
+<span class="hljs-comment">// For other languages, add translations first</span>
+<span class="hljs-keyword">table</span>.addTranslations('de', germanTranslations);
+<span class="hljs-keyword">table</span>.setLanguage('de');
+</code></pre>
+<h2 id="api-reference">API Reference</h2>
+<h3 id="table-methods">Table Methods</h3>
+<h4 id="-t-key-params-"><code>t(key, params = {})</code></h4>
+<p>Get a localized string by translation key.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>key</code> (string): Translation key (e.g., &#39;pagination.next&#39;)</li>
+<li><code>params</code> (object): Optional parameters for substitution</li>
+</ul>
+<p><strong>Returns:</strong> Localized string</p>
+<p><strong>Example:</strong></p>
+<pre><code class="lang-javascript"><span class="hljs-selector-tag">table</span><span class="hljs-selector-class">.t</span>(<span class="hljs-string">'pagination.showingRecords'</span>, {
+    <span class="hljs-attribute">startRow</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attribute">endRow</span>: <span class="hljs-number">10</span>,
+    <span class="hljs-attribute">totalRows</span>: <span class="hljs-number">100</span>
+}); <span class="hljs-comment">// "Showing 1-10 of 100 records"</span>
+</code></pre>
+<h4 id="-setlanguage-language-"><code>setLanguage(language)</code></h4>
+<p>Set the current language and re-render the table.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>language</code> (string): Language code (e.g., &#39;fr&#39;, &#39;es&#39;)</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">table</span>.setLanguage('fr');
+</code></pre>
+<h4 id="-addlanguagepack-language-translations-setascurrent-false-"><code>addLanguagePack(language, translations, setAsCurrent = false)</code></h4>
+<p>Add a complete language pack with convenience options.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>language</code> (string): Language code</li>
+<li><code>translations</code> (object): Complete translation key-value pairs</li>
+<li><code>setAsCurrent</code> (boolean): Whether to immediately set this as the current language</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code class="lang-javascript">// <span class="hljs-keyword">Add</span><span class="bash"> German and immediately switch to it
+</span>table.addLanguagePack(<span class="hljs-string">'de'</span>, germanTranslations, true);
+
+// Or <span class="hljs-keyword">add</span><span class="bash"> without switching
+</span>table.addLanguagePack(<span class="hljs-string">'it'</span>, italianTranslations);
+table.setLanguage(<span class="hljs-string">'it'</span>); // Switch later
+</code></pre>
+<h4 id="-addtranslations-language-translations-"><code>addTranslations(language, translations)</code></h4>
+<p>Add translations for a specific language.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>language</code> (string): Language code</li>
+<li><code>translations</code> (object): Translation key-value pairs</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code class="lang-javascript">table.addTranslations(<span class="hljs-symbol">'de'</span>, {
+    <span class="hljs-symbol">'pagination</span>.next': <span class="hljs-symbol">'N</span>ächste',
+    <span class="hljs-symbol">'pagination</span>.previous': <span class="hljs-symbol">'Vorherige'</span>
+});
+</code></pre>
+<h4 id="-getcurrentlanguage-"><code>getCurrentLanguage()</code></h4>
+<p>Get the current language code.</p>
+<p><strong>Returns:</strong> Current language string</p>
+<h4 id="-getavailablelanguages-"><code>getAvailableLanguages()</code></h4>
+<p>Get array of available language codes.</p>
+<p><strong>Returns:</strong> Array of language strings</p>
+<h4 id="-haslanguage-language-"><code>hasLanguage(language)</code></h4>
+<p>Check if a language is available.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>language</code> (string): Language code to check</li>
+</ul>
+<p><strong>Returns:</strong> Boolean</p>
+<h4 id="-formatnumber-number-options-"><code>formatNumber(number, options = {})</code></h4>
+<p>Format a number using the current locale.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>number</code> (number): Number to format</li>
+<li><code>options</code> (object): Intl.NumberFormat options</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code class="lang-javascript">table.formatNumber(<span class="hljs-number">1234.56</span>, { style: <span class="hljs-string">'currency'</span>, currency: <span class="hljs-string">'EUR'</span> });
+<span class="hljs-regexp">//</span> <span class="hljs-string">"€1,234.56"</span> <span class="hljs-keyword">in</span> English, <span class="hljs-string">"1 234,56 €"</span> <span class="hljs-keyword">in</span> French
+</code></pre>
+<h4 id="-formatdate-date-options-"><code>formatDate(date, options = {})</code></h4>
+<p>Format a date using the current locale.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>date</code> (Date|string|number): Date to format</li>
+<li><code>options</code> (object): Intl.DateTimeFormat options</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code class="lang-javascript">table.formatDate(<span class="hljs-keyword">new</span> Date(), { dateStyle: <span class="hljs-symbol">'medium</span>' });
+// <span class="hljs-string">"Jan 15, 2024"</span> <span class="hljs-keyword">in</span> English, <span class="hljs-string">"15 janv. 2024"</span> <span class="hljs-keyword">in</span> French
+</code></pre>
+<h2 id="language-packs">Language Packs</h2>
+<h3 id="built-in-language-packs">Built-in Language Packs</h3>
+<p>TablixJS comes with complete language packs for:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> { englishTranslations } <span class="hljs-keyword">from</span> <span class="hljs-string">'./src/locales/en.js'</span>;
+<span class="hljs-keyword">import</span> { frenchTranslations } <span class="hljs-keyword">from</span> <span class="hljs-string">'./src/locales/fr.js'</span>;
+<span class="hljs-keyword">import</span> { spanishTranslations } <span class="hljs-keyword">from</span> <span class="hljs-string">'./src/locales/es.js'</span>;
+<span class="hljs-keyword">import</span> { serbianTranslations } <span class="hljs-keyword">from</span> <span class="hljs-string">'./src/locales/sr.js'</span>;
+</code></pre>
+<h3 id="auto-loading-support">Auto-Loading Support</h3>
+<p>TablixJS automatically loads these language packs when you call <code>setLanguage()</code>:</p>
+<ul>
+<li><strong>French (fr)</strong> - Auto-loaded on demand</li>
+<li><strong>Spanish (es)</strong> - Auto-loaded on demand  </li>
+<li><strong>Serbian (sr)</strong> - Auto-loaded on demand</li>
+</ul>
+<p>No need to manually import or add these translations - just use <code>table.setLanguage(&#39;fr&#39;)</code> and they&#39;ll be loaded automatically.</p>
+<h3 id="translation-keys-structure">Translation Keys Structure</h3>
+<p>All translation keys follow a hierarchical structure:</p>
+<pre><code class="lang-javascript">{
+    <span class="hljs-comment">// General terms</span>
+    <span class="hljs-string">'general.loading'</span>: <span class="hljs-string">'Loading...'</span>,
+    <span class="hljs-string">'general.error'</span>: <span class="hljs-string">'Error'</span>,
+    <span class="hljs-string">'general.noData'</span>: <span class="hljs-string">'No data available'</span>,
+
+    <span class="hljs-comment">// Search functionality</span>
+    <span class="hljs-string">'search.placeholder'</span>: <span class="hljs-string">'Search...'</span>,
+    <span class="hljs-string">'search.clear'</span>: <span class="hljs-string">'Clear search'</span>,
+
+    <span class="hljs-comment">// Pagination</span>
+    <span class="hljs-string">'pagination.first'</span>: <span class="hljs-string">'First'</span>,
+    <span class="hljs-string">'pagination.previous'</span>: <span class="hljs-string">'Previous'</span>,
+    <span class="hljs-string">'pagination.next'</span>: <span class="hljs-string">'Next'</span>,
+    <span class="hljs-string">'pagination.last'</span>: <span class="hljs-string">'Last'</span>,
+    <span class="hljs-string">'pagination.showingRecords'</span>: <span class="hljs-string">'Showing {startRow}-{endRow} of {totalRows} records'</span>,
+
+    <span class="hljs-comment">// Sorting</span>
+    <span class="hljs-string">'sort.sortAscending'</span>: <span class="hljs-string">'Sort ascending'</span>,
+    <span class="hljs-string">'sort.sortDescending'</span>: <span class="hljs-string">'Sort descending'</span>,
+    <span class="hljs-string">'sort.sortedAscending'</span>: <span class="hljs-string">'Sorted ascending'</span>,
+    <span class="hljs-string">'sort.sortedDescending'</span>: <span class="hljs-string">'Sorted descending'</span>,
+    <span class="hljs-string">'sort.notSorted'</span>: <span class="hljs-string">'Not sorted'</span>,
+
+    <span class="hljs-comment">// Selection</span>
+    <span class="hljs-string">'selection.selectRow'</span>: <span class="hljs-string">'Select row'</span>,
+    <span class="hljs-string">'selection.selectAll'</span>: <span class="hljs-string">'Select all'</span>,
+    <span class="hljs-string">'selection.selectedCount'</span>: <span class="hljs-string">'{count} selected'</span>,
+
+    <span class="hljs-comment">// Filtering</span>
+    <span class="hljs-string">'filter.filter'</span>: <span class="hljs-string">'Filter'</span>,
+    <span class="hljs-string">'filter.clearFilter'</span>: <span class="hljs-string">'Clear filter'</span>,
+    <span class="hljs-string">'filter.filterColumn'</span>: <span class="hljs-string">'Filter column'</span>,
+    <span class="hljs-string">'filter.filterByValue'</span>: <span class="hljs-string">'Filter by Value'</span>, 
+    <span class="hljs-string">'filter.filterByCondition'</span>: <span class="hljs-string">'Filter by Condition'</span>,
+    <span class="hljs-string">'filter.searchValues'</span>: <span class="hljs-string">'Search values...'</span>,
+    <span class="hljs-string">'filter.selectAll'</span>: <span class="hljs-string">'Select All'</span>,
+    <span class="hljs-string">'filter.noValuesAvailable'</span>: <span class="hljs-string">'No values available'</span>,
+    <span class="hljs-string">'filter.addCondition'</span>: <span class="hljs-string">'Add Condition'</span>,
+    <span class="hljs-string">'filter.removeCondition'</span>: <span class="hljs-string">'Remove condition'</span>,
+    <span class="hljs-string">'filter.value'</span>: <span class="hljs-string">'Value'</span>,
+    <span class="hljs-string">'filter.apply'</span>: <span class="hljs-string">'Apply'</span>,
+    <span class="hljs-string">'filter.clear'</span>: <span class="hljs-string">'Clear'</span>, 
+    <span class="hljs-string">'filter.cancel'</span>: <span class="hljs-string">'Cancel'</span>,
+    <span class="hljs-string">'filter.contains'</span>: <span class="hljs-string">'Contains'</span>,
+    <span class="hljs-string">'filter.equals'</span>: <span class="hljs-string">'Equals'</span>,
+
+    <span class="hljs-comment">// Controls</span>
+    <span class="hljs-string">'controls.refresh'</span>: <span class="hljs-string">'Refresh data'</span>,
+    <span class="hljs-string">'controls.export'</span>: <span class="hljs-string">'Export data'</span>,
+
+    <span class="hljs-comment">// Error messages</span>
+    <span class="hljs-string">'error.loadingData'</span>: <span class="hljs-string">'Failed to load data'</span>,
+    <span class="hljs-string">'error.networkError'</span>: <span class="hljs-string">'Network error occurred'</span>,
+
+    <span class="hljs-comment">// Accessibility</span>
+    <span class="hljs-string">'accessibility.table'</span>: <span class="hljs-string">'Data table'</span>,
+    <span class="hljs-string">'accessibility.sortableColumn'</span>: <span class="hljs-string">'Sortable column'</span>
+}
+</code></pre>
+<h3 id="creating-custom-language-packs">Creating Custom Language Packs</h3>
+<h4 id="method-1-using-addlanguagepack-recommended-">Method 1: Using addLanguagePack() (Recommended)</h4>
+<pre><code class="lang-javascript">const germanTranslations = {
+    <span class="hljs-string">'general.loading'</span>: <span class="hljs-string">'Laden...'</span>,
+    <span class="hljs-string">'general.error'</span>: <span class="hljs-string">'Fehler'</span>,
+    <span class="hljs-string">'general.noData'</span>: <span class="hljs-string">'Keine Daten verfügbar'</span>,
+    <span class="hljs-string">'search.placeholder'</span>: <span class="hljs-string">'Suchen...'</span>,
+    <span class="hljs-string">'pagination.next'</span>: <span class="hljs-string">'Nächste'</span>,
+    <span class="hljs-string">'pagination.previous'</span>: <span class="hljs-string">'Vorherige'</span>,
+    <span class="hljs-string">'pagination.showingRecords'</span>: <span class="hljs-string">'Zeige {startRow}-{endRow} von {totalRows} Datensätzen'</span>,
+    <span class="hljs-string">'filter.filter'</span>: <span class="hljs-string">'Filter'</span>,
+    <span class="hljs-string">'filter.apply'</span>: <span class="hljs-string">'Anwenden'</span>,
+    <span class="hljs-string">'filter.clear'</span>: <span class="hljs-string">'Löschen'</span>,
+    <span class="hljs-string">'filter.cancel'</span>: <span class="hljs-string">'Abbrechen'</span>,
+    // ... <span class="hljs-keyword">add</span><span class="bash"> more translations as needed
+</span>};
+
+// <span class="hljs-keyword">Add</span><span class="bash"> and immediately switch to German
+</span>table.addLanguagePack(<span class="hljs-string">'de'</span>, germanTranslations, true);
+</code></pre>
+<h4 id="method-2-using-addtranslations-">Method 2: Using addTranslations()</h4>
+<pre><code class="lang-javascript"><span class="hljs-keyword">table</span>.addTranslations('de', germanTranslations);
+<span class="hljs-keyword">table</span>.setLanguage('de');
+</code></pre>
+<h4 id="method-3-auto-loading-for-supported-languages-">Method 3: Auto-loading (for supported languages)</h4>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Just switch - translations auto-load if available</span>
+<span class="hljs-keyword">table</span>.setLanguage('fr'); // French <span class="hljs-comment">auto-loads</span>
+<span class="hljs-keyword">table</span>.setLanguage('es'); // Spanish <span class="hljs-comment">auto-loads</span>
+<span class="hljs-keyword">table</span>.setLanguage('sr'); // Serbian <span class="hljs-comment">auto-loads</span>
+</code></pre>
+<h2 id="custom-translations">Custom Translations</h2>
+<h3 id="application-specific-translations">Application-Specific Translations</h3>
+<p>You can override or extend translations for your specific use case:</p>
+<pre><code class="lang-javascript"><span class="hljs-attribute">const customerTranslations</span> = {
+    <span class="hljs-string">'general.noData'</span>: <span class="hljs-string">'No customers found'</span>,
+    <span class="hljs-string">'search.placeholder'</span>: <span class="hljs-string">'Search customers...'</span>,
+    <span class="hljs-string">'pagination.showingRecords'</span>: <span class="hljs-string">'Displaying {startRow}-{endRow} of {totalRows} customers'</span>
+};
+
+<span class="hljs-attribute">const table</span> = new Tablix(<span class="hljs-string">'#myTable'</span>, {
+    data: customerData,
+    columns: customerColumns,
+    language: <span class="hljs-string">'en-custom'</span>,
+    translations: {
+        <span class="hljs-string">'en-custom'</span>: customerTranslations
+    }
+});
+</code></pre>
+<h3 id="parameter-substitution">Parameter Substitution</h3>
+<p>Translations support parameter substitution using <code>{paramName}</code> syntax:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Translation with parameters</span>
+<span class="hljs-string">'welcome.message'</span>: <span class="hljs-string">'Welcome back, {username}! You have {count} new messages.'</span>
+
+<span class="hljs-comment">// Usage</span>
+<span class="hljs-keyword">table</span>.t('welcome.message', { 
+    username: <span class="hljs-string">'John'</span>,
+    count: <span class="hljs-number">5</span> 
+}); <span class="hljs-comment">// "Welcome back, John! You have 5 new messages."</span>
+</code></pre>
+<h2 id="plugin-development">Plugin Development</h2>
+<h3 id="adding-plugin-translations">Adding Plugin Translations</h3>
+<p>Plugin developers can easily add their own translations:</p>
+<pre><code class="lang-javascript"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ExportPlugin</span> </span>{
+    <span class="hljs-keyword">constructor</span>(table) {
+        <span class="hljs-keyword">this</span>.table = table;
+        <span class="hljs-keyword">this</span>.addTranslations();
+    }
+
+    addTranslations() {
+        <span class="hljs-comment">// Add English translations</span>
+        <span class="hljs-keyword">this</span>.table.addTranslations(<span class="hljs-string">'en'</span>, {
+            <span class="hljs-string">'export.csv'</span>: <span class="hljs-string">'Export as CSV'</span>,
+            <span class="hljs-string">'export.excel'</span>: <span class="hljs-string">'Export as Excel'</span>,
+            <span class="hljs-string">'export.success'</span>: <span class="hljs-string">'Export completed successfully'</span>
+        });
+
+        <span class="hljs-comment">// Add French translations</span>
+        <span class="hljs-keyword">this</span>.table.addTranslations(<span class="hljs-string">'fr'</span>, {
+            <span class="hljs-string">'export.csv'</span>: <span class="hljs-string">'Exporter en CSV'</span>,
+            <span class="hljs-string">'export.excel'</span>: <span class="hljs-string">'Exporter en Excel'</span>,
+            <span class="hljs-string">'export.success'</span>: <span class="hljs-string">'Export terminé avec succès'</span>
+        });
+    }
+
+    createExportButton() {
+        const button = document.createElement(<span class="hljs-string">'button'</span>);
+        button.textContent = <span class="hljs-keyword">this</span>.table.t(<span class="hljs-string">'export.csv'</span>);
+        <span class="hljs-keyword">return</span> button;
+    }
+}
+</code></pre>
+<h3 id="best-practices-for-plugins">Best Practices for Plugins</h3>
+<ol>
+<li><strong>Namespace your keys</strong>: Use a prefix like <code>pluginName.keyName</code></li>
+<li><strong>Add translations for all supported languages</strong></li>
+<li><strong>Provide English fallbacks</strong>: Always include English translations</li>
+<li><strong>Use descriptive keys</strong>: Make keys self-explanatory</li>
+</ol>
+<pre><code class="lang-javascript">// Good plugin translation structure
+{
+    'myPlugin.title': 'My Plugin',
+    'myPlugin.button.save': 'Save Data',
+    'myPlugin.message.success': 'Operation completed successfully',
+    'myPlugin.error.validation': 'Please<span class="hljs-built_in"> check </span>your input'
+}
+</code></pre>
+<h2 id="advanced-usage">Advanced Usage</h2>
+<h3 id="component-translation-updates">Component Translation Updates</h3>
+<p>TablixJS automatically updates all UI components when the language changes, including:</p>
+<ul>
+<li><strong>Filter dropdowns</strong>: All filter UI text updates immediately</li>
+<li><strong>Pagination controls</strong>: Page numbers and navigation text  </li>
+<li><strong>Sort indicators</strong>: Tooltips and accessibility labels</li>
+<li><strong>Search placeholders</strong>: Input field placeholder text</li>
+<li><strong>Error messages</strong>: All user-facing error text</li>
+</ul>
+<pre><code class="lang-javascript"><span class="hljs-regexp">//</span> When switching languages, everything updates automatically
+table.setLanguage(<span class="hljs-string">'fr'</span>);
+<span class="hljs-regexp">//</span> Filter dropdown now shows <span class="hljs-string">"Filtrer"</span>, <span class="hljs-string">"Appliquer"</span>, <span class="hljs-string">"Effacer"</span>, etc.
+
+table.setLanguage(<span class="hljs-string">'sr'</span>); 
+<span class="hljs-regexp">//</span> Filter dropdown now shows <span class="hljs-string">"Filter"</span>, <span class="hljs-string">"Primeni"</span>, <span class="hljs-string">"Obriši"</span>, etc.
+</code></pre>
+<h3 id="smart-language-detection">Smart Language Detection</h3>
+<p>TablixJS can intelligently handle language switching with graceful fallbacks:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Try to load a language - auto-loads if available, falls back gracefully</span>
+function switchToUserLanguage(userLang) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">table</span>.hasLanguage(userLang)) {
+        <span class="hljs-keyword">table</span>.setLanguage(userLang);
+    } else {
+        <span class="hljs-comment">// Try auto-loading common languages</span>
+        <span class="hljs-keyword">table</span>.setLanguage(userLang); // Will <span class="hljs-comment">auto-load fr</span>/es/<span class="hljs-comment">sr if requested</span>
+
+        <span class="hljs-comment">// Check if it loaded successfully</span>
+        if (!<span class="hljs-keyword">table</span>.hasLanguage(userLang)) {
+            console.warn(`Language ${userLang} not available, staying with current language`);
+        }
+    }
+}
+</code></pre>
+<h3 id="conditional-translations">Conditional Translations</h3>
+<pre><code class="lang-javascript"><span class="hljs-keyword">class</span> <span class="hljs-title">StatusRenderer</span> {
+    <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-title">getStatusText</span>(<span class="hljs-params">table, status</span>) </span>{
+        <span class="hljs-keyword">const</span> statusKeys = {
+            active: <span class="hljs-string">'status.active'</span>,
+            inactive: <span class="hljs-string">'status.inactive'</span>,
+            pending: <span class="hljs-string">'status.pending'</span>
+        };
+
+        <span class="hljs-keyword">return</span> table.t(statusKeys[status] || <span class="hljs-string">'status.unknown'</span>);
+    }
+}
+</code></pre>
+<h3 id="context-aware-translations">Context-Aware Translations</h3>
+<pre><code class="lang-javascript"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TimeBasedGreeting</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-title">getGreeting</span><span class="hljs-params">(table)</span> </span>{
+        <span class="hljs-keyword">const</span> hour = <span class="hljs-keyword">new</span> Date().getHours();
+
+        <span class="hljs-keyword">if</span> (hour &lt; <span class="hljs-number">12</span>) <span class="hljs-function"><span class="hljs-keyword">return</span> table.<span class="hljs-title">t</span><span class="hljs-params">(<span class="hljs-string">'greeting.morning'</span>)</span></span>;
+        <span class="hljs-keyword">if</span> (hour &lt; <span class="hljs-number">18</span>) <span class="hljs-function"><span class="hljs-keyword">return</span> table.<span class="hljs-title">t</span><span class="hljs-params">(<span class="hljs-string">'greeting.afternoon'</span>)</span></span>;
+        <span class="hljs-function"><span class="hljs-keyword">return</span> table.<span class="hljs-title">t</span><span class="hljs-params">(<span class="hljs-string">'greeting.evening'</span>)</span></span>;
+    }
+}
+</code></pre>
+<h3 id="rich-text-translations">Rich Text Translations</h3>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> richTranslations = {
+    '<span class="hljs-keyword">help</span>.tip': '<span class="hljs-keyword">Use</span> &lt;kbd&gt;Ctrl+F&lt;/kbd&gt; to <span class="hljs-keyword">search</span> or &lt;strong&gt;click&lt;/strong&gt; the <span class="hljs-keyword">search</span> box',
+    '<span class="hljs-keyword">error</span>.withLink': '<span class="hljs-keyword">Error</span> occurred. &lt;a href=<span class="hljs-string">"/contact"</span>&gt;Contact support&lt;/a&gt;.'
+};
+</code></pre>
+<h3 id="pluralization">Pluralization</h3>
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSelectionText</span><span class="hljs-params">(table, count)</span></span> {
+    <span class="hljs-keyword">if</span> (count === <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> <span class="hljs-built_in">table</span>.t(<span class="hljs-string">'selection.none'</span>);
+    <span class="hljs-keyword">if</span> (count === <span class="hljs-number">1</span>) <span class="hljs-keyword">return</span> <span class="hljs-built_in">table</span>.t(<span class="hljs-string">'selection.single'</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">table</span>.t(<span class="hljs-string">'selection.multiple'</span>, { count });
+}
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="for-application-developers">For Application Developers</h3>
+<ol>
+<li><strong>Always provide translations</strong>: Include translations for all languages you support</li>
+<li><strong>Use meaningful keys</strong>: Make translation keys descriptive and hierarchical</li>
+<li><strong>Test fallbacks</strong>: Ensure your app works when translations are missing</li>
+<li><strong>Consider context</strong>: Some words have different meanings in different contexts</li>
+<li><strong>Use parameters wisely</strong>: Prefer parameters over string concatenation</li>
+</ol>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Good</span>
+<span class="hljs-string">'message.itemsSelected'</span>: <span class="hljs-string">'{count} item(s) selected'</span>
+
+<span class="hljs-comment">// Avoid</span>
+<span class="hljs-string">'message.itemsSelected'</span>: <span class="hljs-string">' item(s) selected'</span> <span class="hljs-comment">// Requires concatenation</span>
+</code></pre>
+<h3 id="for-plugin-developers">For Plugin Developers</h3>
+<ol>
+<li><strong>Namespace your keys</strong>: Prevent conflicts with other plugins</li>
+<li><strong>Document your keys</strong>: Provide a list of translation keys for users</li>
+<li><strong>Support all table languages</strong>: Add translations for languages the table supports</li>
+<li><strong>Use table.t() consistently</strong>: Always use the table&#39;s translation method</li>
+</ol>
+<h3 id="performance-considerations">Performance Considerations</h3>
+<ol>
+<li><strong>Cache formatted values</strong>: Don&#39;t re-format the same values repeatedly</li>
+<li><strong>Lazy load translations</strong>: Only load translations when needed</li>
+<li><strong>Avoid frequent re-renders</strong>: Batch language changes when possible</li>
+</ol>
+<h3 id="accessibility">Accessibility</h3>
+<p>The localization system supports accessibility by providing proper ARIA labels and screen reader friendly text:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Accessible sort indicators</span>
+<span class="hljs-string">'sort.sortedAscending'</span>: <span class="hljs-string">'Sorted ascending'</span>,
+<span class="hljs-string">'accessibility.sortableColumn'</span>: <span class="hljs-string">'Sortable column'</span>,
+<span class="hljs-string">'accessibility.table'</span>: <span class="hljs-string">'Data table'</span>
+</code></pre>
+<h2 id="integration-examples">Integration Examples</h2>
+<h3 id="react-integration">React Integration</h3>
+<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> React, { useState, useEffect } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> Tablix <span class="hljs-keyword">from</span> <span class="hljs-string">'tablixjs'</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">DataTable</span>(<span class="hljs-params">{ language = <span class="hljs-string">'en'</span> }</span>) </span>{
+    <span class="hljs-keyword">const</span> [table, setTable] = useState(<span class="hljs-literal">null</span>);
+
+    useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-keyword">const</span> tableInstance = <span class="hljs-keyword">new</span> Tablix(<span class="hljs-string">'#table'</span>, {
+            <span class="hljs-attr">data</span>: myData,
+            <span class="hljs-attr">columns</span>: myColumns,
+            <span class="hljs-attr">language</span>: language
+        });
+
+        setTable(tableInstance);
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> tableInstance.destroy();
+    }, []);
+
+    useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-keyword">if</span> (table) {
+            <span class="hljs-comment">// Auto-loads translations for fr/es/sr, updates all components</span>
+            table.setLanguage(language);
+        }
+    }, [table, language]);
+
+    <span class="hljs-keyword">const</span> handleLanguageChange = <span class="hljs-function">(<span class="hljs-params">newLang</span>) =&gt;</span> {
+        <span class="hljs-comment">// Filter dropdowns and all UI automatically update</span>
+        table.setLanguage(newLang);
+    };
+
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">select</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{(e)</span> =&gt;</span> handleLanguageChange(e.target.value)}&gt;
+                <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"en"</span>&gt;</span>English<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"fr"</span>&gt;</span>Français<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"es"</span>&gt;</span>Español<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"sr"</span>&gt;</span>Српски<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">select</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"table"</span> /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    );
+}</span>
+</code></pre>
+<h3 id="vue-js-integration">Vue.js Integration</h3>
+<pre><code class="lang-javascript"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">select</span> <span class="hljs-attr">v-model</span>=<span class="hljs-string">"currentLanguage"</span> @<span class="hljs-attr">change</span>=<span class="hljs-string">"updateLanguage"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"en"</span>&gt;</span>English<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"fr"</span>&gt;</span>Français<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"es"</span>&gt;</span>Español<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"sr"</span>&gt;</span>Српски<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">select</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"tableContainer"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+<span class="hljs-keyword">import</span> Tablix <span class="hljs-keyword">from</span> <span class="hljs-string">'tablixjs'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+    data() {
+        <span class="hljs-keyword">return</span> {
+            <span class="hljs-attr">currentLanguage</span>: <span class="hljs-string">'en'</span>,
+            <span class="hljs-attr">table</span>: <span class="hljs-literal">null</span>
+        };
+    },
+
+    mounted() {
+        <span class="hljs-keyword">this</span>.table = <span class="hljs-keyword">new</span> Tablix(<span class="hljs-keyword">this</span>.$refs.tableContainer, {
+            <span class="hljs-attr">data</span>: <span class="hljs-keyword">this</span>.myData,
+            <span class="hljs-attr">columns</span>: <span class="hljs-keyword">this</span>.myColumns,
+            <span class="hljs-attr">language</span>: <span class="hljs-keyword">this</span>.currentLanguage
+        });
+    },
+
+    <span class="hljs-attr">methods</span>: {
+        updateLanguage() {
+            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.table) {
+                <span class="hljs-comment">// Automatically handles filter dropdown translations</span>
+                <span class="hljs-keyword">this</span>.table.setLanguage(<span class="hljs-keyword">this</span>.currentLanguage);
+            }
+        }
+    },
+
+    <span class="hljs-attr">watch</span>: {
+        <span class="hljs-attr">currentLanguage</span>: <span class="hljs-string">'updateLanguage'</span>
+    },
+
+    beforeUnmount() {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.table) {
+            <span class="hljs-keyword">this</span>.table.destroy();
+        }
+    }
+};
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="common-issues">Common Issues</h3>
+<p><strong>Translation not showing:</strong></p>
+<ul>
+<li>Check if the language is set correctly using <code>table.getCurrentLanguage()</code></li>
+<li>For fr/es/sr, just use <code>table.setLanguage()</code> - they auto-load</li>
+<li>For other languages, add translations first with <code>table.addLanguagePack()</code> </li>
+<li>Verify the translation key exists in the language pack</li>
+</ul>
+<p><strong>Filter dropdowns still in English:</strong></p>
+<ul>
+<li>Ensure you&#39;re using <code>table.setLanguage()</code> not just setting a config option</li>
+<li>The filter dropdowns update automatically when language changes</li>
+<li>Check if the language pack includes filter translation keys</li>
+</ul>
+<p><strong>Auto-loading not working:</strong></p>
+<ul>
+<li>Auto-loading only works for French (fr), Spanish (es), and Serbian (sr)</li>
+<li>Other languages must be added manually with <code>addTranslations()</code> or <code>addLanguagePack()</code></li>
+<li>Check browser console for auto-loading messages</li>
+</ul>
+<p><strong>Fallback not working:</strong></p>
+<ul>
+<li>Ensure English translations are present (they&#39;re included by default)</li>
+<li>Check if the fallback language is set correctly</li>
+</ul>
+<p><strong>Plugin translations not appearing:</strong></p>
+<ul>
+<li>Add plugin translations before using them</li>
+<li>Ensure plugins add translations for the current language</li>
+<li>Use the new <code>addLanguagePack()</code> method for easier plugin translation management</li>
+</ul>
+<h3 id="debugging">Debugging</h3>
+<p>Enable translation debugging and test the new features:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Check available languages (should include auto-loaded ones)</span>
+console.<span class="hljs-built_in">log</span>(<span class="hljs-keyword">table</span>.getAvailableLanguages()); <span class="hljs-comment">// ['en', 'fr', 'es', 'sr']</span>
+
+<span class="hljs-comment">// Check current language</span>
+console.<span class="hljs-built_in">log</span>(<span class="hljs-keyword">table</span>.getCurrentLanguage());
+
+<span class="hljs-comment">// Test auto-loading</span>
+<span class="hljs-keyword">table</span>.setLanguage('sr'); <span class="hljs-comment">// Should auto-load Serbian</span>
+console.<span class="hljs-built_in">log</span>(<span class="hljs-keyword">table</span>.hasLanguage('sr')); <span class="hljs-comment">// Should be true</span>
+
+<span class="hljs-comment">// Test translation with filter keys</span>
+console.<span class="hljs-built_in">log</span>(<span class="hljs-keyword">table</span>.t('filter.apply')); <span class="hljs-comment">// Should show localized "Apply" button text</span>
+console.<span class="hljs-built_in">log</span>(<span class="hljs-keyword">table</span>.t('filter.filterByValue')); <span class="hljs-comment">// Should show "Filter by Value"</span>
+
+<span class="hljs-comment">// Test the new convenience method</span>
+<span class="hljs-keyword">table</span>.addLanguagePack('<span class="hljs-keyword">de</span>', germanTranslations);
+console.<span class="hljs-built_in">log</span>(<span class="hljs-keyword">table</span>.hasLanguage('<span class="hljs-keyword">de</span>')); <span class="hljs-comment">// Should be true</span>
+
+<span class="hljs-comment">// Check if language exists</span>
+console.<span class="hljs-built_in">log</span>(<span class="hljs-keyword">table</span>.hasLanguage('fr')); <span class="hljs-comment">// Should be true (auto-loaded)</span>
+</code></pre>
+<h3 id="performance-tips">Performance Tips</h3>
+<ol>
+<li><strong>Use auto-loading</strong>: Let TablixJS auto-load fr/es/sr instead of manually importing</li>
+<li><strong>Use addLanguagePack()</strong>: More efficient than multiple <code>addTranslations()</code> calls</li>
+<li><strong>Batch language operations</strong>: Avoid rapid <code>setLanguage()</code> calls</li>
+<li><strong>Component updates are automatic</strong>: Filter dropdowns, pagination, etc. update automatically</li>
+</ol>
+<p>This comprehensive localization system makes TablixJS truly international, providing seamless multilingual support while maintaining excellent developer experience and performance.</p>

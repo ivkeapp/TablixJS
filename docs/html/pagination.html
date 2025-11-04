@@ -1,0 +1,248 @@
+<h1 id="tablixjs-pagination-api-documentation">TablixJS Pagination API Documentation</h1>
+<h2 id="overview">Overview</h2>
+<p>TablixJS provides comprehensive pagination support for both client-side and server-side scenarios. The pagination system is designed to be performant, flexible, and easy to customize.</p>
+<h2 id="features">Features</h2>
+<ul>
+<li><strong>Client-side pagination</strong>: Slice data locally for small to medium datasets</li>
+<li><strong>Server-side pagination</strong>: Async data loading for large datasets</li>
+<li><strong>Consistent API</strong>: Same methods work for both modes</li>
+<li><strong>Event hooks</strong>: React to pagination changes</li>
+<li><strong>Customizable UI</strong>: Style pagination controls with CSS</li>
+<li><strong>Keyboard navigation</strong>: Accessible pagination controls</li>
+<li><strong>Page size controls</strong>: Allow users to change records per page</li>
+<li><strong>Mobile responsive</strong>: Adapts to smaller screens</li>
+</ul>
+<h2 id="basic-usage">Basic Usage</h2>
+<h3 id="client-side-pagination">Client-side Pagination</h3>
+<pre><code class="lang-javascript">import <span class="hljs-keyword">Table</span> from <span class="hljs-comment">'./src/core/Table.js'</span>;
+
+const <span class="hljs-keyword">table</span> = new <span class="hljs-comment">Table(</span><span class="hljs-comment">'#myTable'</span><span class="hljs-comment">, {</span>
+  data: myDataArray,
+  columns: [
+    { name: <span class="hljs-string">'id'</span>, title: <span class="hljs-string">'ID'</span> },
+    { name: <span class="hljs-string">'name'</span>, title: <span class="hljs-string">'Name'</span> }
+  ],
+  pagination: {
+    enabled: true,
+    pageSize: <span class="hljs-number">10</span>,
+    mode: <span class="hljs-string">'client'</span>  <span class="hljs-comment">// Default mode</span>
+  }
+});
+</code></pre>
+<h3 id="server-side-pagination">Server-side Pagination</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Define your server data loader</span>
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadDataFromServer</span>(<span class="hljs-params">{ page, pageSize, filters, sorts }</span>) </span>{
+  <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">`/api/data?page=<span class="hljs-subst">${page}</span>&amp;size=<span class="hljs-subst">${pageSize}</span>`</span>);
+  <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> response.json();
+
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">data</span>: result.items,     <span class="hljs-comment">// Array of records for current page</span>
+    totalRows: result.total <span class="hljs-comment">// Total number of records</span>
+  };
+}
+
+<span class="hljs-keyword">const</span> table = <span class="hljs-keyword">new</span> Table(<span class="hljs-string">'#myTable'</span>, {
+  <span class="hljs-attr">columns</span>: [...],
+  <span class="hljs-attr">pagination</span>: {
+    <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">pageSize</span>: <span class="hljs-number">25</span>,
+    <span class="hljs-attr">mode</span>: <span class="hljs-string">'server'</span>,
+    <span class="hljs-attr">serverDataLoader</span>: loadDataFromServer
+  }
+});
+</code></pre>
+<h2 id="configuration-options">Configuration Options</h2>
+<p>All pagination options are configured in the <code>pagination</code> object:</p>
+<pre><code class="lang-javascript"><span class="hljs-attribute">pagination</span>: {
+  <span class="hljs-attribute">enabled</span>: true,              // Enable/disable pagination
+  <span class="hljs-attribute">pageSize</span>: 10,              // Records per page
+  <span class="hljs-attribute">mode</span>: 'client',            // 'client' or 'server'
+
+<span class="sql">  // UI Display Options
+  showPageNumbers: true,     // <span class="hljs-keyword">Show</span> numbered page buttons
+  maxPageNumbers: <span class="hljs-number">5</span>,         // <span class="hljs-keyword">Max</span> page numbers <span class="hljs-keyword">to</span> <span class="hljs-keyword">show</span> <span class="hljs-keyword">before</span> <span class="hljs-keyword">ellipsis</span>
+  showFirstLast: <span class="hljs-literal">true</span>,       // <span class="hljs-keyword">Show</span> <span class="hljs-string">"First"</span> <span class="hljs-keyword">and</span> <span class="hljs-string">"Last"</span> buttons
+  showPrevNext: <span class="hljs-literal">true</span>,        // <span class="hljs-keyword">Show</span> <span class="hljs-string">"Previous"</span> <span class="hljs-keyword">and</span> <span class="hljs-string">"Next"</span> buttons
+  showPageSizes: <span class="hljs-literal">false</span>,      // <span class="hljs-keyword">Show</span> page <span class="hljs-keyword">size</span> selector
+  pageSizeOptions: [<span class="hljs-number">10</span>, <span class="hljs-number">25</span>, <span class="hljs-number">50</span>, <span class="hljs-number">100</span>], // Available page <span class="hljs-keyword">sizes</span>
+
+  // <span class="hljs-keyword">Server</span>-side Options
+  serverDataLoader: <span class="hljs-literal">null</span>     // <span class="hljs-keyword">Function</span> <span class="hljs-keyword">to</span> <span class="hljs-keyword">load</span> <span class="hljs-keyword">data</span> <span class="hljs-keyword">from</span> <span class="hljs-keyword">server</span>
+}</span>
+</code></pre>
+<h2 id="api-methods">API Methods</h2>
+<h3 id="navigation-methods">Navigation Methods</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Go to specific page (1-indexed)</span>
+await <span class="hljs-keyword">table</span>.goToPage(3);
+
+<span class="hljs-comment">// Navigate relative to current page</span>
+await <span class="hljs-keyword">table</span>.nextPage();
+await <span class="hljs-keyword">table</span>.prevPage();
+await <span class="hljs-keyword">table</span>.firstPage();
+await <span class="hljs-keyword">table</span>.lastPage();
+
+<span class="hljs-comment">// Change page size</span>
+await <span class="hljs-keyword">table</span>.changePageSize(25);
+</code></pre>
+<h3 id="information-methods">Information Methods</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Get current pagination state</span>
+const info = <span class="hljs-keyword">table</span>.getPaginationInfo();
+console.log(info);
+<span class="hljs-comment">// Returns:</span>
+<span class="hljs-comment">// {</span>
+<span class="hljs-comment">//   currentPage: 2,</span>
+<span class="hljs-comment">//   totalPages: 10,</span>
+<span class="hljs-comment">//   pageSize: 10,</span>
+<span class="hljs-comment">//   totalRows: 95,</span>
+<span class="hljs-comment">//   startRow: 11,</span>
+<span class="hljs-comment">//   endRow: 20,</span>
+<span class="hljs-comment">//   hasNextPage: true,</span>
+<span class="hljs-comment">//   hasPrevPage: true,</span>
+<span class="hljs-comment">//   isLoading: false</span>
+<span class="hljs-comment">// }</span>
+</code></pre>
+<h3 id="control-methods">Control Methods</h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Enable/disable pagination dynamically</span>
+<span class="hljs-function">await table.<span class="hljs-title">setPaginationEnabled</span><span class="hljs-params">(<span class="hljs-keyword">false</span>)</span></span>;
+<span class="hljs-function">await table.<span class="hljs-title">setPaginationEnabled</span><span class="hljs-params">(<span class="hljs-keyword">true</span>)</span></span>;
+
+<span class="hljs-comment">// Switch between client and server mode</span>
+<span class="hljs-function">await table.<span class="hljs-title">setPaginationMode</span><span class="hljs-params">(<span class="hljs-string">'server'</span>, myServerLoader)</span></span>;
+<span class="hljs-function">await table.<span class="hljs-title">setPaginationMode</span><span class="hljs-params">(<span class="hljs-string">'client'</span>)</span></span>;
+</code></pre>
+<h2 id="events">Events</h2>
+<p>Listen to pagination events to react to changes:</p>
+<pre><code class="lang-javascript"><span class="hljs-regexp">//</span> Page navigation events
+table.<span class="hljs-literal">on</span>(<span class="hljs-string">'beforePageChange'</span>, <span class="hljs-function"><span class="hljs-params">({ oldPage, newPage, pageSize })</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(`<span class="javascript">Navigating <span class="hljs-keyword">from</span> page ${oldPage} to ${newPage}</span>`);
+});
+
+table.<span class="hljs-literal">on</span>(<span class="hljs-string">'afterPageChange'</span>, <span class="hljs-function"><span class="hljs-params">({ oldPage, newPage, pageSize })</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(`<span class="javascript">Now on page ${newPage}</span>`);
+});
+
+<span class="hljs-regexp">//</span> Page size change events
+table.<span class="hljs-literal">on</span>(<span class="hljs-string">'beforePageSizeChange'</span>, <span class="hljs-function"><span class="hljs-params">({ oldPageSize, newPageSize })</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(`<span class="javascript">Changing page size <span class="hljs-keyword">from</span> ${oldPageSize} to ${newPageSize}</span>`);
+});
+
+table.<span class="hljs-literal">on</span>(<span class="hljs-string">'afterPageSizeChange'</span>, <span class="hljs-function"><span class="hljs-params">({ newPageSize, page })</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(`<span class="javascript">Page size changed to ${newPageSize}, now on page ${page}</span>`);
+});
+
+<span class="hljs-regexp">//</span> Server-side loading events
+table.<span class="hljs-literal">on</span>(<span class="hljs-string">'beforePageLoad'</span>, <span class="hljs-function"><span class="hljs-params">({ page, pageSize })</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Loading data from server...'</span>);
+});
+
+table.<span class="hljs-literal">on</span>(<span class="hljs-string">'afterPageLoad'</span>, <span class="hljs-function"><span class="hljs-params">({ page, pageSize, data, totalRows })</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(`<span class="javascript">Loaded ${data.length} records <span class="hljs-keyword">for</span> page ${page}</span>`);
+});
+
+table.<span class="hljs-literal">on</span>(<span class="hljs-string">'pageLoadError'</span>, <span class="hljs-function"><span class="hljs-params">(error)</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'Failed to load page data:'</span>, error);
+});
+</code></pre>
+<h2 id="server-side-data-loader">Server-side Data Loader</h2>
+<p>When using server-side pagination, your data loader function receives these parameters:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">serverDataLoader</span>(<span class="hljs-params">{
+  page,      <span class="hljs-comment">// Current page number (1-indexed)</span>
+  pageSize,  <span class="hljs-comment">// Number of records per page</span>
+  filters,   <span class="hljs-comment">// Current filter criteria object</span>
+  sorts      <span class="hljs-comment">// Current sort criteria array</span>
+}</span>) </span>{
+  <span class="hljs-comment">// Your server request logic here</span>
+  <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">`/api/data`</span>, {
+    <span class="hljs-attribute">method</span>: <span class="hljs-string">'POST'</span>,
+    <span class="hljs-attribute">headers</span>: { <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span> },
+    <span class="hljs-attribute">body</span>: <span class="hljs-built_in">JSON</span>.stringify({ page, pageSize, filters, sorts })
+  });
+
+  <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> response.json();
+
+  <span class="hljs-comment">// Must return this structure:</span>
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attribute">data</span>: result.records,    <span class="hljs-comment">// Array of records for this page</span>
+    <span class="hljs-attribute">totalRows</span>: result.total  <span class="hljs-comment">// Total number of records (for pagination calculation)</span>
+  };
+}
+</code></pre>
+<h2 id="integration-with-filtering-and-sorting">Integration with Filtering and Sorting</h2>
+<p>Pagination automatically integrates with filtering and sorting:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// When filtering, pagination resets to page 1</span>
+<span class="hljs-selector-tag">await</span> <span class="hljs-selector-tag">table</span><span class="hljs-selector-class">.filter</span>({ <span class="hljs-attribute">name</span>: <span class="hljs-string">'John'</span> });
+<span class="hljs-selector-tag">console</span><span class="hljs-selector-class">.log</span>(table.getPaginationInfo().currentPage); <span class="hljs-comment">// 1</span>
+
+<span class="hljs-comment">// When sorting, pagination resets to page 1</span>
+<span class="hljs-selector-tag">await</span> <span class="hljs-selector-tag">table</span><span class="hljs-selector-class">.sort</span>([{ <span class="hljs-attribute">column</span>: <span class="hljs-string">'name'</span>, <span class="hljs-attribute">direction</span>: <span class="hljs-string">'asc'</span> }]);
+<span class="hljs-selector-tag">console</span><span class="hljs-selector-class">.log</span>(table.getPaginationInfo().currentPage); <span class="hljs-comment">// 1</span>
+</code></pre>
+<p>For server-side pagination, your data loader will receive the current filter and sort state.</p>
+<h2 id="css-customization">CSS Customization</h2>
+<p>The pagination controls use CSS classes that you can customize:</p>
+<pre><code class="lang-css"><span class="hljs-comment">/* Main pagination container */</span>
+<span class="hljs-selector-class">.tablix-pagination</span> { }
+
+<span class="hljs-comment">/* Information text */</span>
+<span class="hljs-selector-class">.tablix-pagination-info</span> { }
+
+<span class="hljs-comment">/* Page size selector */</span>
+<span class="hljs-selector-class">.tablix-pagination-page-size</span> { }
+<span class="hljs-selector-class">.tablix-page-size-select</span> { }
+
+<span class="hljs-comment">/* Navigation controls */</span>
+<span class="hljs-selector-class">.tablix-pagination-nav</span> { }
+<span class="hljs-selector-class">.tablix-pagination-btn</span> { }
+<span class="hljs-selector-class">.tablix-pagination-btn</span><span class="hljs-selector-class">.active</span> { }
+<span class="hljs-selector-class">.tablix-pagination-btn</span><span class="hljs-selector-attr">[disabled]</span> { }
+
+<span class="hljs-comment">/* Ellipsis */</span>
+<span class="hljs-selector-class">.tablix-pagination-ellipsis</span> { }
+
+<span class="hljs-comment">/* Loading indicator */</span>
+<span class="hljs-selector-class">.tablix-pagination-loading</span> { }
+</code></pre>
+<h2 id="performance-considerations">Performance Considerations</h2>
+<h3 id="client-side-pagination">Client-side Pagination</h3>
+<ul>
+<li>Best for datasets up to 10,000 records</li>
+<li>All data is kept in memory</li>
+<li>Filtering and sorting happen instantly</li>
+<li>No network requests for navigation</li>
+</ul>
+<h3 id="server-side-pagination">Server-side Pagination</h3>
+<ul>
+<li>Best for large datasets (100,000+ records)</li>
+<li>Only current page data is kept in memory</li>
+<li>Network request required for each page</li>
+<li>Server handles filtering and sorting</li>
+</ul>
+<h2 id="examples">Examples</h2>
+<p>See the complete examples in:</p>
+<ul>
+<li><code>examples/pagination.html</code> - Comprehensive pagination examples</li>
+<li><code>examples/vanilla.html</code> - Basic usage example</li>
+</ul>
+<h2 id="migration-from-legacy-code">Migration from Legacy Code</h2>
+<p>If you&#39;re updating from a version without the pagination manager:</p>
+<ol>
+<li>Update your table initialization to use the new options structure</li>
+<li>Replace direct <code>getPageData()</code> calls with pagination methods</li>
+<li>Add event listeners for pagination events</li>
+<li>Update your CSS to use the new class names</li>
+</ol>
+<pre><code class="lang-javascript"><span class="hljs-comment">// OLD</span>
+<span class="hljs-keyword">const</span> table = <span class="hljs-keyword">new</span> <span class="hljs-keyword">Table</span>(<span class="hljs-string">'#table'</span>, {
+  pagination: { pageSize: <span class="hljs-number">10</span> }
+});
+
+<span class="hljs-comment">// NEW</span>
+<span class="hljs-keyword">const</span> table = <span class="hljs-keyword">new</span> <span class="hljs-keyword">Table</span>(<span class="hljs-string">'#table'</span>, {
+  pagination: {
+    enabled: <span class="hljs-keyword">true</span>,
+    pageSize: <span class="hljs-number">10</span>,
+    showPageNumbers: <span class="hljs-keyword">true</span>,
+    showPageSizes: <span class="hljs-keyword">true</span>
+  }
+});
+</code></pre>
