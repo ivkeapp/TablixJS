@@ -63,7 +63,7 @@ export default class FilterUI {
       filterIndicator = document.createElement('span');
       filterIndicator.className = 'tablix-filter-indicator';
       filterIndicator.innerHTML = `
-        <span class="tablix-filter-icon" title="${this.table.t('filter.filterColumn')}">⚪</span>
+        <span class="tablix-filter-icon" title="${this.table.t('filter.filterColumn')}">🞃</span>
       `;
       
       // Add click handler
