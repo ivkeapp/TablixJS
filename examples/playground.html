@@ -55,6 +55,7 @@
       line-height: 1.6;
       height: 100vh;
       overflow: hidden;
+      width: 100%;
     }
 
     .playground {
@@ -65,17 +66,441 @@
         "header header header"
         "sidebar content panel";
       height: 100vh;
+      width: 100%;
       background: linear-gradient(135deg, var(--bg-primary) 0%, #1a1a2e 100%);
     }
 
+    /* Responsive Design - Progressive Enhancement */
+    
+    /* Tablet and below - Hide side panels, show content only */
     @media (max-width: 1200px) {
       .playground {
         grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
         grid-template-areas: 
           "header"
           "content";
+        width: 100vw;
+        height: 100vh;
       }
-      .sidebar, .panel { display: none; }
+      
+      .sidebar, .panel { 
+        display: none;
+      }
+      
+      .content {
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+    }
+
+    /* Mobile Landscape and below */
+    @media (max-width: 768px) {
+      body {
+        overflow-x: hidden;
+        width: 100vw;
+      }
+
+      .playground {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .header {
+        padding: 0 1rem;
+        width: 100%;
+      }
+
+      .logo {
+        font-size: 1rem;
+      }
+
+      .header-actions {
+        gap: 0.5rem;
+      }
+
+      .btn-small {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem;
+      }
+
+      /* Hide some buttons on very small screens */
+      .header-actions .btn-secondary:first-child {
+        display: none;
+      }
+
+      /* Mobile menu button */
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .content {
+        width: 100%;
+        height: 100%;
+        padding: 1rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Mobile sidebar overlay - only show when explicitly opened */
+      .sidebar {
+        display: none !important;
+      }
+      
+      .sidebar.mobile-open {
+        display: block !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 85%;
+        max-width: 320px;
+        height: 100vh;
+        z-index: 999;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+        animation: slideIn 0.3s ease-out;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .sidebar.mobile-open .mobile-close-btn {
+        position: sticky;
+        top: 1rem;
+        margin: 1rem 1rem 0 auto;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(-100%);
+        }
+        to {
+          transform: translateX(0);
+        }
+      }
+
+      /* Mobile overlay backdrop */
+      .mobile-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 998;
+        backdrop-filter: blur(4px);
+        pointer-events: none;
+      }
+
+      .mobile-overlay.active {
+        display: block;
+        pointer-events: auto;
+      }
+
+      /* Mobile panel overlay - only show when explicitly opened */
+      .panel {
+        display: none !important;
+      }
+      
+      .panel.mobile-open {
+        display: flex !important;
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 85%;
+        max-width: 320px;
+        height: 100vh;
+        z-index: 999;
+        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+        animation: slideInRight 0.3s ease-out;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .panel.mobile-open .mobile-close-btn {
+        position: sticky;
+        top: 1rem;
+        margin: 1rem auto 0 1rem;
+      }
+
+      @keyframes slideInRight {
+        from {
+          transform: translateX(100%);
+        }
+        to {
+          transform: translateX(0);
+        }
+      }
+
+      .demo-container {
+        border-radius: var(--radius);
+        min-height: auto;
+        width: 100%;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .demo-header {
+        padding: 1rem;
+        flex-shrink: 0;
+      }
+
+      .demo-title {
+        font-size: 1.2rem;
+      }
+
+      .demo-subtitle {
+        font-size: 0.85rem;
+      }
+
+      .demo-content {
+        padding: 1rem;
+        min-height: 400px;
+        flex: 1;
+        overflow: visible;
+      }
+
+      /* Table container responsive */
+      #tableContainer {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        min-height: 400px;
+      }
+
+      /* FAB adjustments */
+      .fab {
+        width: 48px;
+        height: 48px;
+        font-size: 1.25rem;
+        bottom: 1rem;
+        right: 1rem;
+      }
+    }
+
+    /* Mobile Portrait - Extra small screens */
+    @media (max-width: 480px) {
+      body {
+        overflow-x: hidden;
+        width: 100vw;
+      }
+
+      .playground {
+        grid-template-rows: auto 1fr;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .header {
+        padding: 0 0.75rem;
+        height: auto;
+        min-height: 50px;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        width: 100%;
+      }
+
+      .logo {
+        font-size: 0.9rem;
+        gap: 0.5rem;
+      }
+
+      .header-actions {
+        gap: 0.4rem;
+      }
+
+      .btn-small {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.7rem;
+        gap: 0.25rem;
+      }
+
+      /* Hide export button on smallest screens */
+      .header-actions .btn-secondary {
+        display: none;
+      }
+
+      .content {
+        padding: 0.75rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+        width: 100%;
+        height: 100%;
+      }
+
+      .demo-container {
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        width: 100%;
+      }
+
+      .demo-header {
+        padding: 0.75rem;
+      }
+
+      .demo-title {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .demo-subtitle {
+        font-size: 0.75rem;
+      }
+
+      .demo-content {
+        padding: 0.75rem;
+        min-height: 350px;
+      }
+
+      /* Ensure table doesn't break layout */
+      #tableContainer {
+        max-width: 100%;
+        width: 100%;
+        overflow-x: auto;
+        min-height: 350px;
+      }
+
+      /* FAB smaller on mobile */
+      .fab {
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+        bottom: 0.75rem;
+        right: 0.75rem;
+      }
+    }
+
+    /* Very small phones (iPhone SE, etc.) */
+    @media (max-width: 375px) {
+      .header {
+        padding: 0 0.5rem;
+        width: 100%;
+      }
+
+      .logo {
+        font-size: 0.85rem;
+      }
+
+      .btn-small {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.65rem;
+      }
+
+      .content {
+        padding: 0.5rem;
+        width: 100%;
+      }
+
+      .demo-container {
+        border-radius: 6px;
+        width: 100%;
+      }
+
+      .demo-header {
+        padding: 0.5rem;
+      }
+
+      .demo-title {
+        font-size: 0.9rem;
+      }
+
+      .demo-subtitle {
+        font-size: 0.7rem;
+      }
+
+      .demo-content {
+        padding: 0.5rem;
+        min-height: 300px;
+      }
+
+      #tableContainer {
+        min-height: 300px;
+        width: 100%;
+      }
+
+      .fab {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+      }
+    }
+
+    /* Touch-friendly improvements for all mobile devices */
+    @media (max-width: 768px) and (hover: none) {
+      /* Increase tap target sizes */
+      .btn {
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+
+      /* Remove hover effects that don't work on touch */
+      .btn:hover {
+        transform: none;
+      }
+
+      .fab:hover {
+        transform: none;
+      }
+
+      /* Better scrolling on mobile */
+      .content {
+        -webkit-overflow-scrolling: touch;
+        overflow-y: auto;
+      }
+
+      /* Prevent zoom on inputs */
+      input, select, textarea {
+        font-size: 16px;
+      }
+    }
+
+    /* Landscape orientation adjustments */
+    @media (max-width: 768px) and (orientation: landscape) {
+      .playground {
+        height: 100vh;
+      }
+
+      .header {
+        min-height: 48px;
+      }
+
+      .content {
+        height: calc(100vh - 48px);
+        overflow-y: auto;
+      }
+
+      .demo-header {
+        padding: 0.75rem;
+      }
+
+      .demo-title {
+        font-size: 1.1rem;
+      }
+
+      .demo-content {
+        min-height: 300px;
+      }
+
+      #tableContainer {
+        min-height: 300px;
+      }
+
+      .fab {
+        bottom: 0.5rem;
+        right: 0.5rem;
+      }
+    }
+
+    /* High DPI screens - sharper rendering */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
     }
 
     /* Header */
@@ -88,6 +513,8 @@
       justify-content: space-between;
       padding: 0 2rem;
       backdrop-filter: blur(20px);
+      flex-shrink: 0;
+      width: 100%;
     }
 
     .logo {
@@ -233,6 +660,8 @@
       padding: 2rem;
       overflow: auto;
       position: relative;
+      width: 100%;
+      height: 100%;
     }
 
     .demo-container {
@@ -242,6 +671,8 @@
       overflow: hidden;
       box-shadow: var(--shadow-lg);
       min-height: 600px;
+      width: 100%;
+      max-width: 100%;
     }
 
     .demo-header {
@@ -265,6 +696,9 @@
     .demo-content {
       padding: 2rem;
       min-height: 500px;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     /* Right panel */
@@ -407,6 +841,64 @@
       justify-content: center;
     }
 
+    /* Mobile menu button */
+    .mobile-menu-btn {
+      display: none;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .mobile-menu-btn:hover {
+      background: var(--bg-glass);
+      border-color: var(--border-hover);
+    }
+
+    .mobile-menu-btn:active {
+      transform: scale(0.95);
+    }
+
+    .mobile-menu-btn .badge {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 10px;
+      margin-left: 0.25rem;
+      font-weight: 600;
+    }
+
+    /* Close button for mobile menus */
+    .mobile-close-btn {
+      display: none;
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 32px;
+      height: 32px;
+      background: var(--danger);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 1001;
+      line-height: 1;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .mobile-close-btn {
+        display: flex;
+      }
+    }
+
     /* Floating action button */
     .fab {
       position: fixed;
@@ -422,7 +914,7 @@
       cursor: pointer;
       box-shadow: var(--shadow-lg);
       transition: var(--transition);
-      z-index: 1000;
+      z-index: 997;
     }
 
     .fab:hover {
@@ -467,8 +959,101 @@
     #tableContainer {
       min-height: 400px;
       border-radius: var(--radius);
-      overflow: hidden;
+      overflow: visible;
       border: 1px solid var(--border);
+      width: 100%;
+      max-width: 100%;
+      display: block;
+      position: relative;
+    }
+
+    /* Mobile table responsiveness */
+    @media (max-width: 768px) {
+      #tableContainer {
+        min-height: 400px;
+        border-radius: 8px;
+        width: 100%;
+        display: block;
+        overflow: visible;
+      }
+
+      /* Ensure table controls are touch-friendly */
+      #tableContainer .tablix-pagination {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.75rem;
+      }
+
+      #tableContainer .tablix-pagination button {
+        min-height: 40px;
+        min-width: 40px;
+        padding: 0.5rem;
+      }
+
+      #tableContainer .tablix-search input {
+        font-size: 16px; /* Prevent zoom on iOS */
+        padding: 0.6rem;
+      }
+
+      /* Better table scrolling on mobile */
+      #tableContainer .tablix-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+      }
+
+      #tableContainer .tablix-table {
+        width: 100%;
+        display: table;
+      }
+
+      /* Stack filter controls vertically on small screens */
+      #tableContainer .tablix-filter-row {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      #tableContainer .tablix-filter-row select,
+      #tableContainer .tablix-filter-row input {
+        font-size: 16px;
+        min-height: 40px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #tableContainer {
+        min-height: 350px;
+        width: 100%;
+        display: block;
+      }
+
+      /* Smaller fonts for table cells on mobile */
+      #tableContainer .tablix-table {
+        font-size: 0.85rem;
+        width: 100%;
+        display: table;
+      }
+
+      #tableContainer .tablix-header {
+        font-size: 0.8rem;
+      }
+
+      #tableContainer .tablix-pagination {
+        font-size: 0.8rem;
+        padding: 0.5rem;
+      }
+
+      #tableContainer .tablix-pagination button {
+        min-height: 36px;
+        min-width: 36px;
+        font-size: 0.75rem;
+      }
+
+      /* Compact page size selector */
+      #tableContainer .tablix-page-size select {
+        font-size: 0.85rem;
+        padding: 0.4rem;
+      }
     }
 
     /* Selection styles for table rows */
@@ -513,6 +1098,9 @@
   <div class="playground">
     <!-- Header -->
     <header class="header">
+      <button class="mobile-menu-btn btn btn-small" onclick="toggleMobileMenu('sidebar')" style="display: none;">
+        ☰ Controls
+      </button>
       <div class="logo">
         🎮 TablixJS Playground
       </div>
@@ -526,11 +1114,18 @@
         <button class="btn btn-primary btn-small" onclick="generateCode()">
           💻 Generate Code
         </button>
+        <button class="mobile-menu-btn btn btn-small" onclick="toggleMobileMenu('panel')" style="display: none;">
+          📊 Stats
+        </button>
       </div>
     </header>
 
+    <!-- Mobile overlay backdrop -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenus()"></div>
+
     <!-- Sidebar Controls -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebarMenu">
+      <button class="mobile-close-btn" onclick="closeMobileMenus()">✕</button>
       <!-- Data Configuration -->
       <section class="control-section">
         <h3 class="section-title">📊 Data Setup</h3>
@@ -687,7 +1282,8 @@
     </main>
 
     <!-- Right Panel -->
-    <aside class="panel">
+    <aside class="panel" id="panelMenu">
+      <button class="mobile-close-btn" onclick="closeMobileMenus()">✕</button>
       <!-- Performance Stats -->
       <section class="panel-section">
         <h3 class="panel-title">📈 Performance</h3>
@@ -1242,8 +1838,106 @@ table.on('afterPageChange', (data) => console.log('Page:', data));`;
 
     window.generateCode = generateCode;
 
+    // Mobile menu functions
+    window.toggleMobileMenu = function(type) {
+      const overlay = document.getElementById('mobileOverlay');
+      
+      if (type === 'sidebar') {
+        const sidebar = document.getElementById('sidebarMenu');
+        const panel = document.getElementById('panelMenu');
+        
+        sidebar.classList.toggle('mobile-open');
+        panel.classList.remove('mobile-open');
+        overlay.classList.toggle('active', sidebar.classList.contains('mobile-open'));
+      } else if (type === 'panel') {
+        const panel = document.getElementById('panelMenu');
+        const sidebar = document.getElementById('sidebarMenu');
+        
+        panel.classList.toggle('mobile-open');
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.toggle('active', panel.classList.contains('mobile-open'));
+      }
+      
+      // Prevent body scroll when menu is open
+      document.body.style.overflow = overlay.classList.contains('active') ? 'hidden' : '';
+    };
+
+    window.closeMobileMenus = function() {
+      const overlay = document.getElementById('mobileOverlay');
+      const sidebar = document.getElementById('sidebarMenu');
+      const panel = document.getElementById('panelMenu');
+      
+      sidebar.classList.remove('mobile-open');
+      panel.classList.remove('mobile-open');
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    };
+
+    // Show/hide mobile menu buttons based on viewport
+    function updateMobileMenuButtons() {
+      const isMobile = window.innerWidth <= 1200;
+      const menuButtons = document.querySelectorAll('.mobile-menu-btn');
+      
+      menuButtons.forEach(btn => {
+        btn.style.display = isMobile ? 'block' : 'none';
+      });
+
+      // Close menus if resizing to desktop
+      if (!isMobile) {
+        closeMobileMenus();
+      }
+    }
+
     // Initialize
-    document.addEventListener('DOMContentLoaded', initPlayground);
+    document.addEventListener('DOMContentLoaded', () => {
+      initPlayground();
+      updateMobileMenuButtons();
+    });
+
+    // Update on resize
+    window.addEventListener('resize', updateMobileMenuButtons);
+
+    // Touch gesture support for closing menus
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      
+      // Only trigger on horizontal swipes (not vertical scrolls)
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+        const sidebar = document.getElementById('sidebarMenu');
+        const panel = document.getElementById('panelMenu');
+        
+        // Swipe right to close left sidebar
+        if (diffX < -50 && sidebar.classList.contains('mobile-open')) {
+          closeMobileMenus();
+        }
+        
+        // Swipe left to close right panel
+        if (diffX > 50 && panel.classList.contains('mobile-open')) {
+          closeMobileMenus();
+        }
+      }
+    }, { passive: true });
+
+    // Keyboard support - ESC to close menus
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const overlay = document.getElementById('mobileOverlay');
+        if (overlay.classList.contains('active')) {
+          closeMobileMenus();
+        }
+      }
+    });
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
