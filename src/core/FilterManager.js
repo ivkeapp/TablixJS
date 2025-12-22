@@ -71,17 +71,24 @@ export default class FilterManager {
       isActive: this.isFilterActive(filterConfig)
     });
 
+    // Update state manager with current filters
+    if (this.table.stateManager) {
+      this.table.stateManager.updateFilters(this.getActiveFilters());
+      // Reset to first page when filters change
+      this.table.stateManager.resetPage();
+    }
+
     if (this.options.mode === 'server') {
-      await this._filterServer();
+      // Server mode - update will be triggered by refreshTable via unified loader
+      await this.table.refreshTable();
     } else {
+      // Client mode - apply filter locally
       this._filterClient();
+      await this.table.refreshTable();
     }
 
     // Update UI indicators
     this.updateFilterIndicators();
-    
-    // Refresh table display
-    await this.table.refreshTable();
 
     // Trigger afterFilter hook
     this.table.eventManager.trigger('afterFilter', {
@@ -108,14 +115,20 @@ export default class FilterManager {
 
     this.columnFilters.delete(columnName);
 
+    // Update state manager with current filters
+    if (this.table.stateManager) {
+      this.table.stateManager.updateFilters(this.getActiveFilters());
+      this.table.stateManager.resetPage();
+    }
+
     if (this.options.mode === 'server') {
-      await this._filterServer();
+      await this.table.refreshTable();
     } else {
       this._filterClient();
+      await this.table.refreshTable();
     }
 
     this.updateFilterIndicators();
-    await this.table.refreshTable();
 
     this.table.eventManager.trigger('afterFilter', {
       columnName,
@@ -140,14 +153,20 @@ export default class FilterManager {
 
     this.columnFilters.clear();
 
+    // Update state manager with empty filters
+    if (this.table.stateManager) {
+      this.table.stateManager.updateFilters({});
+      this.table.stateManager.resetPage();
+    }
+
     if (this.options.mode === 'server') {
-      await this._filterServer();
+      await this.table.refreshTable();
     } else {
       this._filterClient();
+      await this.table.refreshTable();
     }
 
     this.updateFilterIndicators();
-    await this.table.refreshTable();
 
     this.table.eventManager.trigger('afterFilter', {
       columnName: null,
@@ -177,7 +196,12 @@ export default class FilterManager {
    * @returns {Array} Unique values
    */
   getColumnUniqueValues(columnName) {
-    const data = this.table.dataManager.originalData;
+    // For server mode, use the current filtered data (what's loaded from server)
+    // For client mode, use the original data
+    const data = this.options.mode === 'server' 
+      ? this.table.dataManager.filteredData 
+      : this.table.dataManager.originalData;
+    
     const values = new Set();
     
     data.forEach(row => {
@@ -280,10 +304,14 @@ export default class FilterManager {
   }
 
   /**
-   * Server-side filtering
+   * Server-side filtering (DEPRECATED - now handled by unified loader)
+   * @deprecated Use unified _loadServerData in Table.js
    * @private
    */
   async _filterServer() {
+    // This method is deprecated and should not be called anymore
+    // Filtering in server mode is now handled by the unified _loadServerData method
+    console.warn('_filterServer is deprecated. Server filtering now uses unified data loading.');
     if (!this.options.serverFilterLoader) {
       console.warn('TablixJS: Server-side filtering enabled but no serverFilterLoader provided');
       return;

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS - Server Mode Test</title>
+    <link rel="stylesheet" href="../src/styles/tablix.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .test-info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .test-info h2 {
+            margin-top: 0;
+        }
+        .request-log {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .request-log .request {
+            padding: 5px;
+            margin: 5px 0;
+            border-left: 3px solid #007bff;
+            padding-left: 10px;
+        }
+        .test-controls {
+            margin: 20px 0;
+        }
+        .test-controls button {
+            margin: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>TablixJS - Server Mode Fixes Test</h1>
+    
+    <div class="test-info">
+        <h2>Test Scenarios</h2>
+        <p>This page tests all server-side mode fixes:</p>
+        <ol>
+            <li>✅ Selection works on first load</li>
+            <li>✅ Filter by values populated on first load</li>
+            <li>✅ Only ONE request per action (no duplicates)</li>
+            <li>✅ Filters persist when sorting/paginating</li>
+            <li>✅ Search term included in requests</li>
+            <li>✅ Table refreshes with sorted results</li>
+            <li>✅ Sort value consistent (never undefined/null)</li>
+        </ol>
+    </div>
+
+    <div class="test-controls">
+        <h3>Quick Tests</h3>
+        <button onclick="testSelection()">Test Selection</button>
+        <button onclick="testFilters()">Test Filters</button>
+        <button onclick="testSorting()">Test Sorting</button>
+        <button onclick="testSearch()">Test Search</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div class="request-log" id="requestLog">
+        <strong>Request Log:</strong> (Watch for duplicate requests - should only see ONE per action)
+    </div>
+
+    <div id="tableContainer"></div>
+
+    <script type="module">
+        import Table from '../src/index.js';
+
+        // Request counter and logger
+        let requestCount = 0;
+        const requestLog = document.getElementById('requestLog');
+
+        function logRequest(type, params) {
+            requestCount++;
+            const time = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'request';
+            logEntry.innerHTML = `
+                <strong>#${requestCount} [${time}] ${type}:</strong><br>
+                ${JSON.stringify(params, null, 2)}
+            `;
+            requestLog.appendChild(logEntry);
+            requestLog.scrollTop = requestLog.scrollHeight;
+        }
+
+        window.clearLog = function() {
+            requestCount = 0;
+            requestLog.innerHTML = '<strong>Request Log:</strong> (Watch for duplicate requests - should only see ONE per action)';
+        };
+
+        // Mock server data loader
+        function generateMockData(params) {
+            console.log('🌐 Server request received:', params);
+            logRequest('SERVER REQUEST', params);
+
+            // Generate mock data
+            const allData = [];
+            for (let i = 1; i <= 100; i++) {
+                allData.push({
+                    id: i,
+                    test_id: `ID-${i.toString().padStart(3, '0')}`,
+                    test_name: `Item ${String.fromCharCode(65 + (i % 26))}${i}`,
+                    test_category: ['Alpha', 'Beta', 'Gamma', 'Delta'][i % 4],
+                    test_value: Math.floor(Math.random() * 1000),
+                    test_date: new Date(2024, 0, 1 + (i % 30)).toISOString().split('T')[0]
+                });
+            }
+
+            let filteredData = [...allData];
+
+            // Apply search
+            if (params.search) {
+                const searchTerm = params.search.toLowerCase();
+                filteredData = filteredData.filter(item => 
+                    Object.values(item).some(val => 
+                        String(val).toLowerCase().includes(searchTerm)
+                    )
+                );
+            }
+
+            // Apply filters
+            if (params.filters && Object.keys(params.filters).length > 0) {
+                Object.entries(params.filters).forEach(([column, filter]) => {
+                    if (filter.type === 'value' && filter.values && filter.values.length > 0) {
+                        filteredData = filteredData.filter(item => 
+                            filter.values.includes(String(item[column]))
+                        );
+                    }
+                });
+            }
+
+            // Apply sorting
+            if (params.sort && params.sort.column) {
+                filteredData.sort((a, b) => {
+                    const aVal = a[params.sort.column];
+                    const bVal = b[params.sort.column];
+                    const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+                    return params.sort.direction === 'desc' ? -comparison : comparison;
+                });
+            }
+
+            // Apply pagination
+            const start = (params.page - 1) * params.pageSize;
+            const end = start + params.pageSize;
+            const pageData = filteredData.slice(start, end);
+
+            return {
+                data: pageData,
+                totalRows: filteredData.length
+            };
+        }
+
+        // Simulate async server call
+        async function serverDataLoader(params) {
+            await new Promise(resolve => setTimeout(resolve, 100)); // Simulate network delay
+            return generateMockData(params);
+        }
+
+        // Initialize table
+        const table = new Table('#tableContainer', {
+            columns: [
+                { name: 'test_id', title: 'ID', sortable: true, filterable: true },
+                { name: 'test_name', title: 'Name', sortable: true, filterable: true },
+                { name: 'test_category', title: 'Category', sortable: true, filterable: true },
+                { name: 'test_value', title: 'Value', sortable: true, filterable: true },
+                { name: 'test_date', title: 'Date', sortable: true, filterable: true }
+            ],
+            pagination: {
+                enabled: true,
+                mode: 'server',
+                pageSize: 10,
+                showPageSizes: true,
+                pageSizeOptions: [5, 10, 25, 50],
+                serverDataLoader: serverDataLoader
+            },
+            sorting: {
+                enabled: true,
+                mode: 'server',
+                serverSortLoader: serverDataLoader
+            },
+            filtering: {
+                enabled: true,
+                mode: 'server',
+                serverFilterLoader: serverDataLoader
+            },
+            controls: {
+                enabled: true,
+                search: true,
+                position: 'top'
+            },
+            search: {
+                enabled: true,
+                searchDelay: 500
+            },
+            selection: {
+                enabled: true,
+                mode: 'multi'
+            }
+        });
+
+        // Test functions
+        window.testSelection = function() {
+            const selectedRows = table.getSelectedRows();
+            if (selectedRows.length > 0) {
+                alert(`✅ Selection working! Selected ${selectedRows.length} row(s)`);
+            } else {
+                alert('ℹ️ Please select some rows first, then click this button again.');
+            }
+        };
+
+        window.testFilters = async function() {
+            // Apply a filter
+            await table.applyFilter('test_category', {
+                type: 'value',
+                values: ['Alpha', 'Beta']
+            });
+            
+            // Wait a bit
+            setTimeout(() => {
+                alert('✅ Filter applied! Check that:\n1. Only ONE request was made\n2. Table shows filtered results\n3. Now try sorting - filter should persist!');
+            }, 200);
+        };
+
+        window.testSorting = async function() {
+            await table.sort('test_name', 'asc');
+            setTimeout(() => {
+                alert('✅ Sorting applied! Check that:\n1. Only ONE request was made\n2. Table shows sorted results\n3. Any active filters are still applied');
+            }, 200);
+        };
+
+        window.testSearch = function() {
+            const searchInput = document.querySelector('.tablix-search-input');
+            if (searchInput) {
+                searchInput.value = 'A1';
+                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                setTimeout(() => {
+                    alert('✅ Search triggered! Check the request log to see that "search" parameter is included.');
+                }, 600);
+            }
+        };
+
+        // Log events
+        table.on('afterSelect', (data) => {
+            console.log('✅ Selection working on first load!', data);
+        });
+
+        table.on('afterServerLoad', (data) => {
+            console.log('✅ Server data loaded:', data);
+        });
+
+        console.log('🎉 TablixJS Server Mode Test initialized!');
+        console.log('📋 Try these actions and watch the request log:');
+        console.log('   1. Click on a row - selection should work immediately');
+        console.log('   2. Open filter dropdown - values should be visible');
+        console.log('   3. Sort a column - only ONE request should be made');
+        console.log('   4. Apply filter, then sort - filter should persist');
+        console.log('   5. Type in search box - search term should be in request params');
+    </script>
+</body>
+</html>
