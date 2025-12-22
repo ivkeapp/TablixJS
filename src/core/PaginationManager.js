@@ -100,46 +100,13 @@ export default class PaginationManager {
 
   /**
    * Get page data for server-side pagination
+   * Now delegates to unified server loading
    */
   async getServerPageData() {
-    if (!this.options.serverDataLoader) {
-      throw new Error('Server data loader not configured for server-side pagination');
-    }
-
-    this.isLoading = true;
-    this.table.eventManager.trigger('beforePageLoad', {
-      page: this.currentPage,
-      pageSize: this.pageSize
-    });
-
-    try {
-      const result = await this.options.serverDataLoader({
-        page: this.currentPage,
-        pageSize: this.pageSize,
-        // Include current filter/sort state if available
-        filters: this.table.dataManager.currentFilters || {},
-        sorts: this.table.dataManager.currentSorts || []
-      });
-
-      // Expect result to have: { data: [], totalRows: number }
-      if (result.totalRows !== undefined) {
-        this.updatePaginationInfo(result.totalRows);
-      }
-
-      this.isLoading = false;
-      this.table.eventManager.trigger('afterPageLoad', {
-        page: this.currentPage,
-        pageSize: this.pageSize,
-        data: result.data,
-        totalRows: result.totalRows
-      });
-
-      return result.data;
-    } catch (error) {
-      this.isLoading = false;
-      this.table.eventManager.trigger('pageLoadError', error);
-      throw error;
-    }
+    // Server-side pagination is now handled by the unified _loadServerData method
+    // Just return the current data from DataManager
+    // The actual loading happens in refreshTable() -> _loadServerData()
+    return this.table.dataManager.getData();
   }
 
   /**
@@ -155,6 +122,11 @@ export default class PaginationManager {
     const oldPage = this.currentPage;
     this.currentPage = targetPage;
 
+    // Update state manager
+    if (this.table.stateManager) {
+      this.table.stateManager.updatePagination({ page: targetPage });
+    }
+
     this.table.eventManager.trigger('beforePageChange', {
       oldPage,
       newPage: this.currentPage,
@@ -162,7 +134,7 @@ export default class PaginationManager {
     });
 
     try {
-      await this.refreshTable();
+      await this.table.refreshTable();
       
       this.table.eventManager.trigger('afterPageChange', {
         oldPage,
@@ -172,6 +144,9 @@ export default class PaginationManager {
     } catch (error) {
       // Revert page change on error
       this.currentPage = oldPage;
+      if (this.table.stateManager) {
+        this.table.stateManager.updatePagination({ page: oldPage });
+      }
       throw error;
     }
   }
@@ -225,6 +200,14 @@ export default class PaginationManager {
 
     this.updatePaginationInfo();
     
+    // Update state manager
+    if (this.table.stateManager) {
+      this.table.stateManager.updatePagination({ 
+        pageSize: newPageSize,
+        page: newPage
+      });
+    }
+    
     this.table.eventManager.trigger('beforePageSizeChange', {
       oldPageSize,
       newPageSize: this.pageSize,
@@ -233,7 +216,7 @@ export default class PaginationManager {
     });
 
     this.currentPage = newPage;
-    await this.refreshTable();
+    await this.table.refreshTable();
 
     this.table.eventManager.trigger('afterPageSizeChange', {
       oldPageSize,
@@ -243,21 +226,19 @@ export default class PaginationManager {
   }
 
   /**
-   * Refresh the table with current pagination settings
-   */
-  async refreshTable() {
-    const pageData = await this.getPageData();
-    this.table.renderer.renderTable(pageData);
-    this.table.renderer.renderPagination();
-  }
-
-  /**
    * Reset pagination to first page (useful after filtering/sorting)
    */
   async resetToFirstPage() {
     this.currentPage = 1;
     this.updatePaginationInfo();
-    await this.refreshTable();
+    
+    // Update state manager
+    if (this.table.stateManager) {
+      this.table.stateManager.updatePagination({ page: 1 });
+    }
+    
+    // Use table's refreshTable instead of local method
+    await this.table.refreshTable();
   }
 
   /**
@@ -345,6 +326,12 @@ export default class PaginationManager {
     // Reset to first page when switching modes
     this.currentPage = 1;
     this.updatePaginationInfo();
-    await this.refreshTable();
+    
+    // Update state manager
+    if (this.table.stateManager) {
+      this.table.stateManager.updatePagination({ page: 1 });
+    }
+    
+    await this.table.refreshTable();
   }
 }

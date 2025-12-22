@@ -128,22 +128,40 @@ export default class SearchManager {
 
     this.currentSearchTerm = searchTerm;
 
-    // If search term is below minimum length, show all data
-    if (searchTerm.length < this.options.minLength) {
-      this.table.dataManager.filteredData = [...this.originalData];
+    // Update state manager with search term
+    if (this.table.stateManager) {
+      this.table.stateManager.updateSearch(searchTerm);
+      // Reset to first page when search changes
+      this.table.stateManager.resetPage();
+    }
+
+    // Check if we're in server mode
+    const isServerMode = this.table._isServerMode && this.table._isServerMode();
+
+    if (isServerMode) {
+      // Server mode - let refreshTable handle the server request with search param
+      // Reset pagination to first page
+      if (this.table.paginationManager) {
+        this.table.paginationManager.currentPage = 1;
+      }
+      await this.table.refreshTable();
     } else {
-      // Filter data based on search term
-      const filteredData = this.filterData(searchTerm);
-      this.table.dataManager.filteredData = filteredData;
-    }
+      // Client mode - filter data locally
+      if (searchTerm.length < this.options.minLength) {
+        this.table.dataManager.filteredData = [...this.originalData];
+      } else {
+        const filteredData = this.filterData(searchTerm);
+        this.table.dataManager.filteredData = filteredData;
+      }
 
-    // Reset pagination to first page
-    if (this.table.paginationManager) {
-      this.table.paginationManager.resetToFirstPage();
+      // Reset pagination to first page
+      if (this.table.paginationManager) {
+        this.table.paginationManager.resetToFirstPage();
+      } else {
+        // If no pagination manager, just refresh
+        await this.table.refreshTable();
+      }
     }
-
-    // Refresh table display
-    await this.table.refreshTable();
 
     // Restore focus after table refresh if it had focus before
     if (hadFocus) {

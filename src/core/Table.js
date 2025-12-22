@@ -10,6 +10,7 @@ import SearchManager from './SearchManager.js';
 import SelectionManager from './SelectionManager.js';
 import VirtualScrollManager from './VirtualScroll.js';
 import Localization from './Localization.js';
+import StateManager from './StateManager.js';
 import { frenchTranslations } from '../locales/fr.js';
 import { spanishTranslations } from '../locales/es.js';
 import { serbianTranslations } from '../locales/sr.js';
@@ -111,6 +112,9 @@ export default class Table {
     this.dataManager = new DataManager(this, options.data || []);
     this.renderer = new Renderer(this);
     
+    // Initialize state manager for server-side operations
+    this.stateManager = new StateManager(this);
+    
     // Initialize columns if provided
     if (options.columns) {
       this.columnManager.initializeColumns(options.columns);
@@ -119,6 +123,10 @@ export default class Table {
     // Initialize pagination if enabled
     if (this.options.pagination && this.options.pagination.enabled !== false) {
       this.paginationManager = new PaginationManager(this, this.options.pagination);
+      // Sync initial page size with state manager
+      this.stateManager.updatePagination({ 
+        pageSize: this.options.pagination.pageSize || 10 
+      });
     }
 
     // Initialize sorting if enabled
@@ -157,17 +165,29 @@ export default class Table {
         this.searchManager.init();
       }
 
-      // Get initial data
-      const initialData = this.dataManager.getData();
+      // Determine if we're using server-side operations
+      const isServerMode = this._isServerMode();
       
       // Trigger beforeLoad hook for initial data
-      this.eventManager.trigger('beforeLoad', { source: initialData });
+      this.eventManager.trigger('beforeLoad', { source: 'initialization' });
       
-      // Render table with first page of data
-      await this.refreshTable();
+      if (isServerMode) {
+        // For server mode, load initial data through unified request
+        await this._loadServerData();
+      } else {
+        // For client mode, just refresh with local data
+        await this.refreshTable();
+      }
+      
+      // Mark state as initialized
+      this.stateManager.markInitialized();
       
       // Trigger afterLoad hook with consistent payload format
-      this.eventManager.trigger('afterLoad', { data: initialData, source: initialData });
+      const loadedData = this.dataManager.getData();
+      this.eventManager.trigger('afterLoad', { data: loadedData, source: 'initialization' });
+      
+      // Explicitly trigger afterRender to ensure selection works on first load
+      this.eventManager.trigger('afterRender');
     } catch (error) {
       console.error('Failed to initialize table:', error);
       this.eventManager.trigger('loadError', { error, source: 'initialization' });
@@ -178,10 +198,96 @@ export default class Table {
   }
 
   /**
+   * Check if any feature is using server mode
+   * @private
+   */
+  _isServerMode() {
+    return (this.options.pagination && this.options.pagination.mode === 'server') ||
+           (this.options.sorting && this.options.sorting.mode === 'server') ||
+           (this.options.filtering && this.options.filtering.mode === 'server');
+  }
+
+  /**
+   * Unified server data loading
+   * Ensures only one request is made with all current state (pagination, sort, filter, search)
+   * @private
+   */
+  async _loadServerData() {
+    // Update state manager with current search term
+    if (this.searchManager) {
+      this.stateManager.updateSearch(this.searchManager.currentSearchTerm);
+    }
+
+    // Get unified parameters from state manager
+    const params = this.stateManager.getServerParams();
+    
+    this.stateManager.updateLoading(true);
+    this.eventManager.trigger('beforeServerLoad', params);
+
+    try {
+      let result;
+      
+      // Determine which loader to use based on the operation
+      // Priority: serverFilterLoader > serverSortLoader > serverDataLoader
+      if (this.options.filtering && 
+          this.options.filtering.mode === 'server' && 
+          this.options.filtering.serverFilterLoader &&
+          Object.keys(params.filters).length > 0) {
+        // Use filter loader if filters are active
+        result = await this.options.filtering.serverFilterLoader(params);
+      } else if (this.options.sorting && 
+                 this.options.sorting.mode === 'server' && 
+                 this.options.sorting.serverSortLoader &&
+                 params.sort && params.sort.column) {
+        // Use sort loader if sort is active and no filters
+        result = await this.options.sorting.serverSortLoader(params);
+      } else if (this.options.pagination && 
+                 this.options.pagination.serverDataLoader) {
+        // Fall back to pagination loader
+        result = await this.options.pagination.serverDataLoader(params);
+      } else {
+        throw new Error('No server data loader configured for server-side operations');
+      }
+
+      // Update data manager with server response
+      this.dataManager.setServerData(result.data, result.totalRows);
+      
+      // Update state manager with total rows
+      this.stateManager.updatePagination({ totalRows: result.totalRows });
+      
+      // Update pagination manager info
+      if (this.paginationManager) {
+        this.paginationManager.updatePaginationInfo(result.totalRows);
+      }
+
+      // Render the table with the loaded data
+      this.renderer.renderTable(result.data);
+
+      this.stateManager.updateLoading(false);
+      this.eventManager.trigger('afterServerLoad', { params, result });
+      
+      return result.data;
+    } catch (error) {
+      this.stateManager.updateLoading(false);
+      this.eventManager.trigger('serverLoadError', { params, error });
+      throw error;
+    }
+  }
+
+  /**
    * Refresh the table with current data and pagination
    */
   async refreshTable() {
     let dataToRender;
+    
+    // Check if we're in server mode
+    const isServerMode = this._isServerMode();
+    
+    if (isServerMode && this.stateManager.isReady()) {
+      // For server mode after initialization, always use unified server loading
+      dataToRender = await this._loadServerData();
+      return; // _loadServerData already renders the table
+    }
     
     if (this.virtualScrollManager && this.virtualScrollManager.isEnabled()) {
       // Virtual scrolling mode - get all data for virtual scrolling manager
@@ -196,7 +302,7 @@ export default class Table {
       // Initialize virtual scrolling after table structure is ready
       this.virtualScrollManager.init(dataToRender);
     } else if (this.paginationManager) {
-      // Traditional pagination mode
+      // Traditional pagination mode (client-side)
       dataToRender = await this.paginationManager.getPageData();
       this.renderer.renderTable(dataToRender);
     } else {

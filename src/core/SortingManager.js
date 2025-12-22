@@ -39,17 +39,31 @@ export default class SortingManager {
     const beforeSortData = { columnName, direction, currentSort: this.currentSort };
     this.table.eventManager.trigger('beforeSort', beforeSortData);
 
-    if (this.options.mode === 'server') {
-      await this._sortServer(columnName, direction);
+    // Set current sort state
+    if (direction !== null) {
+      this.currentSort = { column: columnName, direction };
     } else {
-      this._sortClient(columnName, direction);
+      this.currentSort = null;
+    }
+
+    // Update state manager
+    if (this.table.stateManager) {
+      this.table.stateManager.updateSort(this.currentSort);
+      // Reset to first page when sorting changes
+      this.table.stateManager.resetPage();
+    }
+
+    if (this.options.mode === 'server') {
+      // Server mode - update will be triggered by refreshTable via unified loader
+      await this.table.refreshTable();
+    } else {
+      // Client mode - apply sorting locally
+      this._applySorting();
+      await this.table.refreshTable();
     }
 
     // Update UI
     this.table.renderer.updateSortIndicators(this.currentSort);
-    
-    // Refresh table display
-    await this.table.refreshTable();
 
     // Trigger afterSort event
     this.table.eventManager.trigger('afterSort', {
@@ -90,37 +104,13 @@ export default class SortingManager {
   }
 
   /**
-   * Server-side sorting
+   * Server-side sorting (DEPRECATED - now handled by unified loader)
+   * @deprecated Use unified _loadServerData in Table.js
    */
   async _sortServer(columnName, direction) {
-    if (!this.options.serverSortLoader) {
-      console.warn('Server-side sorting enabled but no serverSortLoader provided');
-      return;
-    }
-
-    // Set current sort
-    if (direction !== null) {
-      this.currentSort = { column: columnName, direction };
-    } else {
-      this.currentSort = null;
-    }
-
-    try {
-      // Load data from server with current sort state
-      const result = await this.options.serverSortLoader({
-        sort: this.currentSort,
-        filters: this.table.dataManager.currentFilters,
-        page: this.table.paginationManager ? this.table.paginationManager.currentPage : 1,
-        pageSize: this.table.paginationManager ? this.table.paginationManager.pageSize : 10
-      });
-
-      // Update data manager with new data
-      this.table.dataManager.setServerData(result.data, result.totalRows);
-      
-    } catch (error) {
-      console.error('Failed to load sorted data from server:', error);
-      throw error;
-    }
+    // This method is deprecated and should not be called anymore
+    // Sorting in server mode is now handled by the unified _loadServerData method
+    console.warn('_sortServer is deprecated. Server sorting now uses unified data loading.');
   }
 
   /**

@@ -63,6 +63,27 @@ This folder contains comprehensive examples and tests for TablixJS functionality
 - `async-loading-test.html` - Server-side data loading test
 - `async-data-loading-usage.js` - Data loading examples
 
+### Server-Side Mode Demo ⭐ NEW
+- **`server-side-demo.html`** - Comprehensive server-side validation demo
+- **Purpose**: Interactive testing of server-side pagination, sorting, filtering, and search
+- **Features**:
+  - Real-time request monitoring and debugging
+  - Visual validation of all fixed server-side issues
+  - Request payload inspection
+  - Duplicate request detection
+  - State persistence verification
+- **Documentation**: `SERVER-SIDE-DEMO-README.md` - Complete testing guide
+- **Quick Start**: `QUICK-START.md` - 5-minute setup guide
+- **Backend**: `server-side-demo-backend.js` - Sample Express.js server
+- **What It Validates**:
+  - Selection works on first load
+  - Filter values populated immediately
+  - No duplicate server requests
+  - Persistent state across operations
+  - Search term included in requests
+  - Consistent sort payload format
+- **Usage**: See [Quick Start Guide](QUICK-START.md) for setup instructions
+
 ### Virtual Scrolling Examples
 - `virtual-scroll-demo.html` - Large dataset performance
 - `virtual-scroll-test.html` - Virtual scroll testing

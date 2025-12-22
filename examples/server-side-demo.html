@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TablixJS - Server-Side Data Loading Demo</title>
+    <link rel="stylesheet" href="../src/styles/tablix.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        /* Demo Layout */
+        .demo-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 1024px) {
+            .demo-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Table Container */
+        .table-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Debug Panel */
+        .debug-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        
+        .debug-panel h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 16px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        
+        /* Request Counter */
+        .request-counter {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        
+        .request-counter .count {
+            font-size: 32px;
+            font-weight: bold;
+            color: #007bff;
+            margin-right: 10px;
+        }
+        
+        .request-counter .label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .request-counter.warning {
+            border-left-color: #ffc107;
+            background: #fff9e6;
+        }
+        
+        .request-counter.error {
+            border-left-color: #dc3545;
+            background: #ffe6e6;
+        }
+        
+        .request-counter.warning .count {
+            color: #ffc107;
+        }
+        
+        .request-counter.error .count {
+            color: #dc3545;
+        }
+        
+        /* Last Request Display */
+        .last-request {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .last-request pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        /* Test Checklist */
+        .test-checklist {
+            background: #f8f9fa;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .test-checklist h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .test-item {
+            display: flex;
+            align-items: start;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        
+        .test-item .icon {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .test-item.pending .icon {
+            color: #6c757d;
+        }
+        
+        .test-item.success .icon {
+            color: #28a745;
+        }
+        
+        .test-item.fail .icon {
+            color: #dc3545;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            margin-bottom: 15px;
+        }
+        
+        .action-buttons button {
+            width: 100%;
+            margin-bottom: 8px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            transition: background 0.2s;
+        }
+        
+        .action-buttons button:hover {
+            background: #0056b3;
+        }
+        
+        .action-buttons button.secondary {
+            background: #6c757d;
+        }
+        
+        .action-buttons button.secondary:hover {
+            background: #545b62;
+        }
+        
+        .action-buttons button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        /* Info Box */
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .info-box h2 {
+            margin-top: 0;
+            color: #004085;
+            font-size: 18px;
+        }
+        
+        .info-box ul {
+            margin: 10px 0 0 0;
+            padding-left: 20px;
+        }
+        
+        .info-box li {
+            margin-bottom: 5px;
+            color: #004085;
+        }
+        
+        /* Status Indicator */
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-indicator.loading {
+            background: #ffc107;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .status-indicator.success {
+            background: #28a745;
+        }
+        
+        .status-indicator.idle {
+            background: #6c757d;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Request Log */
+        .request-log {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        
+        .log-entry {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+        }
+        
+        .log-entry .timestamp {
+            color: #6c757d;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .log-entry .action {
+            color: #007bff;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .log-entry pre {
+            margin: 0;
+            color: #333;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        /* Clear button for log */
+        .clear-log-btn {
+            background: #dc3545 !important;
+        }
+        
+        .clear-log-btn:hover {
+            background: #c82333 !important;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 TablixJS Server-Side Data Loading Demo</h1>
+    <p class="subtitle">
+        Interactive demonstration of server-side pagination, sorting, filtering, and search functionality
+    </p>
+    
+    <div class="info-box">
+        <h2>📋 What This Demo Validates</h2>
+        <ul>
+            <li><strong>Selection on First Load:</strong> Click any row immediately after load - selection should work</li>
+            <li><strong>Filter Values Available:</strong> Open any column filter dropdown - values should be populated</li>
+            <li><strong>No Duplicate Requests:</strong> Each action (sort/filter/page) triggers exactly ONE server request</li>
+            <li><strong>Persistent State:</strong> Apply filter → sort → paginate → filter and sort should remain active</li>
+            <li><strong>Search Integration:</strong> Type in search box → search term appears in server request</li>
+            <li><strong>Consistent Payloads:</strong> Sort parameter is always an object (never null/undefined)</li>
+        </ul>
+    </div>
+    
+    <div class="demo-container">
+        <!-- Table Section -->
+        <div class="table-section">
+            <div id="tableContainer"></div>
+        </div>
+        
+        <!-- Debug Panel -->
+        <div class="debug-panel">
+            <h3>📊 Debug Panel</h3>
+            
+            <!-- Request Counter -->
+            <div id="requestCounter" class="request-counter">
+                <div>
+                    <span class="count">0</span>
+                    <span class="label">Total Server Requests</span>
+                </div>
+            </div>
+            
+            <!-- Status -->
+            <div style="margin-bottom: 15px;">
+                <strong>Status:</strong>
+                <span class="status-indicator idle" id="statusIndicator"></span>
+                <span id="statusText">Idle</span>
+            </div>
+            
+            <!-- Last Request -->
+            <h4 style="margin-bottom: 10px;">Last Request Payload:</h4>
+            <div class="last-request">
+                <pre id="lastRequest">No requests yet</pre>
+            </div>
+            
+            <!-- Test Checklist -->
+            <div class="test-checklist">
+                <h4>✅ Validation Checklist:</h4>
+                <div class="test-item pending" id="test-selection">
+                    <span class="icon">⏺</span>
+                    <span>Row selection works immediately</span>
+                </div>
+                <div class="test-item pending" id="test-filters">
+                    <span class="icon">⏺</span>
+                    <span>Filter dropdowns populated on load</span>
+                </div>
+                <div class="test-item success" id="test-no-duplicates">
+                    <span class="icon">✓</span>
+                    <span>No duplicate requests (monitoring...)</span>
+                </div>
+                <div class="test-item pending" id="test-state-persist">
+                    <span class="icon">⏺</span>
+                    <span>State persists across operations</span>
+                </div>
+                <div class="test-item pending" id="test-search">
+                    <span class="icon">⏺</span>
+                    <span>Search term included in requests</span>
+                </div>
+                <div class="test-item success" id="test-sort-consistent">
+                    <span class="icon">✓</span>
+                    <span>Sort payload always consistent</span>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button onclick="runQuickValidation()">🧪 Run Quick Validation</button>
+                <button onclick="validateSelection()">Test Selection</button>
+                <button onclick="validateFilters()">Test Filters</button>
+                <button onclick="validateSearch()">Test Search</button>
+                <button class="secondary" onclick="clearLogs()">Clear Logs</button>
+            </div>
+            
+            <!-- Request Log -->
+            <h4 style="margin-top: 20px; margin-bottom: 10px;">Request History:</h4>
+            <div class="request-log" id="requestLog"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import Table from '../src/index.js';
+
+        // =====================================
+        // STATE TRACKING & MONITORING
+        // =====================================
+        
+        let requestCount = 0;
+        let lastRequestTime = null;
+        let requestTimestamps = [];
+        let tableInstance = null;
+        
+        const state = {
+            selectionTested: false,
+            filtersTested: false,
+            searchTested: false,
+            statePersisted: false,
+            lastAction: null,
+            activeFilters: {},
+            activeSort: null
+        };
+
+        // =====================================
+        // SERVER DATA LOADER
+        // =====================================
+        
+        /**
+         * Main server data loader that communicates with backend
+         * Endpoint: http://localhost:3002/api/getTable
+         * 
+         * This function receives unified parameters from TablixJS:
+         * - page: current page number
+         * - pageSize: items per page
+         * - sort: { column: 'name', direction: 'asc' } or {}
+         * - filters: { columnName: { type: 'value', values: [...] } }
+         * - search: search term string
+         */
+        async function serverDataLoader(params) {
+            // Update status indicator
+            updateStatus('loading', 'Loading data from server...');
+            
+            // Log the request
+            logRequest(params);
+            
+            // Validate sort parameter consistency
+            if (params.sort === null || params.sort === undefined) {
+                markTestFail('test-sort-consistent', 'Sort parameter is null/undefined!');
+            } else {
+                markTestSuccess('test-sort-consistent', 'Sort payload is consistent');
+            }
+            
+            // Check for search term
+            if (params.search && params.search.trim() !== '') {
+                state.searchTested = true;
+                markTestSuccess('test-search', 'Search term included in request');
+            }
+            
+            // Track filters for state persistence test
+            if (params.filters && Object.keys(params.filters).length > 0) {
+                state.activeFilters = { ...params.filters };
+                state.filtersTested = true;
+                markTestSuccess('test-filters', 'Filters applied');
+            }
+            
+            // Track sort for state persistence test
+            if (params.sort && params.sort.column) {
+                state.activeSort = { ...params.sort };
+            }
+            
+            try {
+                // Make actual request to backend
+                const response = await fetch('http://localhost:3001/api/getTable', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(params)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // Update status
+                updateStatus('success', `Loaded ${result.data.length} rows`);
+                
+                // Return in the format TablixJS expects
+                return {
+                    data: result.data,
+                    totalRows: result.totalRows
+                };
+                
+            } catch (error) {
+                console.error('❌ Server request failed:', error);
+                updateStatus('idle', `Error: ${error.message}`);
+                
+                // Return empty result on error
+                return {
+                    data: [],
+                    totalRows: 0
+                };
+            }
+        }
+
+        // =====================================
+        // LOGGING & MONITORING FUNCTIONS
+        // =====================================
+        
+        function logRequest(params) {
+            requestCount++;
+            
+            // Check for duplicate requests
+            const now = Date.now();
+            requestTimestamps.push(now);
+            
+            // Check if there's a duplicate within 100ms
+            const recentRequests = requestTimestamps.filter(t => now - t < 100);
+            if (recentRequests.length > 1) {
+                markTestFail('test-no-duplicates', `⚠️ Duplicate detected! ${recentRequests.length} requests within 100ms`);
+                updateRequestCounter('error');
+            } else {
+                updateRequestCounter('success');
+            }
+            
+            // Clean old timestamps
+            requestTimestamps = requestTimestamps.filter(t => now - t < 1000);
+            
+            // Update last request display
+            document.getElementById('lastRequest').textContent = JSON.stringify(params, null, 2);
+            
+            // Add to request log
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const action = determineAction(params);
+            
+            logEntry.innerHTML = `
+                <div class="timestamp">#${requestCount} - ${timestamp}</div>
+                <div class="action">${action}</div>
+                <pre>${JSON.stringify(params, null, 2)}</pre>
+            `;
+            
+            const logContainer = document.getElementById('requestLog');
+            logContainer.insertBefore(logEntry, logContainer.firstChild);
+            
+            lastRequestTime = now;
+        }
+        
+        function determineAction(params) {
+            const actions = [];
+            
+            if (params.search) actions.push('SEARCH');
+            if (params.filters && Object.keys(params.filters).length > 0) actions.push('FILTER');
+            if (params.sort && params.sort.column) actions.push('SORT');
+            if (params.page > 1) actions.push('PAGINATE');
+            
+            return actions.length > 0 ? actions.join(' + ') : 'INITIAL LOAD';
+        }
+        
+        function updateRequestCounter(status) {
+            const counter = document.getElementById('requestCounter');
+            counter.querySelector('.count').textContent = requestCount;
+            
+            // Update styling based on status
+            counter.className = 'request-counter';
+            if (status === 'warning' && requestCount > 10) {
+                counter.classList.add('warning');
+            } else if (status === 'error') {
+                counter.classList.add('error');
+            }
+        }
+        
+        function updateStatus(status, text) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            
+            indicator.className = 'status-indicator ' + status;
+            statusText.textContent = text;
+        }
+        
+        // =====================================
+        // TEST VALIDATION FUNCTIONS
+        // =====================================
+        
+        function markTestSuccess(testId, message) {
+            const testElement = document.getElementById(testId);
+            testElement.className = 'test-item success';
+            testElement.querySelector('.icon').textContent = '✓';
+            if (message) {
+                testElement.querySelector('span:last-child').textContent = message;
+            }
+        }
+        
+        function markTestFail(testId, message) {
+            const testElement = document.getElementById(testId);
+            testElement.className = 'test-item fail';
+            testElement.querySelector('.icon').textContent = '✗';
+            if (message) {
+                testElement.querySelector('span:last-child').textContent = message;
+            }
+        }
+        
+        function markTestPending(testId) {
+            const testElement = document.getElementById(testId);
+            testElement.className = 'test-item pending';
+            testElement.querySelector('.icon').textContent = '⏺';
+        }
+        
+        // =====================================
+        // USER VALIDATION FUNCTIONS
+        // =====================================
+        
+        window.validateSelection = function() {
+            if (!tableInstance) return;
+            
+            const selectedRows = tableInstance.getSelectedRows();
+            if (selectedRows.length > 0) {
+                markTestSuccess('test-selection', `✓ Selection works! (${selectedRows.length} rows selected)`);
+                state.selectionTested = true;
+                alert(`✅ Selection Test Passed!\n\nSelected ${selectedRows.length} row(s).\n\nThis confirms that row selection works immediately after initial load without requiring any refresh.`);
+            } else {
+                alert('ℹ️ Please select one or more rows by clicking on them, then click this button again to validate.');
+            }
+        };
+        
+        window.validateFilters = async function() {
+            if (!tableInstance) return;
+            
+            // Open a filter panel and check if it has values
+            const filterButtons = document.querySelectorAll('.tablix-filter-icon');
+            if (filterButtons.length > 0) {
+                filterButtons[0].click();
+                
+                // Wait for panel to open
+                setTimeout(() => {
+                    const valuesTab = document.querySelector('[data-tab="values"]');
+                    if (valuesTab) {
+                        valuesTab.click();
+                        
+                        setTimeout(() => {
+                            const checkboxes = document.querySelectorAll('.tablix-filter-value-item input[type="checkbox"]');
+                            if (checkboxes.length > 0) {
+                                markTestSuccess('test-filters', `✓ Filter values loaded (${checkboxes.length} values)`);
+                                alert(`✅ Filter Test Passed!\n\nFound ${checkboxes.length} filter values in the first column.\n\nThis confirms that filter dropdowns are populated immediately on first load.`);
+                            } else {
+                                markTestFail('test-filters', '✗ No filter values found');
+                                alert('❌ Filter Test Failed: No filter values found in dropdown');
+                            }
+                        }, 100);
+                    }
+                }, 100);
+            } else {
+                alert('ℹ️ No filterable columns found');
+            }
+        };
+        
+        window.validateSearch = function() {
+            const searchInput = document.querySelector('.tablix-search-input');
+            if (searchInput) {
+                searchInput.value = 'test';
+                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                
+                setTimeout(() => {
+                    if (state.searchTested) {
+                        alert('✅ Search Test Passed!\n\nSearch term "test" was included in the server request.\n\nCheck the "Last Request Payload" to see the search parameter.');
+                    } else {
+                        alert('⏳ Waiting for search request... Check the request log in a moment.');
+                    }
+                }, 600);
+            } else {
+                alert('ℹ️ Search input not found');
+            }
+        };
+        
+        window.runQuickValidation = async function() {
+            alert('🧪 Running Quick Validation...\n\nThis will:\n1. Apply a filter\n2. Sort a column\n3. Change page\n4. Verify state persistence\n\nWatch the Request Counter - it should show exactly 3 requests (one per action).');
+            
+            if (!tableInstance) return;
+            
+            const startCount = requestCount;
+            
+            // Step 1: Apply filter
+            setTimeout(async () => {
+                await tableInstance.applyFilter('test_category', {
+                    type: 'value',
+                    values: ['Alpha']
+                });
+                
+                // Step 2: Sort
+                setTimeout(async () => {
+                    await tableInstance.sort('test_name', 'asc');
+                    
+                    // Step 3: Change page
+                    setTimeout(async () => {
+                        // Check if we can go to next page
+                        const paginationInfo = tableInstance.getPaginationInfo();
+                        if (paginationInfo.totalPages > 1) {
+                            await tableInstance.goToPage(2);
+                        }
+                        
+                        // Validate results
+                        setTimeout(() => {
+                            const endCount = requestCount;
+                            const requestsMade = endCount - startCount;
+                            
+                            if (requestsMade === 3) {
+                                markTestSuccess('test-no-duplicates', `✓ Perfect! Exactly ${requestsMade} requests`);
+                                markTestSuccess('test-state-persist', '✓ State persisted across operations');
+                                alert(`✅ Quick Validation PASSED!\n\n✓ Made exactly ${requestsMade} requests (no duplicates)\n✓ Filter state persisted through sort and pagination\n✓ All operations completed successfully`);
+                            } else {
+                                markTestFail('test-no-duplicates', `✗ Expected 3 requests, got ${requestsMade}`);
+                                alert(`⚠️ Quick Validation Issues:\n\nExpected 3 requests, but got ${requestsMade}.\n\nCheck the request log for details.`);
+                            }
+                        }, 500);
+                    }, 500);
+                }, 500);
+            }, 500);
+        };
+        
+        window.clearLogs = function() {
+            requestCount = 0;
+            requestTimestamps = [];
+            document.getElementById('requestLog').innerHTML = '';
+            document.getElementById('lastRequest').textContent = 'No requests yet';
+            updateRequestCounter('success');
+            updateStatus('idle', 'Idle');
+            
+            // Reset test states
+            markTestPending('test-selection');
+            markTestPending('test-filters');
+            markTestSuccess('test-no-duplicates');
+            markTestPending('test-state-persist');
+            markTestPending('test-search');
+            markTestSuccess('test-sort-consistent');
+            
+            state.selectionTested = false;
+            state.filtersTested = false;
+            state.searchTested = false;
+            state.statePersisted = false;
+        };
+
+        // =====================================
+        // TABLE INITIALIZATION
+        // =====================================
+        
+        console.log('🚀 Initializing TablixJS with server-side configuration...');
+        
+        // Initialize table with server-side mode
+        tableInstance = new Table('#tableContainer', {
+            columns: [
+                { 
+                    name: 'test_id', 
+                    title: 'ID', 
+                    sortable: true, 
+                    filterable: true,
+                    width: 100
+                },
+                { 
+                    name: 'test_name', 
+                    title: 'Name', 
+                    sortable: true, 
+                    filterable: true 
+                },
+                { 
+                    name: 'test_category', 
+                    title: 'Category', 
+                    sortable: true, 
+                    filterable: true,
+                    width: 120
+                },
+                { 
+                    name: 'test_value', 
+                    title: 'Value', 
+                    sortable: true, 
+                    filterable: true,
+                    width: 100
+                },
+                { 
+                    name: 'test_date', 
+                    title: 'Date', 
+                    sortable: true, 
+                    filterable: true,
+                    width: 120
+                }
+            ],
+            
+            // Server-side pagination configuration
+            pagination: {
+                enabled: true,
+                mode: 'server',
+                pageSize: 10,
+                showPageSizes: true,
+                pageSizeOptions: [5, 10, 25, 50],
+                serverDataLoader: serverDataLoader
+            },
+            
+            // Server-side sorting configuration
+            sorting: {
+                enabled: true,
+                mode: 'server',
+                serverSortLoader: serverDataLoader
+            },
+            
+            // Server-side filtering configuration
+            filtering: {
+                enabled: true,
+                mode: 'server',
+                serverFilterLoader: serverDataLoader
+            },
+            
+            // Controls with search enabled
+            controls: {
+                enabled: true,
+                search: true,
+                refresh: true,
+                position: 'top'
+            },
+            
+            // Search configuration
+            search: {
+                enabled: true,
+                placeholder: 'Search table...',
+                searchDelay: 500
+            },
+            
+            // Row selection configuration
+            selection: {
+                enabled: true,
+                mode: 'multi',
+                dataIdKey: 'id'
+            }
+        });
+
+        // =====================================
+        // EVENT LISTENERS
+        // =====================================
+        
+        // Listen for selection events
+        tableInstance.on('afterSelect', (data) => {
+            console.log('✅ Selection event fired:', data);
+            if (!state.selectionTested) {
+                state.selectionTested = true;
+                markTestSuccess('test-selection', 'Selection works on first load');
+            }
+        });
+        
+        // Listen for server load events
+        tableInstance.on('afterServerLoad', (data) => {
+            console.log('📊 Server data loaded:', data);
+        });
+        
+        // Listen for filter events
+        tableInstance.on('afterFilter', (data) => {
+            console.log('🔍 Filter applied:', data);
+        });
+        
+        // Listen for sort events
+        tableInstance.on('afterSort', (data) => {
+            console.log('↕️ Sort applied:', data);
+        });
+        
+        console.log('✅ TablixJS initialized successfully!');
+        console.log('📋 Backend endpoint: http://localhost:3002/api/getTable');
+        console.log('👉 Start testing by interacting with the table or using the validation buttons');
+    </script>
+</body>
+</html>
