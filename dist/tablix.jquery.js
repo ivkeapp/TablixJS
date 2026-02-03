@@ -1,7 +1,7 @@
 /**
- * TablixJS with jQuery Wrapper v1.0.4
+ * TablixJS with jQuery Wrapper v1.0.5
  * TablixJS is a lightweight, dependency-free JavaScript library for building powerful, responsive data tables.
- * (c) 2025 Ivan Zarkovic
+ * (c) 2026 Ivan Zarkovic
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -182,6 +182,9 @@
         html += `<div class="tablix-scroll-container" style="height: ${containerHeight}px; overflow: auto; position: relative; border: 1px solid #ddd;">`;
       }
 
+      // Table wrapper for horizontal scrolling (mobile support)
+      html += '<div class="tablix-table-wrapper" style="overflow-x: auto;">';
+
       // Table
       html += '<table class="tablix-table" style="width:100%; border-collapse:collapse;">';
 
@@ -236,7 +239,8 @@
 
             // Use ColumnManager for formatting if available
             if (this.table.columnManager) {
-              const result = this.table.columnManager.formatCellValue(col.name, cell, row);
+              // Pass the column object instead of just the name to support multiple columns with same field
+              const result = this.table.columnManager.formatCellValue(col, cell, row);
               if (result.isHtml) {
                 // Custom renderer returned HTML - use as is
                 renderedCell = result.value;
@@ -255,6 +259,7 @@
       }
       html += '</tbody>';
       html += '</table>';
+      html += '</div>'; // Close tablix-table-wrapper
 
       // Close virtual scroll container if enabled
       if (isVirtualScrollEnabled) {
@@ -644,8 +649,17 @@
       data.forEach(row => {
         const values = columns.map(col => {
           const value = row[col.name];
-          // Simple CSV escaping
-          return typeof value === 'string' && value.includes(',') ? `"${value.replace(/"/g, '""')}"` : value;
+
+          // Handle complex objects
+          if (typeof value === 'object' && value !== null && !(value instanceof Date)) {
+            return `"${JSON.stringify(value).replace(/"/g, '""')}"`;
+          }
+
+          // Simple CSV escaping for strings
+          if (typeof value === 'string' && value.includes(',')) {
+            return `"${value.replace(/"/g, '""')}"`;
+          }
+          return value;
         });
         csv += values.join(',') + '\n';
       });
@@ -929,42 +943,13 @@
 
     /**
      * Get page data for server-side pagination
+     * Now delegates to unified server loading
      */
     async getServerPageData() {
-      if (!this.options.serverDataLoader) {
-        throw new Error('Server data loader not configured for server-side pagination');
-      }
-      this.isLoading = true;
-      this.table.eventManager.trigger('beforePageLoad', {
-        page: this.currentPage,
-        pageSize: this.pageSize
-      });
-      try {
-        const result = await this.options.serverDataLoader({
-          page: this.currentPage,
-          pageSize: this.pageSize,
-          // Include current filter/sort state if available
-          filters: this.table.dataManager.currentFilters || {},
-          sorts: this.table.dataManager.currentSorts || []
-        });
-
-        // Expect result to have: { data: [], totalRows: number }
-        if (result.totalRows !== undefined) {
-          this.updatePaginationInfo(result.totalRows);
-        }
-        this.isLoading = false;
-        this.table.eventManager.trigger('afterPageLoad', {
-          page: this.currentPage,
-          pageSize: this.pageSize,
-          data: result.data,
-          totalRows: result.totalRows
-        });
-        return result.data;
-      } catch (error) {
-        this.isLoading = false;
-        this.table.eventManager.trigger('pageLoadError', error);
-        throw error;
-      }
+      // Server-side pagination is now handled by the unified _loadServerData method
+      // Just return the current data from DataManager
+      // The actual loading happens in refreshTable() -> _loadServerData()
+      return this.table.dataManager.getData();
     }
 
     /**
@@ -977,13 +962,20 @@
       }
       const oldPage = this.currentPage;
       this.currentPage = targetPage;
+
+      // Update state manager
+      if (this.table.stateManager) {
+        this.table.stateManager.updatePagination({
+          page: targetPage
+        });
+      }
       this.table.eventManager.trigger('beforePageChange', {
         oldPage,
         newPage: this.currentPage,
         pageSize: this.pageSize
       });
       try {
-        await this.refreshTable();
+        await this.table.refreshTable();
         this.table.eventManager.trigger('afterPageChange', {
           oldPage,
           newPage: this.currentPage,
@@ -992,6 +984,11 @@
       } catch (error) {
         // Revert page change on error
         this.currentPage = oldPage;
+        if (this.table.stateManager) {
+          this.table.stateManager.updatePagination({
+            page: oldPage
+          });
+        }
         throw error;
       }
     }
@@ -1042,6 +1039,14 @@
       const currentRow = (this.currentPage - 1) * oldPageSize;
       const newPage = Math.floor(currentRow / newPageSize) + 1;
       this.updatePaginationInfo();
+
+      // Update state manager
+      if (this.table.stateManager) {
+        this.table.stateManager.updatePagination({
+          pageSize: newPageSize,
+          page: newPage
+        });
+      }
       this.table.eventManager.trigger('beforePageSizeChange', {
         oldPageSize,
         newPageSize: this.pageSize,
@@ -1049,7 +1054,7 @@
         newPage
       });
       this.currentPage = newPage;
-      await this.refreshTable();
+      await this.table.refreshTable();
       this.table.eventManager.trigger('afterPageSizeChange', {
         oldPageSize,
         newPageSize: this.pageSize,
@@ -1058,21 +1063,21 @@
     }
 
     /**
-     * Refresh the table with current pagination settings
-     */
-    async refreshTable() {
-      const pageData = await this.getPageData();
-      this.table.renderer.renderTable(pageData);
-      this.table.renderer.renderPagination();
-    }
-
-    /**
      * Reset pagination to first page (useful after filtering/sorting)
      */
     async resetToFirstPage() {
       this.currentPage = 1;
       this.updatePaginationInfo();
-      await this.refreshTable();
+
+      // Update state manager
+      if (this.table.stateManager) {
+        this.table.stateManager.updatePagination({
+          page: 1
+        });
+      }
+
+      // Use table's refreshTable instead of local method
+      await this.table.refreshTable();
     }
 
     /**
@@ -1155,7 +1160,14 @@
       // Reset to first page when switching modes
       this.currentPage = 1;
       this.updatePaginationInfo();
-      await this.refreshTable();
+
+      // Update state manager
+      if (this.table.stateManager) {
+        this.table.stateManager.updatePagination({
+          page: 1
+        });
+      }
+      await this.table.refreshTable();
     }
   }
 
@@ -1206,17 +1218,34 @@
         currentSort: this.currentSort
       };
       this.table.eventManager.trigger('beforeSort', beforeSortData);
-      if (this.options.mode === 'server') {
-        await this._sortServer(columnName, direction);
+
+      // Set current sort state
+      if (direction !== null) {
+        this.currentSort = {
+          column: columnName,
+          direction
+        };
       } else {
-        this._sortClient(columnName, direction);
+        this.currentSort = null;
+      }
+
+      // Update state manager
+      if (this.table.stateManager) {
+        this.table.stateManager.updateSort(this.currentSort);
+        // Reset to first page when sorting changes
+        this.table.stateManager.resetPage();
+      }
+      if (this.options.mode === 'server') {
+        // Server mode - update will be triggered by refreshTable via unified loader
+        await this.table.refreshTable();
+      } else {
+        // Client mode - apply sorting locally
+        this._applySorting();
+        await this.table.refreshTable();
       }
 
       // Update UI
       this.table.renderer.updateSortIndicators(this.currentSort);
-
-      // Refresh table display
-      await this.table.refreshTable();
 
       // Trigger afterSort event
       this.table.eventManager.trigger('afterSort', {
@@ -1257,38 +1286,13 @@
     }
 
     /**
-     * Server-side sorting
+     * Server-side sorting (DEPRECATED - now handled by unified loader)
+     * @deprecated Use unified _loadServerData in Table.js
      */
     async _sortServer(columnName, direction) {
-      if (!this.options.serverSortLoader) {
-        console.warn('Server-side sorting enabled but no serverSortLoader provided');
-        return;
-      }
-
-      // Set current sort
-      if (direction !== null) {
-        this.currentSort = {
-          column: columnName,
-          direction
-        };
-      } else {
-        this.currentSort = null;
-      }
-      try {
-        // Load data from server with current sort state
-        const result = await this.options.serverSortLoader({
-          sort: this.currentSort,
-          filters: this.table.dataManager.currentFilters,
-          page: this.table.paginationManager ? this.table.paginationManager.currentPage : 1,
-          pageSize: this.table.paginationManager ? this.table.paginationManager.pageSize : 10
-        });
-
-        // Update data manager with new data
-        this.table.dataManager.setServerData(result.data, result.totalRows);
-      } catch (error) {
-        console.error('Failed to load sorted data from server:', error);
-        throw error;
-      }
+      // This method is deprecated and should not be called anymore
+      // Sorting in server mode is now handled by the unified _loadServerData method
+      console.warn('_sortServer is deprecated. Server sorting now uses unified data loading.');
     }
 
     /**
@@ -1577,20 +1581,22 @@
 
     /**
      * Format a cell value for a specific column
-     * @param {string} columnName - Column name
+     * @param {Object|string} column - Column object or column name (for backwards compatibility)
      * @param {*} value - Cell value
      * @param {Object} row - Full row data (for context)
      * @returns {Object} Object with formatted value and metadata
      */
-    formatCellValue(columnName, value, row) {
-      const column = this.getColumn(columnName);
+    formatCellValue(column, value, row) {
+      // Support both column object (new) and column name (backwards compatibility)
+      const columnObj = typeof column === 'string' ? this.getColumn(column) : column;
+      const columnName = columnObj ? columnObj.name : column;
 
       // Priority 1: Custom renderer (overrides everything)
-      if (column && column.renderer) {
+      if (columnObj && columnObj.renderer) {
         // If renderer wants formatted value, provide it
         const formatter = this.formatters.get(columnName);
         const formattedValue = formatter ? formatter(value) : value;
-        const result = column.renderer(value, row, formattedValue);
+        const result = columnObj.renderer(value, row, formattedValue);
         return {
           value: result,
           isHtml: true // Custom renderers can return HTML
@@ -1875,17 +1881,24 @@
         config: filterConfig,
         isActive: this.isFilterActive(filterConfig)
       });
+
+      // Update state manager with current filters
+      if (this.table.stateManager) {
+        this.table.stateManager.updateFilters(this.getActiveFilters());
+        // Reset to first page when filters change
+        this.table.stateManager.resetPage();
+      }
       if (this.options.mode === 'server') {
-        await this._filterServer();
+        // Server mode - update will be triggered by refreshTable via unified loader
+        await this.table.refreshTable();
       } else {
+        // Client mode - apply filter locally
         this._filterClient();
+        await this.table.refreshTable();
       }
 
       // Update UI indicators
       this.updateFilterIndicators();
-
-      // Refresh table display
-      await this.table.refreshTable();
 
       // Trigger afterFilter hook
       this.table.eventManager.trigger('afterFilter', {
@@ -1909,13 +1922,19 @@
       };
       this.table.eventManager.trigger('beforeFilter', beforeFilterData);
       this.columnFilters.delete(columnName);
+
+      // Update state manager with current filters
+      if (this.table.stateManager) {
+        this.table.stateManager.updateFilters(this.getActiveFilters());
+        this.table.stateManager.resetPage();
+      }
       if (this.options.mode === 'server') {
-        await this._filterServer();
+        await this.table.refreshTable();
       } else {
         this._filterClient();
+        await this.table.refreshTable();
       }
       this.updateFilterIndicators();
-      await this.table.refreshTable();
       this.table.eventManager.trigger('afterFilter', {
         columnName,
         filterConfig: null,
@@ -1936,13 +1955,19 @@
       };
       this.table.eventManager.trigger('beforeFilter', beforeFilterData);
       this.columnFilters.clear();
+
+      // Update state manager with empty filters
+      if (this.table.stateManager) {
+        this.table.stateManager.updateFilters({});
+        this.table.stateManager.resetPage();
+      }
       if (this.options.mode === 'server') {
-        await this._filterServer();
+        await this.table.refreshTable();
       } else {
         this._filterClient();
+        await this.table.refreshTable();
       }
       this.updateFilterIndicators();
-      await this.table.refreshTable();
       this.table.eventManager.trigger('afterFilter', {
         columnName: null,
         filterConfig: null,
@@ -1971,14 +1996,28 @@
      * @returns {Array} Unique values
      */
     getColumnUniqueValues(columnName) {
-      const data = this.table.dataManager.originalData;
+      // For server mode, use the current filtered data (what's loaded from server)
+      // For client mode, use the original data
+      const data = this.options.mode === 'server' ? this.table.dataManager.filteredData : this.table.dataManager.originalData;
       const values = new Set();
+      let hasComplexData = false;
       data.forEach(row => {
         const value = row[columnName];
         if (value !== null && value !== undefined) {
+          // Check if value is a complex object (not a primitive or Date)
+          if (typeof value === 'object' && !(value instanceof Date)) {
+            hasComplexData = true;
+            return; // Skip complex objects
+          }
           values.add(String(value));
         }
       });
+
+      // If column contains complex data (objects), return empty array
+      // This will disable value-based filtering for columns with nested/complex data
+      if (hasComplexData && values.size === 0) {
+        return [];
+      }
       return Array.from(values).sort();
     }
 
@@ -2058,10 +2097,14 @@
     }
 
     /**
-     * Server-side filtering
+     * Server-side filtering (DEPRECATED - now handled by unified loader)
+     * @deprecated Use unified _loadServerData in Table.js
      * @private
      */
     async _filterServer() {
+      // This method is deprecated and should not be called anymore
+      // Filtering in server mode is now handled by the unified _loadServerData method
+      console.warn('_filterServer is deprecated. Server filtering now uses unified data loading.');
       if (!this.options.serverFilterLoader) {
         console.warn('TablixJS: Server-side filtering enabled but no serverFilterLoader provided');
         return;
@@ -2092,7 +2135,9 @@
       const cellValue = row[columnName];
       if (filterConfig.type === 'value') {
         // Value filter: check if cell value is in selected values
-        return filterConfig.values.includes(String(cellValue));
+        // Handle complex objects by converting to string safely
+        const cellValueStr = this._valueToString(cellValue);
+        return filterConfig.values.includes(cellValueStr);
       }
       if (filterConfig.type === 'condition') {
         // Condition filter: test all conditions (AND logic)
@@ -2166,6 +2211,23 @@
     }
 
     /**
+     * Convert a value to string safely, handling complex objects
+     * @param {*} value - Value to convert
+     * @returns {string} String representation
+     * @private
+     */
+    _valueToString(value) {
+      if (value === null || value === undefined) {
+        return '';
+      }
+      if (typeof value === 'object' && !(value instanceof Date)) {
+        // For complex objects, use JSON stringify for comparison
+        return JSON.stringify(value);
+      }
+      return String(value);
+    }
+
+    /**
      * Register a custom filter operator
      * @param {string} name - Operator name
      * @param {Object} operator - Operator definition
@@ -2217,6 +2279,34 @@
     }
 
     /**
+     * Check if a column contains complex data (objects)
+     * Complex data columns cannot use value-based filtering
+     * 
+     * @param {string} columnName - Column name to check
+     * @returns {boolean} True if column contains complex data
+     * 
+     * FUTURE IMPLEMENTATION:
+     * - Could add configuration option to enable filtering on specific object properties
+     * - Could support custom filter functions for complex data columns
+     * - Could allow filtering on rendered output instead of raw data
+     */
+    _hasComplexData(columnName) {
+      const data = this.table.dataManager.originalData || [];
+
+      // Check first non-null value to determine if column has complex data
+      for (let i = 0; i < Math.min(data.length, 100); i++) {
+        const value = data[i][columnName];
+        if (value !== null && value !== undefined) {
+          // Check if value is a complex object (not a primitive or Date)
+          if (typeof value === 'object' && !(value instanceof Date)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    /**
      * Destroy FilterUI and clean up event listeners
      */
     destroy() {
@@ -2226,6 +2316,8 @@
 
     /**
      * Render filter icons in table headers
+     * Note: Filter icons are not rendered for columns with complex data (objects)
+     * as value-based filtering is not supported for such columns.
      */
     renderFilterIcons() {
       const headers = this.table.container.querySelectorAll('.tablix-th');
@@ -2234,6 +2326,12 @@
         if (!columnName) return;
         const thContent = header.querySelector('.tablix-th-content');
         if (!thContent) return;
+
+        // Skip rendering filter icon for columns with complex data
+        // Complex data (objects) cannot use value-based filtering
+        if (this._hasComplexData(columnName)) {
+          return;
+        }
 
         // Check if filter icon already exists
         let filterIndicator = header.querySelector('.tablix-filter-indicator');
@@ -2363,7 +2461,11 @@
       const uniqueValues = this.filterManager.getColumnUniqueValues(columnName);
       const selectedValues = currentFilter && currentFilter.type === 'value' ? currentFilter.config.values : [];
       if (uniqueValues.length === 0) {
-        return `<p class="tablix-filter-empty">${this.table.t('filter.noValuesAvailable')}</p>`;
+        // Check if the column contains complex data by sampling the first row
+        const data = this.table.dataManager.originalData;
+        const hasComplexData = data.length > 0 && typeof data[0][columnName] === 'object' && !(data[0][columnName] instanceof Date);
+        const message = hasComplexData ? this.table.t('filter.complexDataNotSupported') || 'Value filtering is not available for columns with complex data. Use Condition filtering instead.' : this.table.t('filter.noValuesAvailable');
+        return `<p class="tablix-filter-empty">${message}</p>`;
       }
       let html = `
       <div class="tablix-filter-search">
@@ -2958,22 +3060,39 @@
       this.table.eventManager.trigger('beforeSearch', beforeSearchData);
       this.currentSearchTerm = searchTerm;
 
-      // If search term is below minimum length, show all data
-      if (searchTerm.length < this.options.minLength) {
-        this.table.dataManager.filteredData = [...this.originalData];
+      // Update state manager with search term
+      if (this.table.stateManager) {
+        this.table.stateManager.updateSearch(searchTerm);
+        // Reset to first page when search changes
+        this.table.stateManager.resetPage();
+      }
+
+      // Check if we're in server mode
+      const isServerMode = this.table._isServerMode && this.table._isServerMode();
+      if (isServerMode) {
+        // Server mode - let refreshTable handle the server request with search param
+        // Reset pagination to first page
+        if (this.table.paginationManager) {
+          this.table.paginationManager.currentPage = 1;
+        }
+        await this.table.refreshTable();
       } else {
-        // Filter data based on search term
-        const filteredData = this.filterData(searchTerm);
-        this.table.dataManager.filteredData = filteredData;
-      }
+        // Client mode - filter data locally
+        if (searchTerm.length < this.options.minLength) {
+          this.table.dataManager.filteredData = [...this.originalData];
+        } else {
+          const filteredData = this.filterData(searchTerm);
+          this.table.dataManager.filteredData = filteredData;
+        }
 
-      // Reset pagination to first page
-      if (this.table.paginationManager) {
-        this.table.paginationManager.resetToFirstPage();
+        // Reset pagination to first page
+        if (this.table.paginationManager) {
+          this.table.paginationManager.resetToFirstPage();
+        } else {
+          // If no pagination manager, just refresh
+          await this.table.refreshTable();
+        }
       }
-
-      // Refresh table display
-      await this.table.refreshTable();
 
       // Restore focus after table refresh if it had focus before
       if (hadFocus) {
@@ -3018,6 +3137,11 @@
         return columns.some(columnName => {
           const cellValue = row[columnName];
           if (cellValue === null || cellValue === undefined) {
+            return false;
+          }
+
+          // Skip complex objects (not primitive values or Dates) in search
+          if (typeof cellValue === 'object' && !(cellValue instanceof Date)) {
             return false;
           }
           const stringValue = this.options.caseSensitive ? String(cellValue) : String(cellValue).toLowerCase();
@@ -4625,7 +4749,8 @@
 
         // Use ColumnManager for formatting if available
         if (this.table.columnManager) {
-          const result = this.table.columnManager.formatCellValue(col.name, cellValue, rowData);
+          // Pass the column object instead of just the name to support multiple columns with same field
+          const result = this.table.columnManager.formatCellValue(col, cellValue, rowData);
           if (result.isHtml) {
             td.innerHTML = result.value;
           } else {
@@ -4887,6 +5012,7 @@
         'filter.isNotEmpty': 'Is not empty',
         'filter.selectValues': 'Select values',
         'filter.noOptionsAvailable': 'No options available',
+        'filter.complexDataNotSupported': 'Value filtering is not available for columns with complex data. Use Condition filtering instead.',
         // Controls
         'controls.refresh': 'Refresh data',
         'controls.export': 'Export data',
@@ -5231,6 +5357,158 @@
   }
 
   /**
+   * StateManager - Centralized state management for server-side operations
+   * 
+   * This class manages the persistent state for pagination, sorting, filtering, and search
+   * to ensure consistency across all server requests and prevent state loss during operations.
+   */
+  class StateManager {
+    constructor(table) {
+      this.table = table;
+
+      // Centralized state
+      this.state = {
+        // Pagination state
+        page: 1,
+        pageSize: 10,
+        totalRows: 0,
+        // Sorting state
+        sort: null,
+        // { column: 'name', direction: 'asc' } or null
+
+        // Filtering state
+        filters: {},
+        // { columnName: { type: 'value', values: [...] } }
+
+        // Search state
+        search: '',
+        // Global search term
+
+        // Loading state
+        isLoading: false
+      };
+
+      // Track if initial load has completed
+      this.isInitialized = false;
+    }
+
+    /**
+     * Get current state snapshot
+     * @returns {Object} Current state
+     */
+    getState() {
+      return {
+        ...this.state
+      };
+    }
+
+    /**
+     * Update pagination state
+     * @param {Object} pageState - Pagination state
+     */
+    updatePagination(pageState) {
+      if (pageState.page !== undefined) {
+        this.state.page = pageState.page;
+      }
+      if (pageState.pageSize !== undefined) {
+        this.state.pageSize = pageState.pageSize;
+      }
+      if (pageState.totalRows !== undefined) {
+        this.state.totalRows = pageState.totalRows;
+      }
+    }
+
+    /**
+     * Update sorting state
+     * @param {Object|null} sortState - Sort state { column, direction } or null
+     */
+    updateSort(sortState) {
+      this.state.sort = sortState;
+    }
+
+    /**
+     * Update filtering state
+     * @param {Object} filters - Filter configurations by column
+     */
+    updateFilters(filters) {
+      this.state.filters = {
+        ...filters
+      };
+    }
+
+    /**
+     * Update search state
+     * @param {string} searchTerm - Search term
+     */
+    updateSearch(searchTerm) {
+      this.state.search = searchTerm || '';
+    }
+
+    /**
+     * Update loading state
+     * @param {boolean} isLoading - Loading state
+     */
+    updateLoading(isLoading) {
+      this.state.isLoading = isLoading;
+    }
+
+    /**
+     * Reset pagination to first page
+     */
+    resetPage() {
+      this.state.page = 1;
+    }
+
+    /**
+     * Get parameters for server requests
+     * Normalizes state into consistent format for server loaders
+     * @returns {Object} Server request parameters
+     */
+    getServerParams() {
+      return {
+        page: this.state.page,
+        pageSize: this.state.pageSize,
+        sort: this.state.sort || {},
+        // Always send object, never null/undefined
+        filters: this.state.filters || {},
+        search: this.state.search || ''
+      };
+    }
+
+    /**
+     * Mark initial load as completed
+     */
+    markInitialized() {
+      this.isInitialized = true;
+    }
+
+    /**
+     * Check if initial load has completed
+     * @returns {boolean}
+     */
+    isReady() {
+      return this.isInitialized;
+    }
+
+    /**
+     * Reset all state to defaults
+     */
+    reset() {
+      this.state = {
+        page: 1,
+        pageSize: this.state.pageSize,
+        // Preserve page size
+        totalRows: 0,
+        sort: null,
+        filters: {},
+        search: '',
+        isLoading: false
+      };
+      this.isInitialized = false;
+    }
+  }
+
+  /**
    * French (fr) translations for TablixJS
    */
   const frenchTranslations = {
@@ -5309,6 +5587,7 @@
     'filter.isNotEmpty': 'N\'est pas vide',
     'filter.selectValues': 'Sélectionner les valeurs',
     'filter.noOptionsAvailable': 'Aucune option disponible',
+    'filter.complexDataNotSupported': 'Le filtrage par valeur n\'est pas disponible pour les colonnes avec des données complexes. Utilisez le filtrage par condition à la place.',
     // Controls
     'controls.refresh': 'Actualiser les données',
     'controls.export': 'Exporter les données',
@@ -5445,6 +5724,7 @@
     'filter.isNotEmpty': 'No está vacío',
     'filter.selectValues': 'Seleccionar valores',
     'filter.noOptionsAvailable': 'No hay opciones disponibles',
+    'filter.complexDataNotSupported': 'El filtrado por valor no está disponible para columnas con datos complejos. Utilice el filtrado por condición en su lugar.',
     // Controls
     'controls.refresh': 'Actualizar datos',
     'controls.export': 'Exportar datos',
@@ -5581,6 +5861,7 @@
     'filter.isNotEmpty': 'Nije prazno',
     'filter.selectValues': 'Izaberi vrednosti',
     'filter.noOptionsAvailable': 'Nema dostupnih opcija',
+    'filter.complexDataNotSupported': 'Filtriranje po vrednosti nije dostupno za kolone sa složenim podacima. Koristite filtriranje po uslovu umesto toga.',
     // Controls
     'controls.refresh': 'Osveži podatke',
     'controls.export': 'Izvezi podatke',
@@ -5746,6 +6027,9 @@
       this.dataManager = new DataManager(this, options.data || []);
       this.renderer = new Renderer(this);
 
+      // Initialize state manager for server-side operations
+      this.stateManager = new StateManager(this);
+
       // Initialize columns if provided
       if (options.columns) {
         this.columnManager.initializeColumns(options.columns);
@@ -5754,6 +6038,10 @@
       // Initialize pagination if enabled
       if (this.options.pagination && this.options.pagination.enabled !== false) {
         this.paginationManager = new PaginationManager(this, this.options.pagination);
+        // Sync initial page size with state manager
+        this.stateManager.updatePagination({
+          pageSize: this.options.pagination.pageSize || 10
+        });
       }
 
       // Initialize sorting if enabled
@@ -5790,22 +6078,33 @@
           this.searchManager.init();
         }
 
-        // Get initial data
-        const initialData = this.dataManager.getData();
+        // Determine if we're using server-side operations
+        const isServerMode = this._isServerMode();
 
         // Trigger beforeLoad hook for initial data
         this.eventManager.trigger('beforeLoad', {
-          source: initialData
+          source: 'initialization'
         });
+        if (isServerMode) {
+          // For server mode, load initial data through unified request
+          await this._loadServerData();
+        } else {
+          // For client mode, just refresh with local data
+          await this.refreshTable();
+        }
 
-        // Render table with first page of data
-        await this.refreshTable();
+        // Mark state as initialized
+        this.stateManager.markInitialized();
 
         // Trigger afterLoad hook with consistent payload format
+        const loadedData = this.dataManager.getData();
         this.eventManager.trigger('afterLoad', {
-          data: initialData,
-          source: initialData
+          data: loadedData,
+          source: 'initialization'
         });
+
+        // Explicitly trigger afterRender to ensure selection works on first load
+        this.eventManager.trigger('afterRender');
       } catch (error) {
         console.error('Failed to initialize table:', error);
         this.eventManager.trigger('loadError', {
@@ -5819,10 +6118,90 @@
     }
 
     /**
+     * Check if any feature is using server mode
+     * @private
+     */
+    _isServerMode() {
+      return this.options.pagination && this.options.pagination.mode === 'server' || this.options.sorting && this.options.sorting.mode === 'server' || this.options.filtering && this.options.filtering.mode === 'server';
+    }
+
+    /**
+     * Unified server data loading
+     * Ensures only one request is made with all current state (pagination, sort, filter, search)
+     * @private
+     */
+    async _loadServerData() {
+      // Update state manager with current search term
+      if (this.searchManager) {
+        this.stateManager.updateSearch(this.searchManager.currentSearchTerm);
+      }
+
+      // Get unified parameters from state manager
+      const params = this.stateManager.getServerParams();
+      this.stateManager.updateLoading(true);
+      this.eventManager.trigger('beforeServerLoad', params);
+      try {
+        let result;
+
+        // Determine which loader to use based on the operation
+        // Priority: serverFilterLoader > serverSortLoader > serverDataLoader
+        if (this.options.filtering && this.options.filtering.mode === 'server' && this.options.filtering.serverFilterLoader && Object.keys(params.filters).length > 0) {
+          // Use filter loader if filters are active
+          result = await this.options.filtering.serverFilterLoader(params);
+        } else if (this.options.sorting && this.options.sorting.mode === 'server' && this.options.sorting.serverSortLoader && params.sort && params.sort.column) {
+          // Use sort loader if sort is active and no filters
+          result = await this.options.sorting.serverSortLoader(params);
+        } else if (this.options.pagination && this.options.pagination.serverDataLoader) {
+          // Fall back to pagination loader
+          result = await this.options.pagination.serverDataLoader(params);
+        } else {
+          throw new Error('No server data loader configured for server-side operations');
+        }
+
+        // Update data manager with server response
+        this.dataManager.setServerData(result.data, result.totalRows);
+
+        // Update state manager with total rows
+        this.stateManager.updatePagination({
+          totalRows: result.totalRows
+        });
+
+        // Update pagination manager info
+        if (this.paginationManager) {
+          this.paginationManager.updatePaginationInfo(result.totalRows);
+        }
+
+        // Render the table with the loaded data
+        this.renderer.renderTable(result.data);
+        this.stateManager.updateLoading(false);
+        this.eventManager.trigger('afterServerLoad', {
+          params,
+          result
+        });
+        return result.data;
+      } catch (error) {
+        this.stateManager.updateLoading(false);
+        this.eventManager.trigger('serverLoadError', {
+          params,
+          error
+        });
+        throw error;
+      }
+    }
+
+    /**
      * Refresh the table with current data and pagination
      */
     async refreshTable() {
       let dataToRender;
+
+      // Check if we're in server mode
+      const isServerMode = this._isServerMode();
+      if (isServerMode && this.stateManager.isReady()) {
+        // For server mode after initialization, always use unified server loading
+        dataToRender = await this._loadServerData();
+        return; // _loadServerData already renders the table
+      }
       if (this.virtualScrollManager && this.virtualScrollManager.isEnabled()) {
         // Virtual scrolling mode - get all data for virtual scrolling manager
         dataToRender = this.dataManager.getData();
@@ -5836,7 +6215,7 @@
         // Initialize virtual scrolling after table structure is ready
         this.virtualScrollManager.init(dataToRender);
       } else if (this.paginationManager) {
-        // Traditional pagination mode
+        // Traditional pagination mode (client-side)
         dataToRender = await this.paginationManager.getPageData();
         this.renderer.renderTable(dataToRender);
       } else {

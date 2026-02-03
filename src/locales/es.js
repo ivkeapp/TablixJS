@@ -82,6 +82,7 @@ export const spanishTranslations = {
   'filter.isNotEmpty': 'No está vacío',
   'filter.selectValues': 'Seleccionar valores',
   'filter.noOptionsAvailable': 'No hay opciones disponibles',
+  'filter.complexDataNotSupported': 'El filtrado por valor no está disponible para columnas con datos complejos. Utilice el filtrado por condición en su lugar.',
 
   // Controls
   'controls.refresh': 'Actualizar datos',

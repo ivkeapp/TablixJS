@@ -82,6 +82,7 @@ export const serbianTranslations = {
   'filter.isNotEmpty': 'Nije prazno',
   'filter.selectValues': 'Izaberi vrednosti',
   'filter.noOptionsAvailable': 'Nema dostupnih opcija',
+  'filter.complexDataNotSupported': 'Filtriranje po vrednosti nije dostupno za kolone sa složenim podacima. Koristite filtriranje po uslovu umesto toga.',
 
   // Controls
   'controls.refresh': 'Osveži podatke',

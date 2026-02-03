@@ -100,20 +100,22 @@ export default class ColumnManager {
 
   /**
    * Format a cell value for a specific column
-   * @param {string} columnName - Column name
+   * @param {Object|string} column - Column object or column name (for backwards compatibility)
    * @param {*} value - Cell value
    * @param {Object} row - Full row data (for context)
    * @returns {Object} Object with formatted value and metadata
    */
-  formatCellValue(columnName, value, row) {
-    const column = this.getColumn(columnName);
+  formatCellValue(column, value, row) {
+    // Support both column object (new) and column name (backwards compatibility)
+    const columnObj = typeof column === 'string' ? this.getColumn(column) : column;
+    const columnName = columnObj ? columnObj.name : column;
     
     // Priority 1: Custom renderer (overrides everything)
-    if (column && column.renderer) {
+    if (columnObj && columnObj.renderer) {
       // If renderer wants formatted value, provide it
       const formatter = this.formatters.get(columnName);
       const formattedValue = formatter ? formatter(value) : value;
-      const result = column.renderer(value, row, formattedValue);
+      const result = columnObj.renderer(value, row, formattedValue);
       return {
         value: result,
         isHtml: true // Custom renderers can return HTML

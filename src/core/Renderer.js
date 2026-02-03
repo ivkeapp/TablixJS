@@ -99,7 +99,8 @@ export default class Renderer {
           
           // Use ColumnManager for formatting if available
           if (this.table.columnManager) {
-            const result = this.table.columnManager.formatCellValue(col.name, cell, row);
+            // Pass the column object instead of just the name to support multiple columns with same field
+            const result = this.table.columnManager.formatCellValue(col, cell, row);
             if (result.isHtml) {
               // Custom renderer returned HTML - use as is
               renderedCell = result.value;
@@ -524,10 +525,18 @@ export default class Renderer {
     data.forEach(row => {
       const values = columns.map(col => {
         const value = row[col.name];
-        // Simple CSV escaping
-        return typeof value === 'string' && value.includes(',') 
-          ? `"${value.replace(/"/g, '""')}"` 
-          : value;
+        
+        // Handle complex objects
+        if (typeof value === 'object' && value !== null && !(value instanceof Date)) {
+          return `"${JSON.stringify(value).replace(/"/g, '""')}"`;
+        }
+        
+        // Simple CSV escaping for strings
+        if (typeof value === 'string' && value.includes(',')) {
+          return `"${value.replace(/"/g, '""')}"`;
+        }
+        
+        return value;
       });
       csv += values.join(',') + '\n';
     });

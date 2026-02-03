@@ -82,6 +82,7 @@ export const frenchTranslations = {
   'filter.isNotEmpty': 'N\'est pas vide',
   'filter.selectValues': 'Sélectionner les valeurs',
   'filter.noOptionsAvailable': 'Aucune option disponible',
+  'filter.complexDataNotSupported': 'Le filtrage par valeur n\'est pas disponible pour les colonnes avec des données complexes. Utilisez le filtrage par condition à la place.',
 
   // Controls
   'controls.refresh': 'Actualiser les données',

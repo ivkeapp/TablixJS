@@ -27,6 +27,35 @@ export default class FilterUI {
   }
 
   /**
+   * Check if a column contains complex data (objects)
+   * Complex data columns cannot use value-based filtering
+   * 
+   * @param {string} columnName - Column name to check
+   * @returns {boolean} True if column contains complex data
+   * 
+   * FUTURE IMPLEMENTATION:
+   * - Could add configuration option to enable filtering on specific object properties
+   * - Could support custom filter functions for complex data columns
+   * - Could allow filtering on rendered output instead of raw data
+   */
+  _hasComplexData(columnName) {
+    const data = this.table.dataManager.originalData || [];
+    
+    // Check first non-null value to determine if column has complex data
+    for (let i = 0; i < Math.min(data.length, 100); i++) {
+      const value = data[i][columnName];
+      if (value !== null && value !== undefined) {
+        // Check if value is a complex object (not a primitive or Date)
+        if (typeof value === 'object' && !(value instanceof Date)) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  }
+
+  /**
    * Destroy FilterUI and clean up event listeners
    */
   destroy() {
@@ -36,6 +65,8 @@ export default class FilterUI {
 
   /**
    * Render filter icons in table headers
+   * Note: Filter icons are not rendered for columns with complex data (objects)
+   * as value-based filtering is not supported for such columns.
    */
   renderFilterIcons() {
     const headers = this.table.container.querySelectorAll('.tablix-th');
@@ -46,6 +77,12 @@ export default class FilterUI {
       
       const thContent = header.querySelector('.tablix-th-content');
       if (!thContent) return;
+      
+      // Skip rendering filter icon for columns with complex data
+      // Complex data (objects) cannot use value-based filtering
+      if (this._hasComplexData(columnName)) {
+        return;
+      }
       
       // Check if filter icon already exists
       let filterIndicator = header.querySelector('.tablix-filter-indicator');
@@ -177,7 +214,17 @@ export default class FilterUI {
       currentFilter.config.values : [];
     
     if (uniqueValues.length === 0) {
-      return `<p class="tablix-filter-empty">${this.table.t('filter.noValuesAvailable')}</p>`;
+      // Check if the column contains complex data by sampling the first row
+      const data = this.table.dataManager.originalData;
+      const hasComplexData = data.length > 0 && 
+        typeof data[0][columnName] === 'object' && 
+        !(data[0][columnName] instanceof Date);
+      
+      const message = hasComplexData 
+        ? this.table.t('filter.complexDataNotSupported') || 'Value filtering is not available for columns with complex data. Use Condition filtering instead.'
+        : this.table.t('filter.noValuesAvailable');
+      
+      return `<p class="tablix-filter-empty">${message}</p>`;
     }
     
     let html = `

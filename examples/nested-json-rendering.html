@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nested JSON Rendering - TablixJS</title>
+    <link rel="stylesheet" href="../dist/tablixjs.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .example {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .example h2 {
+            color: #2196f3;
+            border-bottom: 2px solid #2196f3;
+            padding-bottom: 10px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .badge-gold { background: #FFD700; color: #333; }
+        .badge-silver { background: #C0C0C0; color: #333; }
+        .badge-bronze { background: #CD7F32; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Nested JSON Rendering Example</h1>
+    <p>Demonstrating how to render different parts of nested JSON data in multiple columns using the same field name.</p>
+
+    <div class="example">
+        <h2>Example 1: User Badges System</h2>
+        <p>Server returns nested badge data, and we display different aspects in separate columns.</p>
+        <div id="example1"></div>
+    </div>
+
+    <div class="example">
+        <h2>Example 2: Product Information</h2>
+        <p>Complex product data with pricing in different regions.</p>
+        <div id="example2"></div>
+    </div>
+
+    <div class="example">
+        <h2>Example 3: Address Book</h2>
+        <p>Nested address objects rendered in different formats.</p>
+        <div id="example3"></div>
+    </div>
+
+    <script src="../dist/tablixjs.umd.js"></script>
+    <script>
+        // Example 1: User Badges
+        const usersData = [
+            {
+                user_name: "Alice Johnson",
+                user_email: "alice@example.com",
+                user_badges: {
+                    badge_level: 3,
+                    badge_images: [
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23FFD700'/%3E%3Ctext x='12' y='17' text-anchor='middle' fill='white' font-size='12' font-weight='bold'%3E★%3C/text%3E%3C/svg%3E",
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23C0C0C0'/%3E%3Ctext x='12' y='17' text-anchor='middle' fill='white' font-size='12' font-weight='bold'%3E★%3C/text%3E%3C/svg%3E",
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23CD7F32'/%3E%3Ctext x='12' y='17' text-anchor='middle' fill='white' font-size='12' font-weight='bold'%3E★%3C/text%3E%3C/svg%3E"
+                    ],
+                    earned_dates: ["2024-01-15", "2024-03-20", "2024-06-10"]
+                }
+            },
+            {
+                user_name: "Bob Smith",
+                user_email: "bob@example.com",
+                user_badges: {
+                    badge_level: 2,
+                    badge_images: [
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23FFD700'/%3E%3Ctext x='12' y='17' text-anchor='middle' fill='white' font-size='12' font-weight='bold'%3E★%3C/text%3E%3C/svg%3E",
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23C0C0C0'/%3E%3Ctext x='12' y='17' text-anchor='middle' fill='white' font-size='12' font-weight='bold'%3E★%3C/text%3E%3C/svg%3E"
+                    ],
+                    earned_dates: ["2024-02-01", "2024-05-15"]
+                }
+            },
+            {
+                user_name: "Carol Williams",
+                user_email: "carol@example.com",
+                user_badges: {
+                    badge_level: 1,
+                    badge_images: [
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23FFD700'/%3E%3Ctext x='12' y='17' text-anchor='middle' fill='white' font-size='12' font-weight='bold'%3E★%3C/text%3E%3C/svg%3E"
+                    ],
+                    earned_dates: ["2024-04-10"]
+                }
+            }
+        ];
+
+        new TablixJS.Table('#example1', {
+            data: usersData,
+            columns: [
+                { name: 'user_name', title: 'Name' },
+                { 
+                    name: 'user_badges', 
+                    title: 'All Badges', 
+                    sortable: false,
+                    renderer: (value) => {
+                        return value.badge_images.map(img => 
+                            `<img src="${img}" width="24" height="24" style="margin: 0 2px;">`
+                        ).join('');
+                    }
+                },
+                { 
+                    name: 'user_badges', 
+                    title: 'Badge Count', 
+                    sortable: false,
+                    renderer: (value) => {
+                        const colors = ['badge-bronze', 'badge-silver', 'badge-gold'];
+                        const color = colors[Math.min(value.badge_level - 1, 2)];
+                        return `<span class="badge ${color}">${value.badge_level}</span>`;
+                    }
+                },
+                { 
+                    name: 'user_badges', 
+                    title: 'Latest Badge Date', 
+                    sortable: false,
+                    renderer: (value) => {
+                        const latest = value.earned_dates[value.earned_dates.length - 1];
+                        return new Date(latest).toLocaleDateString();
+                    }
+                }
+            ],
+            pagination: { enabled: false }
+        });
+
+        // Example 2: Product Pricing
+        const productsData = [
+            {
+                product_name: "Premium Widget",
+                product_sku: "PWG-001",
+                pricing: {
+                    us: { amount: 99.99, currency: "USD", symbol: "$" },
+                    eu: { amount: 89.99, currency: "EUR", symbol: "€" },
+                    uk: { amount: 79.99, currency: "GBP", symbol: "£" }
+                }
+            },
+            {
+                product_name: "Standard Gadget",
+                product_sku: "STG-002",
+                pricing: {
+                    us: { amount: 49.99, currency: "USD", symbol: "$" },
+                    eu: { amount: 44.99, currency: "EUR", symbol: "€" },
+                    uk: { amount: 39.99, currency: "GBP", symbol: "£" }
+                }
+            },
+            {
+                product_name: "Basic Tool",
+                product_sku: "BTC-003",
+                pricing: {
+                    us: { amount: 19.99, currency: "USD", symbol: "$" },
+                    eu: { amount: 17.99, currency: "EUR", symbol: "€" },
+                    uk: { amount: 15.99, currency: "GBP", symbol: "£" }
+                }
+            }
+        ];
+
+        new TablixJS.Table('#example2', {
+            data: productsData,
+            columns: [
+                { name: 'product_name', title: 'Product' },
+                { name: 'product_sku', title: 'SKU' },
+                { 
+                    name: 'pricing', 
+                    title: 'US Price', 
+                    renderer: (value) => `${value.us.symbol}${value.us.amount.toFixed(2)}`
+                },
+                { 
+                    name: 'pricing', 
+                    title: 'EU Price', 
+                    renderer: (value) => `${value.eu.symbol}${value.eu.amount.toFixed(2)}`
+                },
+                { 
+                    name: 'pricing', 
+                    title: 'UK Price', 
+                    renderer: (value) => `${value.uk.symbol}${value.uk.amount.toFixed(2)}`
+                }
+            ],
+            pagination: { enabled: false }
+        });
+
+        // Example 3: Address Book
+        const contactsData = [
+            {
+                name: "John Doe",
+                address: {
+                    street: "123 Main St",
+                    city: "New York",
+                    state: "NY",
+                    zip: "10001",
+                    country: "USA"
+                }
+            },
+            {
+                name: "Jane Smith",
+                address: {
+                    street: "456 Oak Ave",
+                    city: "Los Angeles",
+                    state: "CA",
+                    zip: "90001",
+                    country: "USA"
+                }
+            },
+            {
+                name: "Bob Johnson",
+                address: {
+                    street: "789 Pine Rd",
+                    city: "Chicago",
+                    state: "IL",
+                    zip: "60601",
+                    country: "USA"
+                }
+            }
+        ];
+
+        new TablixJS.Table('#example3', {
+            data: contactsData,
+            columns: [
+                { name: 'name', title: 'Name' },
+                { 
+                    name: 'address', 
+                    title: 'City', 
+                    renderer: (value) => value.city
+                },
+                { 
+                    name: 'address', 
+                    title: 'State', 
+                    renderer: (value) => value.state
+                },
+                { 
+                    name: 'address', 
+                    title: 'Full Address', 
+                    renderer: (value) => {
+                        return `${value.street}<br><small style="color: #666;">${value.city}, ${value.state} ${value.zip}</small>`;
+                    }
+                }
+            ],
+            pagination: { enabled: false }
+        });
+
+        console.log('✓ All examples loaded successfully!');
+    </script>
+</body>
+</html>

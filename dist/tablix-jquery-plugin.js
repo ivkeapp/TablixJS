@@ -1,7 +1,7 @@
 /**
- * TablixJS jQuery Plugin (Standalone) v1.0.4
+ * TablixJS jQuery Plugin (Standalone) v1.0.5
  * Requires TablixJS and jQuery to be loaded separately
- * (c) 2025 Ivan Zarkovic
+ * (c) 2026 Ivan Zarkovic
  * Released under the MIT License.
  */
 (function (factory) {
