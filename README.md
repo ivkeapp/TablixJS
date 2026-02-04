@@ -50,11 +50,12 @@ TablixJS is a modern, lightweight, and dependency-free JavaScript library for bu
 
 ### **🔄 Async Data Loading**
 - **Multiple Loading Methods** - Direct arrays, URL endpoints, or custom async functions
-- **Loading States** - Built-in loading indicators and error handling
+- **Loading States** - Built-in event hooks for loading indicators (`beforeLoad`, `afterLoad`)
+- **Empty State Handling** - Event-based approach for "no results" scenarios
+- **Error Recovery** - Graceful error handling with `loadError` event and user feedback
 - **Data Transformation** - Transform server responses to match table format
 - **Authentication Support** - Custom headers and request configuration
-- **Error Recovery** - Graceful error handling with user feedback
-- **Event Hooks** - `beforeLoad`, `afterLoad`, and `loadError` events
+- **Event Hooks** - Complete lifecycle events for custom state management
 
 ### **🎨 Theming & Styling**
 - **CSS Custom Properties** - Extensive theming with CSS variables
@@ -841,9 +842,353 @@ Selection automatically works with all table features:
 
 > **Learn More:** For a complete interactive demo, see [Selection Demo](examples/selection-demo.html) and [Selection Usage Examples](examples/selection-usage-examples.js).
 
+## Handling Loading, Empty, and Error States
+
+TablixJS provides a comprehensive event system for managing table states during data operations. You can display custom UI for loading, empty results, and error scenarios.
+
+### **Loading State**
+
+Display a loading indicator while data is being fetched:
+
+```javascript
+const table = new Table('#tableContainer', {
+  data: [],
+  columns: [...]
+});
+
+// Show loading indicator before data loads
+table.on('beforeLoad', () => {
+  const container = document.querySelector('#tableContainer');
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'tablix-loading-overlay';
+  loadingDiv.innerHTML = `
+    <div class="loading-spinner"></div>
+    <p>Loading data...</p>
+  `;
+  container.appendChild(loadingDiv);
+});
+
+// Hide loading indicator after data loads
+table.on('afterLoad', (payload) => {
+  const loadingOverlay = document.querySelector('.tablix-loading-overlay');
+  if (loadingOverlay) loadingOverlay.remove();
+});
+
+// Load data asynchronously
+await table.loadData('https://api.example.com/users');
+```
+
+### **Empty State**
+
+Show a message when no results are found:
+
+```javascript
+table.on('afterLoad', (payload) => {
+  const container = document.querySelector('#tableContainer');
+  
+  // Check if data is empty
+  if (payload.data.length === 0) {
+    const emptyDiv = document.createElement('div');
+    emptyDiv.className = 'tablix-empty-state';
+    emptyDiv.innerHTML = `
+      <div class="empty-icon">📋</div>
+      <h3>No Results Found</h3>
+      <p>Try adjusting your filters or search criteria</p>
+      <button onclick="table.clearFilters(); table.clearSearch();">
+        Clear Filters
+      </button>
+    `;
+    
+    // Find table wrapper and append empty state
+    const tableWrapper = container.querySelector('.tablix-table-wrapper');
+    if (tableWrapper) {
+      tableWrapper.appendChild(emptyDiv);
+    }
+  } else {
+    // Remove empty state if data exists
+    const emptyState = container.querySelector('.tablix-empty-state');
+    if (emptyState) emptyState.remove();
+  }
+});
+```
+
+### **Empty State After Filtering**
+
+Handle the case where filters return no results:
+
+```javascript
+// Monitor filter changes
+table.on('afterFilter', async () => {
+  const visibleData = await table.dataManager.getVisibleData();
+  const container = document.querySelector('#tableContainer');
+  
+  // Remove any existing empty state
+  const existingEmpty = container.querySelector('.tablix-empty-state');
+  if (existingEmpty) existingEmpty.remove();
+  
+  if (visibleData.length === 0) {
+    const emptyDiv = document.createElement('div');
+    emptyDiv.className = 'tablix-empty-state';
+    emptyDiv.innerHTML = `
+      <div class="empty-icon">🔍</div>
+      <h3>No Matching Results</h3>
+      <p>No data matches your current filters</p>
+      <button onclick="table.clearFilters()">Clear All Filters</button>
+    `;
+    
+    const tableWrapper = container.querySelector('.tablix-table-wrapper');
+    if (tableWrapper) tableWrapper.appendChild(emptyDiv);
+  }
+});
+```
+
+### **Error State**
+
+Display error messages when data loading fails:
+
+```javascript
+table.on('loadError', (payload) => {
+  console.error('Data loading failed:', payload.error);
+  
+  const container = document.querySelector('#tableContainer');
+  
+  // Remove loading indicator if present
+  const loadingOverlay = container.querySelector('.tablix-loading-overlay');
+  if (loadingOverlay) loadingOverlay.remove();
+  
+  // Show error message
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'tablix-error-state';
+  errorDiv.innerHTML = `
+    <div class="error-icon">⚠️</div>
+    <h3>Failed to Load Data</h3>
+    <p>${payload.error.message || 'An unexpected error occurred'}</p>
+    <button onclick="table.loadData('${payload.source}')">
+      Retry
+    </button>
+  `;
+  
+  const tableWrapper = container.querySelector('.tablix-table-wrapper');
+  if (tableWrapper) {
+    tableWrapper.innerHTML = '';
+    tableWrapper.appendChild(errorDiv);
+  }
+});
+
+// Attempt to load data
+try {
+  await table.loadData('https://api.example.com/users');
+} catch (error) {
+  // Error is already handled by the loadError event
+}
+```
+
+### **Complete State Management Example**
+
+Comprehensive state handling with all scenarios:
+
+```javascript
+class TableStateManager {
+  constructor(table, containerSelector) {
+    this.table = table;
+    this.container = document.querySelector(containerSelector);
+    this.setupEventListeners();
+  }
+  
+  setupEventListeners() {
+    // Loading state
+    this.table.on('beforeLoad', () => this.showLoading());
+    this.table.on('afterLoad', (payload) => {
+      this.hideLoading();
+      if (payload.data.length === 0) {
+        this.showEmpty('No data available');
+      } else {
+        this.hideEmpty();
+      }
+    });
+    
+    // Error state
+    this.table.on('loadError', (payload) => {
+      this.hideLoading();
+      this.showError(payload.error);
+    });
+    
+    // Filter/search empty results
+    this.table.on('afterFilter', () => this.checkEmptyResults());
+    this.table.on('afterSearch', () => this.checkEmptyResults());
+  }
+  
+  showLoading() {
+    this.hideAllStates();
+    const loadingDiv = document.createElement('div');
+    loadingDiv.id = 'table-loading-state';
+    loadingDiv.className = 'tablix-loading-overlay';
+    loadingDiv.innerHTML = `
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    `;
+    this.container.appendChild(loadingDiv);
+  }
+  
+  hideLoading() {
+    const loading = this.container.querySelector('#table-loading-state');
+    if (loading) loading.remove();
+  }
+  
+  async checkEmptyResults() {
+    const visibleData = await this.table.dataManager.getVisibleData();
+    if (visibleData.length === 0) {
+      this.showEmpty('No results match your criteria');
+    } else {
+      this.hideEmpty();
+    }
+  }
+  
+  showEmpty(message) {
+    this.hideEmpty();
+    const emptyDiv = document.createElement('div');
+    emptyDiv.id = 'table-empty-state';
+    emptyDiv.className = 'tablix-empty-state';
+    emptyDiv.innerHTML = `
+      <div class="empty-icon">📋</div>
+      <h3>No Results</h3>
+      <p>${message}</p>
+    `;
+    
+    const tableWrapper = this.container.querySelector('.tablix-table-wrapper');
+    if (tableWrapper) tableWrapper.appendChild(emptyDiv);
+  }
+  
+  hideEmpty() {
+    const empty = this.container.querySelector('#table-empty-state');
+    if (empty) empty.remove();
+  }
+  
+  showError(error) {
+    this.hideAllStates();
+    const errorDiv = document.createElement('div');
+    errorDiv.id = 'table-error-state';
+    errorDiv.className = 'tablix-error-state';
+    errorDiv.innerHTML = `
+      <div class="error-icon">⚠️</div>
+      <h3>Error Loading Data</h3>
+      <p>${error.message}</p>
+      <button onclick="location.reload()">Retry</button>
+    `;
+    
+    const tableWrapper = this.container.querySelector('.tablix-table-wrapper');
+    if (tableWrapper) {
+      tableWrapper.innerHTML = '';
+      tableWrapper.appendChild(errorDiv);
+    }
+  }
+  
+  hideAllStates() {
+    this.hideLoading();
+    this.hideEmpty();
+  }
+}
+
+// Usage
+const table = new Table('#myTable', { columns: [...] });
+const stateManager = new TableStateManager(table, '#myTable');
+
+await table.loadData('https://api.example.com/data');
+```
+
+### **CSS for State Messages**
+
+Add these styles to your stylesheet:
+
+```css
+.tablix-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.tablix-loading-overlay .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f0f0f0;
+  border-top-color: #007bff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.tablix-empty-state,
+.tablix-error-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #666;
+}
+
+.tablix-empty-state .empty-icon,
+.tablix-error-state .error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.tablix-error-state {
+  color: #dc3545;
+  background-color: #fff5f5;
+}
+
+.tablix-empty-state h3,
+.tablix-error-state h3 {
+  margin: 0.5rem 0;
+  font-size: 1.25rem;
+}
+
+.tablix-empty-state button,
+.tablix-error-state button {
+  margin-top: 1rem;
+  padding: 0.5rem 1.5rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tablix-empty-state button:hover,
+.tablix-error-state button:hover {
+  background: #0056b3;
+}
+```
+
+### **Available Events for State Management**
+
+| Event | When Fired | Payload |
+|-------|-----------|---------|
+| `beforeLoad` | Before data loading starts | `{ source }` |
+| `afterLoad` | After data loading completes | `{ data }` |
+| `loadError` | When data loading fails | `{ error, source }` |
+| `afterFilter` | After filters are applied | `{ criteria }` |
+| `afterSearch` | After search is performed | `{ query }` |
+| `beforeRender` | Before table is rendered | `{ data }` |
+| `afterRender` | After table is rendered | `{ renderedRows }` |
+
+> ** Future Enhancement:** Native state message support is planned for new version. See [EMPTY-STATE-ENHANCEMENT.md](EMPTY-STATE-ENHANCEMENT.md) for the proposal.
+
+> **Learn More:** See the complete example at [State Handling Demo](examples/state-handling-demo.html).
+
 ## Examples
 
 - **[Basic Usage](examples/vanilla.html)** - Simple client-side pagination
+- **[State Handling Demo](examples/state-handling-demo.html)** - Loading, empty, and error states ⭐ **NEW**
 - **[Async Data Loading Demo](examples/async-data-loading-demo.html)** - Asynchronous data loading examples
 - **[Column Formatting Demo](examples/column-formatting-demo.html)** - Custom column formatting
 - **[Complete Pagination Demo](examples/complete-pagination-demo.html)** - All pagination features
