@@ -18,6 +18,18 @@
   color: var(--tablix-text-color, #333);
 }
 
+/* Table wrapper for horizontal scrolling */
+.tablix-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  width: 100%;
+}
+
+/* When inside virtual scroll container, disable separate horizontal scroll */
+.tablix-scroll-container .tablix-table-wrapper {
+  overflow-x: visible;
+}
+
 /* Table structure */
 .tablix-table {
   width: 100%;
@@ -98,6 +110,18 @@
   .tablix-th,
   .tablix-td {
     padding: var(--tablix-mobile-cell-padding, 8px 6px);
+  }
+  
+  /* Ensure wrapper allows scrolling on mobile */
+  .tablix-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent table from shrinking on mobile */
+  .tablix-table {
+    min-width: 100%;
   }
 }
 

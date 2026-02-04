@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complex Data - Filter UI Test</title>
+  <link rel="stylesheet" href="../dist/tablixjs.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .info {
+      background: #e8f4f8;
+      border-left: 4px solid #2196F3;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+    .info h3 {
+      margin-top: 0;
+      color: #1976D2;
+    }
+    .info ul {
+      margin: 10px 0;
+      padding-left: 25px;
+    }
+    .info li {
+      margin: 5px 0;
+    }
+    .info code {
+      background: #fff;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    .table-container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Complex Data - Filter UI Behavior Test</h1>
+  
+  <div class="info">
+    <h3>Test Objective: Filter Icon Visibility</h3>
+    <ul>
+      <li><strong>Primitive Data Columns</strong> (ID, Name, Status): Should show filter icon (🞃) - filtering works on raw data</li>
+      <li><strong>Custom Renderer Columns</strong> (Active): Should show filter icon - renderer is just for display</li>
+      <li><strong>Complex Data Columns</strong> (User, Metadata): Should NOT show filter icon - filtering not supported</li>
+    </ul>
+    <p><strong>Expected Result:</strong> User and Metadata columns have no filter dropdown arrows.</p>
+  </div>
+
+  <div class="table-container">
+    <div id="myTable"></div>
+  </div>
+
+  <script src="../dist/tablixjs.esm.js" type="module">
+  </script>
+  <script type="module">
+    import TablixJS from '../dist/tablixjs.esm.js';
+
+    // Sample data with mix of primitive and complex data
+    const data = [
+      {
+        id: 1,
+        name: 'Alice Johnson',
+        status: 'active',
+        isActive: true,
+        user: { id: 101, role: 'Admin', email: 'alice@example.com' },
+        metadata: { createdAt: '2024-01-15', tags: ['important', 'verified'] }
+      },
+      {
+        id: 2,
+        name: 'Bob Smith',
+        status: 'inactive',
+        isActive: false,
+        user: { id: 102, role: 'User', email: 'bob@example.com' },
+        metadata: { createdAt: '2024-02-20', tags: ['pending'] }
+      },
+      {
+        id: 3,
+        name: 'Carol White',
+        status: 'active',
+        isActive: true,
+        user: { id: 103, role: 'Manager', email: 'carol@example.com' },
+        metadata: { createdAt: '2024-03-10', tags: ['important', 'manager'] }
+      },
+      {
+        id: 4,
+        name: 'David Brown',
+        status: 'pending',
+        isActive: null,
+        user: { id: 104, role: 'User', email: 'david@example.com' },
+        metadata: { createdAt: '2024-04-05', tags: ['new'] }
+      }
+    ];
+
+    const table = new TablixJS('#myTable', {
+      data: data,
+      columns: [
+        { 
+          name: 'id', 
+          label: 'ID',
+          width: '80px'
+        },
+        { 
+          name: 'name', 
+          label: 'Name',
+          width: '150px'
+        },
+        { 
+          name: 'status', 
+          label: 'Status',
+          width: '120px'
+        },
+        { 
+          name: 'isActive',
+          label: 'Active',
+          width: '100px',
+          // Custom renderer for boolean - should SHOW filter icon
+          // because underlying data is primitive (boolean)
+          renderer: (value) => {
+            if (value === true) return '<span style="color: green;">✓ Yes</span>';
+            if (value === false) return '<span style="color: red;">✗ No</span>';
+            return '<span style="color: gray;">—</span>';
+          }
+        },
+        { 
+          name: 'user', 
+          label: 'User',
+          width: '200px',
+          // Complex object - should NOT show filter icon
+          renderer: (value) => {
+            return `<div>
+              <strong>${value.role}</strong><br>
+              <small>${value.email}</small>
+            </div>`;
+          }
+        },
+        { 
+          name: 'metadata', 
+          label: 'Metadata',
+          width: '250px',
+          // Complex object - should NOT show filter icon
+          renderer: (value) => {
+            return `<div>
+              <strong>Created:</strong> ${value.createdAt}<br>
+              <strong>Tags:</strong> ${value.tags.join(', ')}
+            </div>`;
+          }
+        }
+      ],
+      pagination: {
+        enabled: false
+      },
+      filtering: {
+        enabled: true
+      }
+    });
+
+    // Log for debugging
+    console.log('Table initialized with filtering enabled');
+    console.log('Columns:', table.columns);
+  </script>
+</body>
+</html>

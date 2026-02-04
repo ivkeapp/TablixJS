@@ -99,6 +99,7 @@ export default class Localization {
       'filter.isNotEmpty': 'Is not empty',
       'filter.selectValues': 'Select values',
       'filter.noOptionsAvailable': 'No options available',
+      'filter.complexDataNotSupported': 'Value filtering is not available for columns with complex data. Use Condition filtering instead.',
 
       // Controls
       'controls.refresh': 'Refresh data',

@@ -677,7 +677,8 @@ export default class VirtualScrollManager {
 
       // Use ColumnManager for formatting if available
       if (this.table.columnManager) {
-        const result = this.table.columnManager.formatCellValue(col.name, cellValue, rowData);
+        // Pass the column object instead of just the name to support multiple columns with same field
+        const result = this.table.columnManager.formatCellValue(col, cellValue, rowData);
         if (result.isHtml) {
           td.innerHTML = result.value;
         } else {

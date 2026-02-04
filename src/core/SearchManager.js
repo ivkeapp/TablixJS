@@ -212,6 +212,11 @@ export default class SearchManager {
           return false;
         }
 
+        // Skip complex objects (not primitive values or Dates) in search
+        if (typeof cellValue === 'object' && !(cellValue instanceof Date)) {
+          return false;
+        }
+
         const stringValue = this.options.caseSensitive ? 
           String(cellValue) : 
           String(cellValue).toLowerCase();

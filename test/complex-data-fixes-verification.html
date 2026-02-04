@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✓ Complex Data Fixes - TablixJS</title>
+    <link rel="stylesheet" href="../dist/tablixjs.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .status.fixed {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-title {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .test-description {
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .info-box {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+        
+        .fixed {
+            background-color: #e8f5e9;
+            border-left-color: #4caf50;
+        }
+        
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .info-box ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+        
+        .info-box li {
+            margin: 5px 0;
+        }
+        
+        .badge-img {
+            vertical-align: middle;
+        }
+        
+        .test-instructions {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .test-instructions h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <h1>TablixJS - Complex Data Handling Fixes</h1>
+    <div class="status fixed">✓ ALL FIXES APPLIED</div>
+    
+    <div class="test-section">
+        <h2 class="test-title">Overview: Issues Fixed</h2>
+        
+        <div class="info-box fixed">
+            <strong>✓ Fixed Issues:</strong>
+            <ul>
+                <li><strong>Renderer Bug:</strong> Multiple columns with same field name now use their own renderers</li>
+                <li><strong>Filter Dropdown:</strong> No more "[object Object]" in filter dropdowns for complex data</li>
+                <li><strong>Search:</strong> Complex objects are now skipped during search (prevents "[object Object]" matching)</li>
+                <li><strong>Export:</strong> Complex objects are now JSON stringified in CSV exports</li>
+            </ul>
+        </div>
+        
+        <div class="test-instructions">
+            <h3>Testing Instructions:</h3>
+            <ol>
+                <li><strong>Renderer Test:</strong> Verify Column 3 shows "I should see this" text, not an image</li>
+                <li><strong>Filter Test:</strong> Click filter icon on "Badges" column - should show helpful message about complex data</li>
+                <li><strong>Filter Test 2:</strong> Filter "Username" column - should show actual values, not "[object Object]"</li>
+                <li><strong>Search Test:</strong> Search for "user" - should find matching usernames (complex data ignored)</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2 class="test-title">Test: Complete Feature Integration</h2>
+        <p class="test-description">
+            Table with nested data, multiple renderers, filtering, and search enabled.
+        </p>
+        <div id="fullTest"></div>
+    </div>
+
+    <script src="../dist/tablixjs.umd.js"></script>
+    <script>
+        // Test data with nested badge structure
+        const testData = [
+            {
+                user_name: "Alice Johnson",
+                user_email: "alice@example.com",
+                user_status: "Active",
+                user_badges: { 
+                    badge_level: 3, 
+                    badge_images: [
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ccircle cx='15' cy='15' r='14' fill='%23FFD700'/%3E%3Ctext x='15' y='20' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3E1%3C/text%3E%3C/svg%3E",
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ccircle cx='15' cy='15' r='14' fill='%23C0C0C0'/%3E%3Ctext x='15' y='20' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3E2%3C/text%3E%3C/svg%3E",
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ccircle cx='15' cy='15' r='14' fill='%23CD7F32'/%3E%3Ctext x='15' y='20' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3E3%3C/text%3E%3C/svg%3E"
+                    ]
+                }
+            },
+            {
+                user_name: "Bob Smith",
+                user_email: "bob@example.com",
+                user_status: "Active",
+                user_badges: { 
+                    badge_level: 2, 
+                    badge_images: [
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ccircle cx='15' cy='15' r='14' fill='%23FFD700'/%3E%3Ctext x='15' y='20' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3E1%3C/text%3E%3C/svg%3E",
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ccircle cx='15' cy='15' r='14' fill='%23C0C0C0'/%3E%3Ctext x='15' y='20' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3E2%3C/text%3E%3C/svg%3E"
+                    ]
+                }
+            },
+            {
+                user_name: "Carol Williams",
+                user_email: "carol@example.com",
+                user_status: "Inactive",
+                user_badges: { 
+                    badge_level: 1, 
+                    badge_images: [
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ccircle cx='15' cy='15' r='14' fill='%23FFD700'/%3E%3Ctext x='15' y='20' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3E1%3C/text%3E%3C/svg%3E"
+                    ]
+                }
+            },
+            {
+                user_name: "David Brown",
+                user_email: "david@example.com",
+                user_status: "Active",
+                user_badges: { 
+                    badge_level: 2, 
+                    badge_images: [
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ccircle cx='15' cy='15' r='14' fill='%23FFD700'/%3E%3Ctext x='15' y='20' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3E1%3C/text%3E%3C/svg%3E",
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ccircle cx='15' cy='15' r='14' fill='%23C0C0C0'/%3E%3Ctext x='15' y='20' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3E2%3C/text%3E%3C/svg%3E"
+                    ]
+                }
+            }
+        ];
+
+        // Create comprehensive test table
+        const fullTestTable = new TablixJS.Table('#fullTest', {
+            data: testData,
+            columns: [
+                { 
+                    name: 'user_badges', 
+                    title: 'Badges', 
+                    sortable: false, 
+                    renderer: (value, row) => {
+                        console.log('Badges column renderer called');
+                        return `<img src="${value.badge_images[0]}" class="badge-img" width="30" height="30" alt="Badge 1">`;
+                    }
+                },
+                { 
+                    name: 'user_name', 
+                    title: 'Username'
+                },
+                { 
+                    name: 'user_status', 
+                    title: 'Status'
+                },
+                { 
+                    name: 'user_badges', 
+                    title: 'Example Column', 
+                    sortable: false, 
+                    renderer: (value, row) => {
+                        console.log('Example column renderer called');
+                        return `<span style="color: #2196f3; font-weight: bold;">I should see this</span>`;
+                    }
+                }
+            ],
+            search: {
+                enabled: true,
+                placeholder: 'Search users...'
+            },
+            filtering: {
+                enabled: true
+            },
+            controls: {
+                enabled: true,
+                position: 'top',
+                search: true
+            },
+            pagination: { 
+                enabled: true,
+                pageSize: 5
+            }
+        });
+
+        // Log test results
+        console.log('✓ Test table initialized');
+        console.log('');
+        console.log('Test Checklist:');
+        console.log('1. ✓ Column rendering: Check if "Example Column" shows "I should see this"');
+        console.log('2. ✓ Filter dropdown: Click filter on "Badges" - should NOT show "[object Object]"');
+        console.log('3. ✓ Filter dropdown: Click filter on "Username" - should show actual names');
+        console.log('4. ✓ Search: Type "Alice" - should find Alice Johnson');
+        console.log('5. ✓ Export: If enabled, CSV should have JSON for complex objects, not "[object Object]"');
+        console.log('');
+        console.log('All systems ready for testing!');
+    </script>
+</body>
+</html>

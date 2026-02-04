@@ -203,13 +203,25 @@ export default class FilterManager {
       : this.table.dataManager.originalData;
     
     const values = new Set();
+    let hasComplexData = false;
     
     data.forEach(row => {
       const value = row[columnName];
       if (value !== null && value !== undefined) {
+        // Check if value is a complex object (not a primitive or Date)
+        if (typeof value === 'object' && !(value instanceof Date)) {
+          hasComplexData = true;
+          return; // Skip complex objects
+        }
         values.add(String(value));
       }
     });
+    
+    // If column contains complex data (objects), return empty array
+    // This will disable value-based filtering for columns with nested/complex data
+    if (hasComplexData && values.size === 0) {
+      return [];
+    }
     
     return Array.from(values).sort();
   }
@@ -345,7 +357,9 @@ export default class FilterManager {
     
     if (filterConfig.type === 'value') {
       // Value filter: check if cell value is in selected values
-      return filterConfig.values.includes(String(cellValue));
+      // Handle complex objects by converting to string safely
+      const cellValueStr = this._valueToString(cellValue);
+      return filterConfig.values.includes(cellValueStr);
     }
     
     if (filterConfig.type === 'condition') {
@@ -426,6 +440,23 @@ export default class FilterManager {
     if (badge) {
       badge.textContent = badgeText;
     }
+  }
+
+  /**
+   * Convert a value to string safely, handling complex objects
+   * @param {*} value - Value to convert
+   * @returns {string} String representation
+   * @private
+   */
+  _valueToString(value) {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    if (typeof value === 'object' && !(value instanceof Date)) {
+      // For complex objects, use JSON stringify for comparison
+      return JSON.stringify(value);
+    }
+    return String(value);
   }
 
   /**
