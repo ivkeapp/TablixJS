@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TablixJS - State Handling Demo</title>
+  <link rel="stylesheet" href="../src/styles/tablix.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      padding: 2rem;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .demo-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 2rem;
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      color: #7f8c8d;
+      margin-bottom: 2rem;
+      font-size: 1rem;
+    }
+
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+
+    .demo-section h2 {
+      color: #34495e;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 0.5rem;
+    }
+
+    .demo-controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #3498db;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #2980b9;
+    }
+
+    .btn-success {
+      background: #27ae60;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #229954;
+    }
+
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
+    }
+
+    .btn-warning {
+      background: #f39c12;
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background: #d68910;
+    }
+
+    .btn-secondary {
+      background: #95a5a6;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #7f8c8d;
+    }
+
+    .table-wrapper {
+      position: relative;
+      min-height: 400px;
+    }
+
+    /* Loading State Styles */
+    .tablix-loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      border-radius: 4px;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f0f0f0;
+      border-top-color: #3498db;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .tablix-loading-overlay p {
+      color: #7f8c8d;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    /* Empty State Styles */
+    .tablix-empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #95a5a6;
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .tablix-empty-state h3 {
+      color: #7f8c8d;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tablix-empty-state p {
+      color: #95a5a6;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Error State Styles */
+    .tablix-error-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: #fff5f5;
+      border: 2px solid #e74c3c;
+      border-radius: 4px;
+      margin: 1rem 0;
+    }
+
+    .error-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .tablix-error-state h3 {
+      color: #e74c3c;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tablix-error-state p {
+      color: #c0392b;
+      margin-bottom: 1.5rem;
+    }
+
+    .code-block {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 1rem;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+    }
+
+    .info-box {
+      background: #ecf9ff;
+      border-left: 4px solid #3498db;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+
+    .info-box strong {
+      color: #2980b9;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+
+    .status-loading { background: #f39c12; }
+    .status-success { background: #27ae60; }
+    .status-error { background: #e74c3c; }
+    .status-empty { background: #95a5a6; }
+
+    #statusLog {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+    }
+
+    .log-entry {
+      padding: 0.25rem 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+
+    .log-time {
+      color: #7f8c8d;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <h1>🎭 State Handling Demo</h1>
+    <p class="subtitle">Learn how to handle loading, empty, and error states in TablixJS</p>
+
+    <div class="info-box">
+      <strong>💡 Info:</strong> This demo shows how to use TablixJS events to manage different table states. 
+      Native state message support is planned for v1.2.0 - see 
+      <a href="../EMPTY-STATE-ENHANCEMENT.md">EMPTY-STATE-ENHANCEMENT.md</a> for details.
+    </div>
+
+    <!-- Demo 1: Loading State -->
+    <div class="demo-section">
+      <h2>1. Loading State</h2>
+      <p>Display a loading indicator while fetching data from the server.</p>
+      
+      <div class="demo-controls">
+        <button class="btn btn-primary" onclick="demo1.loadWithDelay()">
+          Load Data (2s delay)
+        </button>
+        <button class="btn btn-secondary" onclick="demo1.loadInstant()">
+          Load Data (instant)
+        </button>
+      </div>
+
+      <div id="table1" class="table-wrapper"></div>
+    </div>
+
+    <!-- Demo 2: Empty State -->
+    <div class="demo-section">
+      <h2>2. Empty State</h2>
+      <p>Show a friendly message when no data is available or filters return no results.</p>
+      
+      <div class="demo-controls">
+        <button class="btn btn-success" onclick="demo2.loadData()">
+          Load Data
+        </button>
+        <button class="btn btn-warning" onclick="demo2.loadEmpty()">
+          Load Empty Data
+        </button>
+        <button class="btn btn-secondary" onclick="demo2.filterNoResults()">
+          Apply Filter (no results)
+        </button>
+      </div>
+
+      <div id="table2" class="table-wrapper"></div>
+    </div>
+
+    <!-- Demo 3: Error State -->
+    <div class="demo-section">
+      <h2>3. Error State</h2>
+      <p>Display error messages when data loading fails.</p>
+      
+      <div class="demo-controls">
+        <button class="btn btn-success" onclick="demo3.loadSuccess()">
+          Load Successfully
+        </button>
+        <button class="btn btn-danger" onclick="demo3.triggerError()">
+          Trigger Error
+        </button>
+        <button class="btn btn-danger" onclick="demo3.triggerNetworkError()">
+          Simulate Network Error
+        </button>
+      </div>
+
+      <div id="table3" class="table-wrapper"></div>
+    </div>
+
+    <!-- Demo 4: Complete State Manager -->
+    <div class="demo-section">
+      <h2>4. Complete State Manager</h2>
+      <p>Comprehensive example handling all states with a reusable state manager class.</p>
+      
+      <div class="demo-controls">
+        <button class="btn btn-primary" onclick="demo4.loadData()">
+          Load Data
+        </button>
+        <button class="btn btn-warning" onclick="demo4.loadEmpty()">
+          Load Empty
+        </button>
+        <button class="btn btn-danger" onclick="demo4.triggerError()">
+          Trigger Error
+        </button>
+        <button class="btn btn-secondary" onclick="demo4.reset()">
+          Reset
+        </button>
+      </div>
+
+      <div id="table4" class="table-wrapper"></div>
+      
+      <div id="statusLog">
+        <strong>Event Log:</strong>
+      </div>
+    </div>
+
+    <!-- Code Example -->
+    <div class="demo-section">
+      <h2>💻 Code Example</h2>
+      <p>Here's how to implement state handling:</p>
+      
+      <div class="code-block">
+// Create state manager class
+class TableStateManager {
+  constructor(table, containerSelector) {
+    this.table = table;
+    this.container = document.querySelector(containerSelector);
+    this.setupEventListeners();
+  }
+  
+  setupEventListeners() {
+    this.table.on('beforeLoad', () => this.showLoading());
+    this.table.on('afterLoad', (payload) => {
+      this.hideLoading();
+      if (payload.data.length === 0) {
+        this.showEmpty();
+      }
+    });
+    this.table.on('loadError', (payload) => {
+      this.hideLoading();
+      this.showError(payload.error);
+    });
+  }
+  
+  showLoading() { /* ... */ }
+  showEmpty() { /* ... */ }
+  showError(error) { /* ... */ }
+}
+
+// Usage
+const table = new Table('#myTable', { columns: [...] });
+const stateManager = new TableStateManager(table, '#myTable');
+await table.loadData('https://api.example.com/data');
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import Table from '../src/core/Table.js';
+
+    // Sample data
+    const sampleData = [
+      { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User' },
+      { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'Editor' },
+      { id: 4, name: 'Alice Williams', email: 'alice@example.com', role: 'User' },
+      { id: 5, name: 'Charlie Brown', email: 'charlie@example.com', role: 'User' }
+    ];
+
+    const columns = [
+      { name: 'id', title: 'ID', width: '60px' },
+      { name: 'name', title: 'Name' },
+      { name: 'email', title: 'Email' },
+      { name: 'role', title: 'Role' }
+    ];
+
+    // Helper functions for state management
+    function showLoading(container) {
+      hideAllStates(container);
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'tablix-loading-overlay state-element';
+      loadingDiv.innerHTML = `
+        <div class="spinner"></div>
+        <p>Loading data...</p>
+      `;
+      container.appendChild(loadingDiv);
+    }
+
+    function hideLoading(container) {
+      const loading = container.querySelector('.tablix-loading-overlay');
+      if (loading) loading.remove();
+    }
+
+    function showEmpty(container, message = 'No results found') {
+      hideEmpty(container);
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'tablix-empty-state state-element';
+      emptyDiv.innerHTML = `
+        <div class="empty-icon">📋</div>
+        <h3>No Results</h3>
+        <p>${message}</p>
+      `;
+      
+      const tableWrapper = container.querySelector('.tablix-table-wrapper');
+      if (tableWrapper) {
+        tableWrapper.appendChild(emptyDiv);
+      } else {
+        container.appendChild(emptyDiv);
+      }
+    }
+
+    function hideEmpty(container) {
+      const empty = container.querySelector('.tablix-empty-state');
+      if (empty) empty.remove();
+    }
+
+    function showError(container, error, retryCallback) {
+      hideAllStates(container);
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'tablix-error-state state-element';
+      errorDiv.innerHTML = `
+        <div class="error-icon">⚠️</div>
+        <h3>Error Loading Data</h3>
+        <p>${error.message || 'An unexpected error occurred'}</p>
+        ${retryCallback ? '<button class="btn btn-primary" id="retryBtn">Retry</button>' : ''}
+      `;
+      
+      const tableWrapper = container.querySelector('.tablix-table-wrapper');
+      if (tableWrapper) {
+        tableWrapper.innerHTML = '';
+        tableWrapper.appendChild(errorDiv);
+      } else {
+        container.appendChild(errorDiv);
+      }
+      
+      if (retryCallback) {
+        setTimeout(() => {
+          const retryBtn = errorDiv.querySelector('#retryBtn');
+          if (retryBtn) retryBtn.onclick = retryCallback;
+        }, 0);
+      }
+    }
+
+    function hideAllStates(container) {
+      hideLoading(container);
+      hideEmpty(container);
+      const error = container.querySelector('.tablix-error-state');
+      if (error) error.remove();
+    }
+
+    // Demo 1: Loading State
+    const demo1 = {
+      table: null,
+      
+      init() {
+        const container = document.querySelector('#table1');
+        
+        this.table = new Table('#table1', {
+          data: [],
+          columns: columns,
+          pagination: { enabled: true, pageSize: 5 }
+        });
+
+        this.table.on('beforeLoad', () => {
+          showLoading(container);
+        });
+
+        this.table.on('afterLoad', () => {
+          hideLoading(container);
+        });
+      },
+
+      async loadWithDelay() {
+        await this.table.loadData(() => {
+          return new Promise(resolve => {
+            setTimeout(() => resolve(sampleData), 2000);
+          });
+        });
+      },
+
+      async loadInstant() {
+        await this.table.loadData(sampleData);
+      }
+    };
+
+    // Demo 2: Empty State
+    const demo2 = {
+      table: null,
+      
+      init() {
+        const container = document.querySelector('#table2');
+        
+        this.table = new Table('#table2', {
+          data: [],
+          columns: columns,
+          filtering: { enabled: true },
+          pagination: { enabled: true, pageSize: 5 }
+        });
+
+        this.table.on('afterLoad', (payload) => {
+          if (payload.data.length === 0) {
+            showEmpty(container, 'No data available. Click "Load Data" to fetch data.');
+          } else {
+            hideEmpty(container);
+          }
+        });
+
+        this.table.on('afterFilter', async () => {
+          const visibleData = await this.table.dataManager.getVisibleData();
+          if (visibleData.length === 0) {
+            showEmpty(container, 'No results match your filters.');
+          } else {
+            hideEmpty(container);
+          }
+        });
+      },
+
+      async loadData() {
+        await this.table.loadData(sampleData);
+      },
+
+      async loadEmpty() {
+        await this.table.loadData([]);
+      },
+
+      async filterNoResults() {
+        await this.table.loadData(sampleData);
+        // Apply a filter that returns no results
+        await this.table.filter({ name: 'NonExistentName' });
+      }
+    };
+
+    // Demo 3: Error State
+    const demo3 = {
+      table: null,
+      
+      init() {
+        const container = document.querySelector('#table3');
+        
+        this.table = new Table('#table3', {
+          data: [],
+          columns: columns,
+          pagination: { enabled: true, pageSize: 5 }
+        });
+
+        this.table.on('beforeLoad', () => {
+          showLoading(container);
+        });
+
+        this.table.on('afterLoad', () => {
+          hideLoading(container);
+        });
+
+        this.table.on('loadError', (payload) => {
+          hideLoading(container);
+          showError(container, payload.error, () => this.loadSuccess());
+        });
+      },
+
+      async loadSuccess() {
+        await this.table.loadData(sampleData);
+      },
+
+      async triggerError() {
+        try {
+          await this.table.loadData(() => {
+            throw new Error('Simulated error: Unable to fetch data from server');
+          });
+        } catch (e) {
+          // Error is handled by loadError event
+        }
+      },
+
+      async triggerNetworkError() {
+        try {
+          await this.table.loadData('https://nonexistent-api-endpoint-12345.com/data');
+        } catch (e) {
+          // Error is handled by loadError event
+        }
+      }
+    };
+
+    // Demo 4: Complete State Manager
+    class TableStateManager {
+      constructor(table, containerSelector) {
+        this.table = table;
+        this.container = document.querySelector(containerSelector);
+        this.setupEventListeners();
+      }
+      
+      setupEventListeners() {
+        this.table.on('beforeLoad', () => {
+          this.logStatus('loading', 'Loading data...');
+          showLoading(this.container);
+        });
+
+        this.table.on('afterLoad', (payload) => {
+          hideLoading(this.container);
+          if (payload.data.length === 0) {
+            this.logStatus('empty', 'No data returned');
+            showEmpty(this.container);
+          } else {
+            this.logStatus('success', `Loaded ${payload.data.length} rows`);
+            hideEmpty(this.container);
+          }
+        });
+
+        this.table.on('loadError', (payload) => {
+          this.logStatus('error', payload.error.message);
+          hideLoading(this.container);
+          showError(this.container, payload.error);
+        });
+
+        this.table.on('afterFilter', async () => {
+          const visibleData = await this.table.dataManager.getVisibleData();
+          if (visibleData.length === 0) {
+            this.logStatus('empty', 'No results match filters');
+            showEmpty(this.container, 'No results match your criteria');
+          } else {
+            this.logStatus('success', `Filtered to ${visibleData.length} rows`);
+            hideEmpty(this.container);
+          }
+        });
+      }
+
+      logStatus(type, message) {
+        const log = document.getElementById('statusLog');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        
+        const statusClass = {
+          loading: 'status-loading',
+          success: 'status-success',
+          error: 'status-error',
+          empty: 'status-empty'
+        }[type] || 'status-success';
+        
+        const time = new Date().toLocaleTimeString();
+        entry.innerHTML = `
+          <span class="log-time">[${time}]</span>
+          <span class="status-indicator ${statusClass}"></span>
+          ${message}
+        `;
+        
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+      }
+    }
+
+    const demo4 = {
+      table: null,
+      stateManager: null,
+      
+      init() {
+        this.table = new Table('#table4', {
+          data: [],
+          columns: columns,
+          pagination: { enabled: true, pageSize: 5 }
+        });
+
+        this.stateManager = new TableStateManager(this.table, '#table4');
+      },
+
+      async loadData() {
+        await this.table.loadData(() => {
+          return new Promise(resolve => {
+            setTimeout(() => resolve(sampleData), 1000);
+          });
+        });
+      },
+
+      async loadEmpty() {
+        await this.table.loadData([]);
+      },
+
+      async triggerError() {
+        try {
+          await this.table.loadData(() => {
+            throw new Error('Database connection failed');
+          });
+        } catch (e) {
+          // Handled by state manager
+        }
+      },
+
+      async reset() {
+        const container = document.querySelector('#table4');
+        hideAllStates(container);
+        await this.table.loadData([]);
+        document.getElementById('statusLog').innerHTML = '<strong>Event Log:</strong>';
+      }
+    };
+
+    // Initialize all demos
+    demo1.init();
+    demo2.init();
+    demo3.init();
+    demo4.init();
+
+    // Make demos globally accessible
+    window.demo1 = demo1;
+    window.demo2 = demo2;
+    window.demo3 = demo3;
+    window.demo4 = demo4;
+  </script>
+</body>
+</html>
