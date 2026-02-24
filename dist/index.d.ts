@@ -12,15 +12,53 @@ declare module 'tablixjs' {
   }
 
   export interface ColumnDefinition {
-    key: string;
+    /** Column data key (field name in each row object) */
+    name?: string;
+    key?: string;
     title?: string;
     width?: number | string;
     minWidth?: number;
     maxWidth?: number;
+
+    // --- Feature flags ---
+
+    /** Whether the column can be sorted. Auto-detected for complex data: defaults to false for objects. */
     sortable?: boolean;
+    /** Whether the column can be filtered. Auto-detected for complex data: defaults to false for objects. */
     filterable?: boolean;
+    /** Whether the column supports inline editing. Auto-detected for complex data: defaults to false for objects. */
+    editable?: boolean;
     searchable?: boolean;
+
+    // --- Value accessors for complex / nested data ---
+
+    /** Custom accessor to extract a primitive value used for filtering */
+    filterAccessor?: (value: any, row: any) => any;
+    /** Dot-path into the cell value to extract a primitive for filtering (e.g. "badge_level") */
+    filterPath?: string;
+
+    /** Custom accessor to extract a primitive value used for sorting */
+    sortAccessor?: (value: any, row: any) => any;
+    /** Dot-path into the cell value to extract a primitive for sorting */
+    sortPath?: string;
+
+    /** Custom accessor to extract a primitive value used for inline editing */
+    editAccessor?: (value: any, row: any) => any;
+    /** Dot-path into the cell value to extract a primitive for editing */
+    editPath?: string;
+
+    // --- Formatting & rendering ---
+
+    /** Column format type */
+    format?: 'text' | 'date' | 'currency' | 'number' | 'percent';
+    /** Custom cell renderer. Return value is treated as HTML. */
+    renderer?: (value: any, row: any, formattedValue: any) => string;
     formatter?: (value: any, row: any, column: ColumnDefinition) => string;
+    /** Sort type hint */
+    sortType?: 'auto' | 'string' | 'number' | 'date' | 'boolean';
+    /** Custom sort comparison function */
+    sortFunction?: (a: any, b: any) => number;
+
     headerClass?: string;
     cellClass?: string | ((value: any, row: any) => string);
   }
@@ -176,4 +214,21 @@ declare module 'tablixjs' {
 
   export { Table };
   export const version: string;
+
+  // ValueResolver utilities
+  export function resolveColumnValue(
+    column: ColumnDefinition,
+    row: any,
+    purpose?: 'display' | 'filter' | 'sort' | 'edit'
+  ): any;
+
+  export function isFeatureEnabled(
+    column: ColumnDefinition,
+    purpose: 'filter' | 'sort' | 'edit',
+    sampleData?: any[]
+  ): boolean;
+
+  export function isComplexValue(value: any): boolean;
+
+  export function getByPath(obj: any, path: string): any;
 }

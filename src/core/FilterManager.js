@@ -1,3 +1,5 @@
+import { resolveColumnValue, isFeatureEnabled, isComplexValue } from './ValueResolver.js';
+
 /**
  * FilterManager - Advanced column filtering system for TablixJS
  * 
@@ -7,6 +9,7 @@
  * - Supports multiple conditions per column
  * - Extensible operator system for custom filters
  * - Integration with sorting and pagination
+ * - Support for complex/nested data via filterAccessor, filterPath, and filterable flags
  */
 export default class FilterManager {
   constructor(table, options = {}) {
@@ -191,11 +194,34 @@ export default class FilterManager {
   }
 
   /**
-   * Get unique values for a column (for value filtering)
+   * Check if filtering is enabled for a column.
+   * Respects the `filterable` flag, accessor/path config, and auto-detects complex data.
    * @param {string} columnName - Column name
-   * @returns {Array} Unique values
+   * @returns {boolean}
+   */
+  isColumnFilterable(columnName) {
+    const column = this._getColumnDef(columnName);
+    if (!column) return true; // Unknown column — allow (backward compat)
+
+    const sampleData = this.table.dataManager.originalData || [];
+    return isFeatureEnabled(column, 'filter', sampleData);
+  }
+
+  /**
+   * Get unique values for a column (for value filtering).
+   * Uses filterAccessor / filterPath when available so that complex data
+   * columns can still participate in value-based filtering.
+   * @param {string} columnName - Column name
+   * @returns {Array} Unique primitive string values
    */
   getColumnUniqueValues(columnName) {
+    // If column is explicitly non-filterable, return empty
+    if (!this.isColumnFilterable(columnName)) {
+      return [];
+    }
+
+    const column = this._getColumnDef(columnName);
+
     // For server mode, use the current filtered data (what's loaded from server)
     // For client mode, use the original data
     const data = this.options.mode === 'server' 
@@ -203,25 +229,17 @@ export default class FilterManager {
       : this.table.dataManager.originalData;
     
     const values = new Set();
-    let hasComplexData = false;
     
     data.forEach(row => {
-      const value = row[columnName];
-      if (value !== null && value !== undefined) {
-        // Check if value is a complex object (not a primitive or Date)
-        if (typeof value === 'object' && !(value instanceof Date)) {
-          hasComplexData = true;
-          return; // Skip complex objects
-        }
-        values.add(String(value));
+      // Resolve through accessor/path when available
+      const resolved = column
+        ? resolveColumnValue(column, row, 'filter')
+        : row[columnName];
+
+      if (resolved !== null && resolved !== undefined && !isComplexValue(resolved)) {
+        values.add(String(resolved));
       }
     });
-    
-    // If column contains complex data (objects), return empty array
-    // This will disable value-based filtering for columns with nested/complex data
-    if (hasComplexData && values.size === 0) {
-      return [];
-    }
     
     return Array.from(values).sort();
   }
@@ -345,7 +363,8 @@ export default class FilterManager {
   }
 
   /**
-   * Test a row against a filter
+   * Test a row against a filter.
+   * Uses resolveColumnValue so that filterAccessor / filterPath are respected.
    * @param {Object} row - Data row
    * @param {string} columnName - Column name
    * @param {Object} filterConfig - Filter configuration
@@ -353,11 +372,14 @@ export default class FilterManager {
    * @private
    */
   _testRowAgainstFilter(row, columnName, filterConfig) {
-    const cellValue = row[columnName];
+    const column = this._getColumnDef(columnName);
+    // Resolve value through accessor/path — falls back to raw primitive
+    const cellValue = column
+      ? resolveColumnValue(column, row, 'filter')
+      : row[columnName];
     
     if (filterConfig.type === 'value') {
-      // Value filter: check if cell value is in selected values
-      // Handle complex objects by converting to string safely
+      // Value filter: compare resolved (primitive) value
       const cellValueStr = this._valueToString(cellValue);
       return filterConfig.values.includes(cellValueStr);
     }
@@ -478,5 +500,19 @@ export default class FilterManager {
    */
   getOperators() {
     return { ...this.operators };
+  }
+
+  /**
+   * Look up a column definition by name.
+   * @param {string} columnName
+   * @returns {Object|null}
+   * @private
+   */
+  _getColumnDef(columnName) {
+    if (this.table.columnManager) {
+      return this.table.columnManager.getColumn(columnName);
+    }
+    const cols = this.table.options.columns || [];
+    return cols.find(c => c.name === columnName || c.key === columnName) || null;
   }
 }

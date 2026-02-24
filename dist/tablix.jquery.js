@@ -1172,8 +1172,176 @@
   }
 
   /**
+   * ValueResolver - Centralized value resolution for non-primitive column data
+   * 
+   * Provides a clean abstraction layer between raw cell data and the features
+   * that consume it (filtering, sorting, editing, display). Each feature can
+   * resolve a purpose-specific primitive value from complex objects using
+   * column-level configuration (accessor functions, dot-path strings, etc.).
+   * 
+   * Supported column options:
+   *   - filterAccessor:  (value, row) => primitive   — custom filter value extractor
+   *   - filterPath:      "prop.nested.key"           — dot-path shorthand for filterAccessor
+   *   - sortAccessor:    (value, row) => primitive    — custom sort value extractor
+   *   - sortPath:        "prop.nested.key"            — dot-path shorthand for sortAccessor
+   *   - editAccessor:    (value, row) => primitive    — custom edit value extractor
+   *   - editPath:        "prop.nested.key"            — dot-path shorthand for editAccessor
+   *   - filterable:      false                        — disable filtering entirely
+   *   - sortable:        false                        — disable sorting entirely
+   *   - editable:        false                        — disable editing entirely
+   */
+
+  /**
+   * Check whether a value is a non-null, non-Date object (i.e. an object or array
+   * that is NOT a primitive wrapper and NOT a Date).
+   * 
+   * @param {*} value 
+   * @returns {boolean}
+   */
+  function isComplexValue(value) {
+    return value !== null && value !== undefined && typeof value === 'object' && !(value instanceof Date);
+  }
+
+  /**
+   * Navigate into an object using a dot-separated path string.
+   * Returns `undefined` for any invalid / unreachable segment.
+   * 
+   * Examples:
+   *   getByPath({ a: { b: 2 } }, 'a.b')         => 2
+   *   getByPath({ a: [10, 20] }, 'a.1')          => 20
+   *   getByPath({ a: null }, 'a.b')              => undefined
+   * 
+   * @param {*} obj   - The root object to traverse
+   * @param {string} path - Dot-separated property path
+   * @returns {*} The resolved value, or undefined
+   */
+  function getByPath(obj, path) {
+    if (obj == null || typeof path !== 'string' || path === '') {
+      return undefined;
+    }
+    const segments = path.split('.');
+    let current = obj;
+    for (const segment of segments) {
+      if (current == null || typeof current !== 'object') {
+        return undefined;
+      }
+      current = current[segment];
+    }
+    return current;
+  }
+
+  /**
+   * Resolve the value a feature should operate on for a given column + row.
+   * 
+   * Resolution order (per purpose):
+   *   1. Purpose-specific accessor function   (e.g. `filterAccessor`)
+   *   2. Purpose-specific dot-path string     (e.g. `filterPath`)
+   *   3. Raw cell value — but ONLY if it is a primitive
+   *   4. `undefined` if the raw value is complex and no accessor/path is configured
+   * 
+   * For the "display" purpose the raw value is always returned (the Renderer /
+   * ColumnManager already handles display formatting via `renderer` / `format`).
+   * 
+   * @param {Object}  column  - Column definition object
+   * @param {Object}  row     - Full data row
+   * @param {'display'|'filter'|'sort'|'edit'} purpose
+   * @returns {*} A primitive value suitable for the requested purpose, or undefined
+   */
+  function resolveColumnValue(column, row, purpose = 'display') {
+    if (!column || !row) return undefined;
+    const columnName = column.name || column.key;
+    const rawValue = row[columnName];
+
+    // "display" always returns the raw value — formatting is handled elsewhere
+    if (purpose === 'display') {
+      return rawValue;
+    }
+
+    // Map purpose → accessor / path property names
+    const accessorKey = `${purpose}Accessor`; // e.g. "filterAccessor"
+    const pathKey = `${purpose}Path`; // e.g. "filterPath"
+
+    // 1. Purpose-specific accessor function
+    if (typeof column[accessorKey] === 'function') {
+      try {
+        return column[accessorKey](rawValue, row);
+      } catch (err) {
+        console.warn(`TablixJS: ${accessorKey} threw for column '${columnName}':`, err);
+        return undefined;
+      }
+    }
+
+    // 2. Purpose-specific dot-path
+    if (typeof column[pathKey] === 'string') {
+      return getByPath(rawValue, column[pathKey]);
+    }
+
+    // 3. If raw value is primitive — return as-is
+    if (!isComplexValue(rawValue)) {
+      return rawValue;
+    }
+
+    // 4. Complex value with no accessor/path — return undefined (feature should skip)
+    return undefined;
+  }
+
+  /**
+   * Check whether a specific feature is enabled for a column.
+   * 
+   * Rules:
+   *  - If the column explicitly sets the flag (e.g. `filterable: false`) → honour it.
+   *  - If the column has complex data but no accessor/path for the purpose,
+   *    default to **disabled** (safe default).
+   *  - Otherwise default to **enabled** (backward compat for primitive columns).
+   * 
+   * @param {Object}  column   - Column definition
+   * @param {'filter'|'sort'|'edit'} purpose
+   * @param {Array}   [sampleData] - Optional sample rows to detect complex data
+   * @returns {boolean}
+   */
+  function isFeatureEnabled(column, purpose, sampleData = []) {
+    if (!column) return false;
+
+    // Map purpose → explicit flag name
+    const flagMap = {
+      filter: 'filterable',
+      sort: 'sortable',
+      edit: 'editable'
+    };
+    const flag = flagMap[purpose];
+    if (!flag) return false;
+
+    // Explicit column-level flag takes priority
+    if (column[flag] !== undefined) {
+      return !!column[flag];
+    }
+
+    // Check if column has a purpose-specific accessor/path — that implies enabled
+    const accessorKey = `${purpose}Accessor`;
+    const pathKey = `${purpose}Path`;
+    if (typeof column[accessorKey] === 'function' || typeof column[pathKey] === 'string') {
+      return true;
+    }
+
+    // Auto-detect: sample data to see if column holds complex values
+    const columnName = column.name || column.key;
+    const limit = Math.min(sampleData.length, 100);
+    for (let i = 0; i < limit; i++) {
+      const value = sampleData[i]?.[columnName];
+      if (isComplexValue(value)) {
+        // Complex data detected, no accessor → disable by default
+        return false;
+      }
+    }
+
+    // Primitive data — enabled by default (backward compat)
+    return true;
+  }
+
+  /**
    * SortingManager - Handles all sorting functionality for TablixJS
-   * Supports client-side and server-side sorting with custom sort functions
+   * Supports client-side and server-side sorting with custom sort functions.
+   * Uses ValueResolver for safe sorting of complex/nested data columns.
    */
   class SortingManager {
     constructor(table, options = {}) {
@@ -1296,7 +1464,9 @@
     }
 
     /**
-     * Apply current sort to filtered data
+     * Apply current sort to filtered data.
+     * Uses resolveColumnValue so that sortAccessor / sortPath are respected
+     * for columns containing complex/nested objects.
      */
     _applySorting() {
       if (!this.currentSort) return;
@@ -1304,7 +1474,11 @@
       this.table.dataManager.filteredData.sort((a, b) => {
         // Support both 'name' and 'key' properties for column identification
         const column = columns.find(col => col.name === this.currentSort.column || col.key === this.currentSort.column);
-        const comparison = this._compareValues(a[this.currentSort.column], b[this.currentSort.column], column);
+
+        // Resolve comparable values through accessor/path
+        const valA = column ? resolveColumnValue(column, a, 'sort') : a[this.currentSort.column];
+        const valB = column ? resolveColumnValue(column, b, 'sort') : b[this.currentSort.column];
+        const comparison = this._compareValues(valA, valB, column);
         return this.currentSort.direction === 'desc' ? -comparison : comparison;
       });
 
@@ -1464,13 +1638,16 @@
     }
 
     /**
-     * Check if a column is sortable
+     * Check if a column is sortable.
+     * Uses isFeatureEnabled to auto-detect complex data and respect sortAccessor/sortPath.
      */
     isColumnSortable(columnName) {
       if (!this.options.enabled) return false;
       const columns = this.table.options.columns || [];
       const column = columns.find(col => col.name === columnName);
-      return column && column.sortable !== false;
+      if (!column) return false;
+      const sampleData = this.table.dataManager.originalData || [];
+      return isFeatureEnabled(column, 'sort', sampleData);
     }
 
     /**
@@ -1490,6 +1667,7 @@
    * - Custom renderer priority over formatting
    * - Extensible design for future format types
    * - Performance-optimized with cached formatters
+   * - Auto-detects non-primitive column data and normalizes feature flags
    */
   class ColumnManager {
     constructor(table) {
@@ -1500,7 +1678,9 @@
     }
 
     /**
-     * Initialize columns and prepare formatters
+     * Initialize columns and prepare formatters.
+     * Normalizes feature flags (filterable, sortable, editable) based on
+     * data sampling when the table has initial data available.
      * @param {Array} columns - Array of column definitions
      */
     initializeColumns(columns = []) {
@@ -1510,7 +1690,9 @@
     }
 
     /**
-     * Prepare and validate a single column definition
+     * Prepare and validate a single column definition.
+     * Normalizes new properties: filterable, sortable, editable,
+     * filterAccessor, filterPath, sortAccessor, sortPath, editAccessor, editPath.
      * @param {Object} column - Column definition
      * @returns {Object} Prepared column
      */
@@ -1533,6 +1715,22 @@
       // Set default title if not provided
       if (!prepared.title) {
         prepared.title = prepared.name;
+      }
+
+      // Validate accessor types
+      for (const key of ['filterAccessor', 'sortAccessor', 'editAccessor']) {
+        if (prepared[key] !== undefined && typeof prepared[key] !== 'function') {
+          console.warn(`TablixJS: Column '${prepared.name}' has non-function ${key}. Ignoring.`);
+          delete prepared[key];
+        }
+      }
+
+      // Validate path types
+      for (const key of ['filterPath', 'sortPath', 'editPath']) {
+        if (prepared[key] !== undefined && typeof prepared[key] !== 'string') {
+          console.warn(`TablixJS: Column '${prepared.name}' has non-string ${key}. Ignoring.`);
+          delete prepared[key];
+        }
       }
       return prepared;
     }
@@ -1786,6 +1984,7 @@
    * - Supports multiple conditions per column
    * - Extensible operator system for custom filters
    * - Integration with sorting and pagination
+   * - Support for complex/nested data via filterAccessor, filterPath, and filterable flags
    */
   class FilterManager {
     constructor(table, options = {}) {
@@ -1991,33 +2190,44 @@
     }
 
     /**
-     * Get unique values for a column (for value filtering)
+     * Check if filtering is enabled for a column.
+     * Respects the `filterable` flag, accessor/path config, and auto-detects complex data.
      * @param {string} columnName - Column name
-     * @returns {Array} Unique values
+     * @returns {boolean}
+     */
+    isColumnFilterable(columnName) {
+      const column = this._getColumnDef(columnName);
+      if (!column) return true; // Unknown column — allow (backward compat)
+
+      const sampleData = this.table.dataManager.originalData || [];
+      return isFeatureEnabled(column, 'filter', sampleData);
+    }
+
+    /**
+     * Get unique values for a column (for value filtering).
+     * Uses filterAccessor / filterPath when available so that complex data
+     * columns can still participate in value-based filtering.
+     * @param {string} columnName - Column name
+     * @returns {Array} Unique primitive string values
      */
     getColumnUniqueValues(columnName) {
+      // If column is explicitly non-filterable, return empty
+      if (!this.isColumnFilterable(columnName)) {
+        return [];
+      }
+      const column = this._getColumnDef(columnName);
+
       // For server mode, use the current filtered data (what's loaded from server)
       // For client mode, use the original data
       const data = this.options.mode === 'server' ? this.table.dataManager.filteredData : this.table.dataManager.originalData;
       const values = new Set();
-      let hasComplexData = false;
       data.forEach(row => {
-        const value = row[columnName];
-        if (value !== null && value !== undefined) {
-          // Check if value is a complex object (not a primitive or Date)
-          if (typeof value === 'object' && !(value instanceof Date)) {
-            hasComplexData = true;
-            return; // Skip complex objects
-          }
-          values.add(String(value));
+        // Resolve through accessor/path when available
+        const resolved = column ? resolveColumnValue(column, row, 'filter') : row[columnName];
+        if (resolved !== null && resolved !== undefined && !isComplexValue(resolved)) {
+          values.add(String(resolved));
         }
       });
-
-      // If column contains complex data (objects), return empty array
-      // This will disable value-based filtering for columns with nested/complex data
-      if (hasComplexData && values.size === 0) {
-        return [];
-      }
       return Array.from(values).sort();
     }
 
@@ -2124,7 +2334,8 @@
     }
 
     /**
-     * Test a row against a filter
+     * Test a row against a filter.
+     * Uses resolveColumnValue so that filterAccessor / filterPath are respected.
      * @param {Object} row - Data row
      * @param {string} columnName - Column name
      * @param {Object} filterConfig - Filter configuration
@@ -2132,10 +2343,11 @@
      * @private
      */
     _testRowAgainstFilter(row, columnName, filterConfig) {
-      const cellValue = row[columnName];
+      const column = this._getColumnDef(columnName);
+      // Resolve value through accessor/path — falls back to raw primitive
+      const cellValue = column ? resolveColumnValue(column, row, 'filter') : row[columnName];
       if (filterConfig.type === 'value') {
-        // Value filter: check if cell value is in selected values
-        // Handle complex objects by converting to string safely
+        // Value filter: compare resolved (primitive) value
         const cellValueStr = this._valueToString(cellValue);
         return filterConfig.values.includes(cellValueStr);
       }
@@ -2248,6 +2460,20 @@
         ...this.operators
       };
     }
+
+    /**
+     * Look up a column definition by name.
+     * @param {string} columnName
+     * @returns {Object|null}
+     * @private
+     */
+    _getColumnDef(columnName) {
+      if (this.table.columnManager) {
+        return this.table.columnManager.getColumn(columnName);
+      }
+      const cols = this.table.options.columns || [];
+      return cols.find(c => c.name === columnName || c.key === columnName) || null;
+    }
   }
 
   /**
@@ -2279,31 +2505,15 @@
     }
 
     /**
-     * Check if a column contains complex data (objects)
-     * Complex data columns cannot use value-based filtering
+     * Check if a column is filterable.
+     * Delegates to FilterManager.isColumnFilterable which uses ValueResolver
+     * to respect filterable flag, accessor/path, and auto-detect complex data.
      * 
      * @param {string} columnName - Column name to check
-     * @returns {boolean} True if column contains complex data
-     * 
-     * FUTURE IMPLEMENTATION:
-     * - Could add configuration option to enable filtering on specific object properties
-     * - Could support custom filter functions for complex data columns
-     * - Could allow filtering on rendered output instead of raw data
+     * @returns {boolean} True if column supports filtering
      */
-    _hasComplexData(columnName) {
-      const data = this.table.dataManager.originalData || [];
-
-      // Check first non-null value to determine if column has complex data
-      for (let i = 0; i < Math.min(data.length, 100); i++) {
-        const value = data[i][columnName];
-        if (value !== null && value !== undefined) {
-          // Check if value is a complex object (not a primitive or Date)
-          if (typeof value === 'object' && !(value instanceof Date)) {
-            return true;
-          }
-        }
-      }
-      return false;
+    _isColumnFilterable(columnName) {
+      return this.filterManager.isColumnFilterable(columnName);
     }
 
     /**
@@ -2327,9 +2537,9 @@
         const thContent = header.querySelector('.tablix-th-content');
         if (!thContent) return;
 
-        // Skip rendering filter icon for columns with complex data
-        // Complex data (objects) cannot use value-based filtering
-        if (this._hasComplexData(columnName)) {
+        // Skip rendering filter icon for non-filterable columns
+        // Respects filterable flag, accessor/path config, and auto-detects complex data
+        if (!this._isColumnFilterable(columnName)) {
           return;
         }
 

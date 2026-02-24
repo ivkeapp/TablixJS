@@ -1,3 +1,5 @@
+import { isComplexValue, isFeatureEnabled } from './ValueResolver.js';
+
 /**
  * ColumnManager - Enhanced column formatting system for TablixJS
  * 
@@ -7,6 +9,7 @@
  * - Custom renderer priority over formatting
  * - Extensible design for future format types
  * - Performance-optimized with cached formatters
+ * - Auto-detects non-primitive column data and normalizes feature flags
  */
 export default class ColumnManager {
   constructor(table) {
@@ -17,7 +20,9 @@ export default class ColumnManager {
   }
 
   /**
-   * Initialize columns and prepare formatters
+   * Initialize columns and prepare formatters.
+   * Normalizes feature flags (filterable, sortable, editable) based on
+   * data sampling when the table has initial data available.
    * @param {Array} columns - Array of column definitions
    */
   initializeColumns(columns = []) {
@@ -27,7 +32,9 @@ export default class ColumnManager {
   }
 
   /**
-   * Prepare and validate a single column definition
+   * Prepare and validate a single column definition.
+   * Normalizes new properties: filterable, sortable, editable,
+   * filterAccessor, filterPath, sortAccessor, sortPath, editAccessor, editPath.
    * @param {Object} column - Column definition
    * @returns {Object} Prepared column
    */
@@ -48,6 +55,22 @@ export default class ColumnManager {
     // Set default title if not provided
     if (!prepared.title) {
       prepared.title = prepared.name;
+    }
+
+    // Validate accessor types
+    for (const key of ['filterAccessor', 'sortAccessor', 'editAccessor']) {
+      if (prepared[key] !== undefined && typeof prepared[key] !== 'function') {
+        console.warn(`TablixJS: Column '${prepared.name}' has non-function ${key}. Ignoring.`);
+        delete prepared[key];
+      }
+    }
+
+    // Validate path types
+    for (const key of ['filterPath', 'sortPath', 'editPath']) {
+      if (prepared[key] !== undefined && typeof prepared[key] !== 'string') {
+        console.warn(`TablixJS: Column '${prepared.name}' has non-string ${key}. Ignoring.`);
+        delete prepared[key];
+      }
     }
 
     return prepared;

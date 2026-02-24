@@ -27,32 +27,15 @@ export default class FilterUI {
   }
 
   /**
-   * Check if a column contains complex data (objects)
-   * Complex data columns cannot use value-based filtering
+   * Check if a column is filterable.
+   * Delegates to FilterManager.isColumnFilterable which uses ValueResolver
+   * to respect filterable flag, accessor/path, and auto-detect complex data.
    * 
    * @param {string} columnName - Column name to check
-   * @returns {boolean} True if column contains complex data
-   * 
-   * FUTURE IMPLEMENTATION:
-   * - Could add configuration option to enable filtering on specific object properties
-   * - Could support custom filter functions for complex data columns
-   * - Could allow filtering on rendered output instead of raw data
+   * @returns {boolean} True if column supports filtering
    */
-  _hasComplexData(columnName) {
-    const data = this.table.dataManager.originalData || [];
-    
-    // Check first non-null value to determine if column has complex data
-    for (let i = 0; i < Math.min(data.length, 100); i++) {
-      const value = data[i][columnName];
-      if (value !== null && value !== undefined) {
-        // Check if value is a complex object (not a primitive or Date)
-        if (typeof value === 'object' && !(value instanceof Date)) {
-          return true;
-        }
-      }
-    }
-    
-    return false;
+  _isColumnFilterable(columnName) {
+    return this.filterManager.isColumnFilterable(columnName);
   }
 
   /**
@@ -78,9 +61,9 @@ export default class FilterUI {
       const thContent = header.querySelector('.tablix-th-content');
       if (!thContent) return;
       
-      // Skip rendering filter icon for columns with complex data
-      // Complex data (objects) cannot use value-based filtering
-      if (this._hasComplexData(columnName)) {
+      // Skip rendering filter icon for non-filterable columns
+      // Respects filterable flag, accessor/path config, and auto-detects complex data
+      if (!this._isColumnFilterable(columnName)) {
         return;
       }
       

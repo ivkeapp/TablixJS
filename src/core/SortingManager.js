@@ -1,6 +1,9 @@
+import { resolveColumnValue, isFeatureEnabled, isComplexValue } from './ValueResolver.js';
+
 /**
  * SortingManager - Handles all sorting functionality for TablixJS
- * Supports client-side and server-side sorting with custom sort functions
+ * Supports client-side and server-side sorting with custom sort functions.
+ * Uses ValueResolver for safe sorting of complex/nested data columns.
  */
 export default class SortingManager {
   constructor(table, options = {}) {
@@ -114,7 +117,9 @@ export default class SortingManager {
   }
 
   /**
-   * Apply current sort to filtered data
+   * Apply current sort to filtered data.
+   * Uses resolveColumnValue so that sortAccessor / sortPath are respected
+   * for columns containing complex/nested objects.
    */
   _applySorting() {
     if (!this.currentSort) return;
@@ -124,11 +129,16 @@ export default class SortingManager {
     this.table.dataManager.filteredData.sort((a, b) => {
       // Support both 'name' and 'key' properties for column identification
       const column = columns.find(col => (col.name === this.currentSort.column) || (col.key === this.currentSort.column));
-      const comparison = this._compareValues(
-        a[this.currentSort.column], 
-        b[this.currentSort.column], 
-        column
-      );
+
+      // Resolve comparable values through accessor/path
+      const valA = column
+        ? resolveColumnValue(column, a, 'sort')
+        : a[this.currentSort.column];
+      const valB = column
+        ? resolveColumnValue(column, b, 'sort')
+        : b[this.currentSort.column];
+
+      const comparison = this._compareValues(valA, valB, column);
       
       return this.currentSort.direction === 'desc' ? -comparison : comparison;
     });
@@ -295,15 +305,18 @@ export default class SortingManager {
   }
 
   /**
-   * Check if a column is sortable
+   * Check if a column is sortable.
+   * Uses isFeatureEnabled to auto-detect complex data and respect sortAccessor/sortPath.
    */
   isColumnSortable(columnName) {
     if (!this.options.enabled) return false;
     
     const columns = this.table.options.columns || [];
     const column = columns.find(col => col.name === columnName);
-    
-    return column && column.sortable !== false;
+    if (!column) return false;
+
+    const sampleData = this.table.dataManager.originalData || [];
+    return isFeatureEnabled(column, 'sort', sampleData);
   }
 
   /**
